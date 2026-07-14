@@ -9,7 +9,7 @@ export default function Services() {
       <Container className="defaultClass">
         {/* Section Header */}
         <div className="mx-auto mb-16 max-w-3xl text-center">
-          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-blue-600">
+          <p className="text-sm font-semibold uppercase tracking-[0.3em] text-primary">
             Our Services
           </p>
 

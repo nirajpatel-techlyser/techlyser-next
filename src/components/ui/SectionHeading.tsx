@@ -16,7 +16,7 @@ export default function Navbar() {
         </ul>
 
         {/* Button */}
-        <button className="rounded-lg bg-blue-600 px-5 py-2 text-white transition hover:bg-blue-700">
+        <button className="rounded-lg bg-primary px-5 py-2 text-white transition hover:bg-primary-hover">
           Let's Talk
         </button>
       </nav>

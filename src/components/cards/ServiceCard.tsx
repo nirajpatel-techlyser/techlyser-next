@@ -18,7 +18,7 @@ export default function ServiceCard({ service }: ServiceCardProps) {
 
       <Link
         href={service.href}
-        className="mt-8 inline-flex items-center font-medium text-blue-600 hover:gap-3 transition-all"
+        className="mt-8 inline-flex items-center font-medium text-primary hover:gap-3 transition-all"
       >
         Learn More →
       </Link>

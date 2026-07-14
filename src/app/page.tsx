@@ -1,6 +1,6 @@
-import Image from "next/image";
 import Navbar from "@/components/layout/Navbar";
 import Hero from "@/components/sections/Hero";
+import FeaturedIn from "@/components/sections/FeaturedIn";
 import Services from "@/components/sections/Services";
 
 export default function Home() {
@@ -8,6 +8,7 @@ export default function Home() {
     <>
       <Navbar />
       <Hero />
+      <FeaturedIn />
       <Services />
       <main className="mx-auto max-w-7xl p-10">
         <h1 className="text-5xl font-bold">Welcome to Techlyser 🚀</h1>
