@@ -12,7 +12,7 @@ const avatars = [
 
 export default function Hero() {
   return (
-    <section className="relative overflow-x-clip bg-hero-bg text-hero-fg">
+    <section className="relative overflow-x-clip bg-surface-dark text-hero-fg">
       <div
         aria-hidden
         className="pointer-events-none absolute -left-24 -top-24 z-0 h-[28rem] w-[28rem] rounded-full bg-primary/20 blur-3xl"
@@ -31,7 +31,7 @@ export default function Hero() {
               {avatars.map((avatar) => (
                 <span
                   key={avatar.initials}
-                  className={`flex h-9 w-9 items-center justify-center rounded-full border-2 border-hero-bg text-[10px] font-bold text-white shadow-sm ${avatar.color}`}
+                  className={`flex h-9 w-9 items-center justify-center rounded-full border-2 border-surface-dark text-[10px] font-bold text-white shadow-sm ${avatar.color}`}
                 >
                   {avatar.initials}
                 </span>
@@ -79,7 +79,7 @@ export default function Hero() {
             </Link>
             <Link
               href="/portfolio"
-              className="rounded-xl border border-hero-border bg-transparent px-7 py-3.5 text-center font-semibold text-hero-fg transition hover:bg-white/5"
+              className="rounded-xl border-2 border-hero-btn-secondary-border bg-transparent px-7 py-3.5 text-center font-semibold text-hero-fg transition hover:border-white hover:bg-hero-btn-secondary-hover"
             >
               View Portfolio
             </Link>
@@ -99,7 +99,7 @@ export default function Hero() {
         </div>
 
         {/* RIGHT */}
-        <div className="relative z-10 w-full self-start pb-8 sm:pb-10">
+        <div className="relative z-10 w-full self-start pb-10 sm:pb-12">
           <div className="relative aspect-[5/4] overflow-hidden rounded-2xl bg-surface-black shadow-[0_28px_70px_-24px_rgba(0,95,213,0.35)] ring-1 ring-hero-border sm:aspect-[4/3]">
             <Image
               src="/images/tech-hero.png"
@@ -111,14 +111,14 @@ export default function Hero() {
             />
           </div>
 
-          {/* Floating review — overlays bottom of image (like example) */}
-          <div className="absolute bottom-0 left-3 right-3 z-20 sm:left-5 sm:right-auto sm:max-w-[420px]">
-            <div className="flex items-start gap-3 rounded-full border-2 border-hero-review-border bg-white p-2.5 pr-5 shadow-[0_12px_40px_rgba(0,0,0,0.28)]">
-              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-white">
+          {/* Floating review — full width over image bottom */}
+          <div className="absolute bottom-0 left-0 right-0 z-20 px-3 sm:px-4">
+            <div className="flex w-full items-start gap-3 rounded-full border-2 border-hero-review-border bg-white p-3 pr-5 shadow-[0_12px_40px_rgba(0,0,0,0.32)] sm:gap-4 sm:p-3.5 sm:pr-6">
+              <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-white sm:h-12 sm:w-12">
                 LV
               </span>
-              <div className="min-w-0 pt-0.5">
-                <p className="line-clamp-2 text-[13px] italic leading-snug text-slate-600">
+              <div className="min-w-0 flex-1 pt-0.5">
+                <p className="text-[13px] italic leading-snug text-slate-600 sm:text-sm">
                   &ldquo;I was very impressed with TECHLYSER and their expertise
                   in customizing my Shopify store.&rdquo;
                 </p>

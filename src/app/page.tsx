@@ -6,8 +6,10 @@ import Services from "@/components/sections/Services";
 export default function Home() {
   return (
     <>
-      <Navbar />
-      <Hero />
+      <div className="bg-surface-dark">
+        <Navbar />
+        <Hero />
+      </div>
       <FeaturedIn />
       <Services />
       <main className="mx-auto max-w-7xl p-10">

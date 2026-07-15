@@ -6,16 +6,21 @@
   --background-soft: #f8fafc;
   --background-muted: #f1f5f9;
 
-  /* Dark surfaces — same pure black as noirandblanco.com header/hero */
+  /* Dark surfaces — shared pure black for header + hero */
   --surface-black: #000000;
-  --header-bg: var(--surface-black);
-  --hero-bg: var(--surface-black);
+  --surface-dark: var(--surface-black);
+  --header-bg: var(--surface-dark);
+  --hero-bg: var(--surface-dark);
   --hero-fg: #ffffff;
   --hero-fg-muted: rgba(255, 255, 255, 0.72);
   --hero-border: rgba(255, 255, 255, 0.2);
   --hero-pill-bg: rgba(255, 255, 255, 0.1);
   --hero-pill-border: rgba(255, 255, 255, 0.45);
   --hero-review-border: rgba(0, 0, 0, 0.12);
+  --hero-btn-secondary-border: rgba(255, 255, 255, 0.55);
+  --hero-btn-secondary-hover: rgba(255, 255, 255, 0.08);
+  --header-border: rgba(255, 255, 255, 0.1);
+  --header-shadow: 0 1px 0 rgba(255, 255, 255, 0.05), 0 12px 40px rgba(0, 0, 0, 0.55);
 
   /* Text */
   --foreground: #101828;
@@ -64,6 +69,7 @@
   --color-primary-hover: var(--primary-hover);
   --color-primary-soft: var(--primary-light);
   --color-surface-black: var(--surface-black);
+  --color-surface-dark: var(--surface-dark);
   --color-header-bg: var(--header-bg);
   --color-hero-bg: var(--hero-bg);
   --color-hero-fg: var(--hero-fg);
@@ -72,6 +78,10 @@
   --color-hero-pill-bg: var(--hero-pill-bg);
   --color-hero-pill-border: var(--hero-pill-border);
   --color-hero-review-border: var(--hero-review-border);
+  --color-hero-btn-secondary-border: var(--hero-btn-secondary-border);
+  --color-hero-btn-secondary-hover: var(--hero-btn-secondary-hover);
+  --color-header-border: var(--header-border);
+  --shadow-header: var(--header-shadow);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
