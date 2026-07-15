@@ -1,58 +1,71 @@
+import {
+  ShoppingBag,
+  Code2,
+  Globe,
+  Palette,
+  Gauge,
+  TrendingUp,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 export interface Service {
   id: number;
   title: string;
   description: string;
   href: string;
-  icon: string;
+  icon: LucideIcon;
 }
 
 export const services: Service[] = [
   {
     id: 1,
+    icon: ShoppingBag,
     title: "Shopify Development",
     description:
-      "Custom Shopify stores, theme development, app integration, and scalable ecommerce solutions.",
-    href: "/services/shopify-development",
-    icon: "⚡",
+      "High-converting Shopify stores designed for speed, scalability, and increased sales.",
+    href: "/services/shopify",
   },
+
   {
     id: 2,
-    title: "WordPress Development",
-    description:
-      "Fast, SEO-friendly WordPress websites, blogs, and custom business solutions.",
-    href: "/services/wordpress-development",
-    icon: "🎨",
-  },
-  {
-    id: 3,
+    icon: Code2,
     title: "Next.js Development",
     description:
-      "Modern web applications with exceptional performance, SEO, and user experience.",
-    href: "/services/nextjs-development",
-    icon: "⚡",
+      "Fast, SEO-friendly web applications built with React and Next.js.",
+    href: "/services/nextjs",
   },
+
+  {
+    id: 3,
+    icon: Globe,
+    title: "WordPress Development",
+    description:
+      "Custom WordPress websites with modern design and easy content management.",
+    href: "/services/wordpress",
+  },
+
   {
     id: 4,
+    icon: Palette,
     title: "UI / UX Design",
     description:
-      "Clean, user-focused interfaces designed to improve engagement and conversions.",
-    href: "/services/ui-ux-design",
-    icon: "🎨",
+      "Beautiful user interfaces focused on conversion and usability.",
+    href: "/services/ui-ux",
   },
+
   {
     id: 5,
+    icon: Gauge,
     title: "Performance Optimization",
-    description:
-      "Improve Core Web Vitals, page speed, and overall website performance.",
-    href: "/services/performance-optimization",
-    icon: "⚡",
+    description: "Improve Core Web Vitals, loading speed, and user experience.",
+    href: "/services/performance",
   },
+
   {
     id: 6,
-    title: "Website Maintenance",
+    icon: TrendingUp,
+    title: "SEO & Growth",
     description:
-      "Reliable updates, bug fixes, monitoring, backups, and ongoing technical support.",
-    href: "/services/maintenance",
-    icon: "🎨",
+      "Technical SEO and performance strategies to increase visibility.",
+    href: "/services/seo",
   },
 ];
