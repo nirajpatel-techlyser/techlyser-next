@@ -13,14 +13,7 @@ const avatars = [
 export default function Hero() {
   return (
     <section className="relative overflow-x-clip bg-surface-dark text-hero-fg">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -left-24 -top-24 z-0 h-[28rem] w-[28rem] rounded-full bg-primary/20 blur-3xl"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -right-16 top-20 z-0 h-72 w-72 rounded-full bg-primary/10 blur-3xl"
-      />
+    
 
       <div className="relative z-10 mx-auto grid max-w-[90rem] items-start gap-6 px-4 py-8 sm:px-6 lg:grid-cols-2 lg:gap-8 lg:px-8 lg:py-10">
         {/* LEFT */}
