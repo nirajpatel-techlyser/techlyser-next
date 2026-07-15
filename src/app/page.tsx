@@ -12,8 +12,9 @@ export default function Home() {
         <Hero />
       </div>
       <FeaturedIn />
-      <Services />
       <WhyChoose />
+      <Services />
+
       <Portfolio />
       <main className="mx-auto max-w-7xl p-10">
         <h1 className="text-5xl font-bold">Welcome to Techlyser 🚀</h1>

@@ -6,7 +6,7 @@ import { benefits } from "@/data/benefits";
 
 export default function WhyChoose() {
   return (
-    <Section id="why-choose">
+    <Section id="why-choose" className="section-bg-grey">
       <Container>
         <SectionHeading
           caption="WHY CHOOSE TECHLYSER"
