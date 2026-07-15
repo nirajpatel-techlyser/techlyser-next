@@ -1,24 +1,77 @@
 @import "tailwindcss";
 
 :root {
+  /* Backgrounds */
   --background: #ffffff;
-  --foreground: #0f172a;
+  --background-soft: #f8fafc;
+  --background-muted: #f1f5f9;
 
-  --primary: #2563eb;
-  --primary-hover: #1d4ed8;
+  /* Dark surfaces — same pure black as noirandblanco.com header/hero */
+  --surface-black: #000000;
+  --header-bg: var(--surface-black);
+  --hero-bg: var(--surface-black);
+  --hero-fg: #ffffff;
+  --hero-fg-muted: rgba(255, 255, 255, 0.72);
+  --hero-border: rgba(255, 255, 255, 0.2);
+  --hero-pill-bg: rgba(255, 255, 255, 0.1);
+  --hero-pill-border: rgba(255, 255, 255, 0.45);
+  --hero-review-border: rgba(0, 0, 0, 0.12);
 
-  --secondary: #64748b;
+  /* Text */
+  --foreground: #101828;
+  --foreground-secondary: #344054;
+  --foreground-muted: #667085;
 
-  --border: #e2e8f0;
+  /* Brand */
+  --primary: #005fd5;
+  --primary-hover: #004bb0;
+  --primary-light: #e8f1fc;
+
+  /* Tech Accent */
+  --accent: #005fd5;
+  --accent-light: #e8f1fc;
+
+  /* Success */
+  --success: #12b76a;
+  --success-light: #ecfdf3;
+
+  /* Warning */
+  --warning: #f79009;
+  --warning-light: #fffaeb;
+
+  /* Error */
+  --danger: #f04438;
+  --danger-light: #fef3f2;
+
+  /* UI */
+  --border: #eaecf0;
+  --border-light: #f2f4f7;
 
   --card: #ffffff;
+  --card-hover: #fcfcfd;
 
-  --section: #f8fafc;
+  /* Shadow */
+  --shadow: rgba(16, 24, 40, 0.08);
+
+  /* Radius */
+  --radius: 20px;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-soft: var(--primary-light);
+  --color-surface-black: var(--surface-black);
+  --color-header-bg: var(--header-bg);
+  --color-hero-bg: var(--hero-bg);
+  --color-hero-fg: var(--hero-fg);
+  --color-hero-fg-muted: var(--hero-fg-muted);
+  --color-hero-border: var(--hero-border);
+  --color-hero-pill-bg: var(--hero-pill-bg);
+  --color-hero-pill-border: var(--hero-pill-border);
+  --color-hero-review-border: var(--hero-review-border);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -34,4 +87,21 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+@keyframes logo-marquee-scroll {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+.logo-marquee {
+  display: flex;
+  width: max-content;
+  align-items: center;
+  will-change: transform;
+  animation: logo-marquee-scroll 20s linear infinite;
 }

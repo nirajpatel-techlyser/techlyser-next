@@ -1,6 +1,6 @@
-import Image from "next/image";
 import Navbar from "@/components/layout/Navbar";
 import Hero from "@/components/sections/Hero";
+import FeaturedIn from "@/components/sections/FeaturedIn";
 import Services from "@/components/sections/Services";
 import WhyChoose from "@/components/sections/WhyChoose";
 import Portfolio from "@/components/sections/Portfolio";
@@ -9,6 +9,7 @@ export default function Home() {
     <>
       <Navbar />
       <Hero />
+      <FeaturedIn />
       <Services />
       <WhyChoose />
       <Portfolio />

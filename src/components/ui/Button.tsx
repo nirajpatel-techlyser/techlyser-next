@@ -16,7 +16,7 @@ export default function Button({
   ...props
 }: ButtonProps) {
   const variantClasses = {
-    primary: "bg-blue-600 text-white hover:bg-blue-700",
+    primary: "bg-primary text-white hover:bg-primary-hover",
 
     outline:
       "border border-slate-300 bg-white text-slate-900 hover:bg-slate-100",

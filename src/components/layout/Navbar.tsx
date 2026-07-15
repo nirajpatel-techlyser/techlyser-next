@@ -1,6 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
 import { useState } from "react";
 import { Menu, X, ArrowRight } from "lucide-react";
 import Container from "@/components/ui/Container";
@@ -20,12 +21,22 @@ export default function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur-md">
+    <header className="sticky top-0 z-50 border-b border-white/10 bg-header-bg/90 backdrop-blur-md">
       <Container className="flex h-20 items-center justify-between">
         {/* Logo */}
-        <Link href="/" className="text-3xl font-bold tracking-tight">
-          <span className="text-slate-900">Tech</span>
-          <span className="text-blue-600">lyser</span>
+        <Link
+          href="/"
+          className="relative z-10 flex shrink-0 items-center"
+          aria-label="Techlyser home"
+        >
+          <Image
+            src="/images/TEXHLYSER_white_Logo.png"
+            alt="Techlyser"
+            width={180}
+            height={48}
+            priority
+            className="h-9 w-auto object-contain sm:h-10 md:h-11"
+          />
         </Link>
 
         {/* Desktop Navigation */}
@@ -34,7 +45,7 @@ export default function Navbar() {
             <Link
               key={item.id}
               href={item.href}
-              className="relative text-sm font-medium text-slate-600 transition hover:text-blue-600"
+              className="relative text-sm font-medium text-slate-300 transition hover:text-primary"
             >
               {item.label}
             </Link>
@@ -44,7 +55,7 @@ export default function Navbar() {
         {/* CTA */}
         <Link
           href="/contact"
-          className="hidden items-center gap-2 rounded-xl bg-blue-600 px-6 py-3 font-medium text-white transition duration-300 hover:bg-blue-700 md:flex"
+          className="hidden items-center gap-2 rounded-xl bg-primary px-6 py-3 font-medium text-white transition duration-300 hover:bg-primary-hover md:flex"
         >
           Start Project
           <ArrowRight size={18} />
@@ -52,14 +63,17 @@ export default function Navbar() {
 
         {/* Mobile Button (Coming Next) */}
 
-        <button onClick={() => setIsOpen(!isOpen)} className="md:hidden">
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="text-white md:hidden"
+        >
           {isOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
       </Container>
 
       {/* Mobile Menu */}
       {isOpen && (
-        <div className="border-t border-slate-200 bg-white md:hidden">
+        <div className="border-t border-white/10 bg-header-bg md:hidden">
           <nav className="flex flex-col px-6 py-4">
             {navigation.map((item) => (
               <Link
@@ -68,8 +82,8 @@ export default function Navbar() {
                 onClick={() => setIsOpen(false)}
                 className={`py-3 text-base font-medium transition ${
                   pathname === item.href
-                    ? "text-blue-600"
-                    : "text-slate-700 hover:text-blue-600"
+                    ? "text-primary"
+                    : "text-slate-300 hover:text-primary"
                 }`}
               >
                 {item.label}
@@ -80,7 +94,7 @@ export default function Navbar() {
           <Link
             href="/contact"
             onClick={() => setIsOpen(false)}
-            className="mx-6 mb-6 flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3 font-medium text-white transition hover:bg-blue-700"
+            className="mx-6 mb-6 flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 font-medium text-white transition hover:bg-primary-hover"
           >
             Start Project
             <ArrowRight size={18} />
