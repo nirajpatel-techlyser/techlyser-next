@@ -37,8 +37,8 @@ export default function Portfolio() {
           </div>
 
           <div className="space-y-20 lg:pt-32">
-            {rightProjects.map((project) => (
-              <PortfolioCard key={project.id} project={project} />
+            {rightProjects.map((project, index) => (
+              <PortfolioCard key={project.id} project={project} index={index} />
             ))}
           </div>
         </div>

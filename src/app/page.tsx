@@ -4,6 +4,7 @@ import FeaturedIn from "@/components/sections/FeaturedIn";
 import Services from "@/components/sections/Services";
 import WhyChoose from "@/components/sections/WhyChoose";
 import Portfolio from "@/components/sections/Portfolio";
+import FAQ from "@/components/sections/FAQ";
 export default function Home() {
   return (
     <>
@@ -16,6 +17,7 @@ export default function Home() {
       <Services />
 
       <Portfolio />
+      <FAQ />
       <main className="mx-auto max-w-7xl p-10">
         <h1 className="text-5xl font-bold">Welcome to Techlyser 🚀</h1>
 
