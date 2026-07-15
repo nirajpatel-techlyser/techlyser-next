@@ -1,25 +1,43 @@
-export default function Navbar() {
+import Badge from "./Badge";
+
+interface SectionHeadingProps {
+  caption: string;
+  badge?: string;
+  title: string;
+  description?: string;
+  align?: "left" | "center";
+}
+
+export default function SectionHeading({
+  caption,
+  badge,
+  title,
+  description,
+  align = "center",
+}: SectionHeadingProps) {
   return (
-    <header className="border-b">
-      <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-        {/* Logo */}
-        <h1 className="text-2xl font-bold">Techlyser</h1>
+    <div
+      className={`mx-auto mb-16 max-w-3xl ${
+        align === "center" ? "text-center" : "text-left"
+      }`}
+    >
+      {badge && <Badge>{badge}</Badge>}
 
-        {/* Navigation */}
-        <ul className="hidden gap-8 md:flex">
-          <li>Home</li>
-          <li>Services</li>
-          <li>Portfolio</li>
-          <li>Blog</li>
-          <li>About</li>
-          <li>Contact</li>
-        </ul>
+      {caption && (
+        <p className="text-sm font-semibold uppercase tracking-[0.3em] text-blue-600">
+          {caption}
+        </p>
+      )}
 
-        {/* Button */}
-        <button className="rounded-lg bg-primary px-5 py-2 text-white transition hover:bg-primary-hover">
-          Let's Talk
-        </button>
-      </nav>
-    </header>
+      {title && (
+        <h2 className="mt-6 text-4xl font-bold tracking-tight text-slate-900 lg:text-5xl">
+          {title}
+        </h2>
+      )}
+
+      {description && (
+        <p className="mt-6 text-lg leading-8 text-slate-600">{description}</p>
+      )}
+    </div>
   );
 }
