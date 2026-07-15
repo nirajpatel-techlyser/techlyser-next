@@ -52,7 +52,7 @@ export default function Hero() {
                 <p className="text-sm font-bold text-hero-fg">4.9 Rating</p>
               </div>
               <p className="mt-0.5 text-sm font-bold text-hero-fg">
-                700+ happy business owners
+                700+ Successful Projects Delivered
               </p>
             </div>
           </div>
