@@ -5,6 +5,7 @@
   --background: #ffffff;
   --background-soft: #f8fafc;
   --background-muted: #f1f5f9;
+  --background-section-grey: #f6f4ef;
 
   /* Dark surfaces — shared pure black for header + hero */
   --surface-black: #000000;
@@ -20,7 +21,8 @@
   --hero-btn-secondary-border: rgba(255, 255, 255, 0.55);
   --hero-btn-secondary-hover: rgba(255, 255, 255, 0.08);
   --header-border: rgba(255, 255, 255, 0.1);
-  --header-shadow: 0 1px 0 rgba(255, 255, 255, 0.05), 0 12px 40px rgba(0, 0, 0, 0.55);
+  --header-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.05), 0 12px 40px rgba(0, 0, 0, 0.55);
 
   /* Text */
   --foreground: #101828;
@@ -114,4 +116,8 @@ body {
   align-items: center;
   will-change: transform;
   animation: logo-marquee-scroll 20s linear infinite;
+}
+
+.section-bg-grey {
+  background-color: var(--background-section-grey);
 }

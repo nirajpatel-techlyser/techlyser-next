@@ -5,7 +5,7 @@ import { Container, Section, SectionHeading } from "@/components/ui";
 
 export default function Services() {
   return (
-    <Section id="services">
+    <Section id="services" className="section-bg-grey">
       <Container className="defaultClass">
         <SectionHeading
           caption="OUR SERVICES"

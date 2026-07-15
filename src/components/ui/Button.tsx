@@ -19,13 +19,13 @@ export default function Button({
     primary: "bg-primary text-white hover:bg-primary-hover",
 
     outline:
-      "border border-slate-300 bg-white text-slate-900 hover:bg-slate-100",
+      "rounded-none border border-black bg-transparent text-black hover:bg-black hover:text-white",
 
     ghost: "text-slate-700 hover:bg-slate-100",
   };
 
   const baseClasses =
-    "inline-flex items-center justify-center rounded-xl px-6 py-3 font-medium transition duration-300";
+    "inline-flex items-center justify-center px-6 py-3 font-medium transition duration-300";
 
   const classes = `${baseClasses} ${variantClasses[variant]} ${className}`;
 
