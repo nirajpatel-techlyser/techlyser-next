@@ -18,18 +18,19 @@ const clientLogos = [
 
 function LogoTrack({ suffix }: { suffix: string }) {
   return (
-    <div className="flex shrink-0 items-center gap-10 pr-10 sm:gap-14 sm:pr-14">
+    <div className="flex shrink-0 items-center gap-12 pr-12 sm:gap-16 sm:pr-16 lg:gap-20 lg:pr-20">
       {clientLogos.map((logo) => (
         <div
           key={`${logo.alt}-${suffix}`}
-          className="relative flex h-10 w-28 shrink-0 items-center justify-center sm:h-12 sm:w-32"
+          className="relative flex h-14 w-44 shrink-0 items-center justify-center sm:h-16 sm:w-52 lg:h-[4.5rem] lg:w-60"
         >
           <Image
             src={logo.src}
             alt={logo.alt}
             fill
-            sizes="128px"
-            className="object-contain opacity-80 brightness-0"
+            unoptimized
+            sizes="(max-width: 1024px) 200px, 280px"
+            className="object-contain brightness-0 contrast-125"
           />
         </div>
       ))}
@@ -40,9 +41,9 @@ function LogoTrack({ suffix }: { suffix: string }) {
 export default function FeaturedIn() {
   return (
     <section className="border-y border-slate-200/80 bg-[#f6f4ef]">
-      <div className="relative mx-auto max-w-[90rem] overflow-hidden px-4 py-6 sm:px-6 lg:px-8 lg:py-7">
+      <div className="relative mx-auto max-w-[90rem] overflow-hidden px-4 py-7 sm:px-6 lg:px-8 lg:py-9">
         {/* Logos scroll right → left continuously */}
-        <div className="overflow-hidden pl-[7.5rem] sm:pl-[9.5rem] lg:pl-[11rem]">
+        <div className="overflow-hidden pl-[8.5rem] sm:pl-[10.5rem] lg:pl-[12.5rem]">
           <div
             className="logo-marquee"
             style={{

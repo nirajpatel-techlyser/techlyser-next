@@ -21,7 +21,7 @@ export default function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-50 border-b border-white/10 bg-header-bg/90 backdrop-blur-md">
+    <header className="sticky top-0 z-50 border-b border-header-border bg-surface-dark shadow-[var(--header-shadow)]">
       <Container className="flex h-20 items-center justify-between">
         {/* Logo */}
         <Link
@@ -73,7 +73,7 @@ export default function Navbar() {
 
       {/* Mobile Menu */}
       {isOpen && (
-        <div className="border-t border-white/10 bg-header-bg md:hidden">
+        <div className="border-t border-white/10 bg-surface-dark md:hidden">
           <nav className="flex flex-col px-6 py-4">
             {navigation.map((item) => (
               <Link

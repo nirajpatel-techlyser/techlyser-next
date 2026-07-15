@@ -7,8 +7,10 @@ import Portfolio from "@/components/sections/Portfolio";
 export default function Home() {
   return (
     <>
-      <Navbar />
-      <Hero />
+      <div className="bg-surface-dark">
+        <Navbar />
+        <Hero />
+      </div>
       <FeaturedIn />
       <Services />
       <WhyChoose />
