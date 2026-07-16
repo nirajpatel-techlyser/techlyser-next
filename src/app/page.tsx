@@ -5,6 +5,7 @@ import Services from "@/components/sections/Services";
 import WhyChoose from "@/components/sections/WhyChoose";
 import Portfolio from "@/components/sections/Portfolio";
 import FAQ from "@/components/sections/FAQ";
+import CTA from "@/components/sections/CTA";
 export default function Home() {
   return (
     <>
@@ -18,14 +19,7 @@ export default function Home() {
 
       <Portfolio />
       <FAQ />
-      <main className="mx-auto max-w-7xl p-10">
-        <h1 className="text-5xl font-bold">Welcome to Techlyser 🚀</h1>
-
-        <p className="mt-6 max-w-2xl text-lg text-gray-600">
-          Helping businesses build fast, scalable Shopify stores and modern web
-          experiences.
-        </p>
-      </main>
+      <CTA />
     </>
   );
 }

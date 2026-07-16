@@ -22,6 +22,8 @@ export default function Button({
       "rounded-none border border-black bg-transparent text-black hover:bg-black hover:text-white",
 
     ghost: "text-slate-700 hover:bg-slate-100",
+    bg_firstBtn: "",
+    bg_secondBtn: "bg-white text-black hover:bg-black hover:text-white",
   };
 
   const baseClasses =

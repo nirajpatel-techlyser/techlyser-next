@@ -1,8 +1,13 @@
 import Image from "next/image";
 import { portfolio } from "@/data/portfolio";
+
 import PortfolioCard from "@/components/cards/PortfolioCard";
 
 import { Container, Section, SectionHeading, Button } from "@/components/ui";
+
+import { cta } from "@/data/cta";
+import { ArrowRight } from "lucide-react";
+import { FaWhatsapp } from "react-icons/fa";
 
 export default function Portfolio() {
   const leftProjects = portfolio.filter((_, index) => index % 2 === 0);
@@ -40,6 +45,24 @@ export default function Portfolio() {
             {rightProjects.map((project, index) => (
               <PortfolioCard key={project.id} project={project} index={index} />
             ))}
+          </div>
+        </div>
+
+        <div className="grid">
+          <div className="mt-12 flex flex-col justify-center gap-4 sm:flex-row">
+            <Button variant="primary" href={cta.primaryButton.href}>
+              {cta.primaryButton.text}
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
+
+            <Button
+              href={cta.secondaryButton.href}
+              variant="bg_secondBtn"
+              target="_blank"
+            >
+              <FaWhatsapp className="mr-2 h-5 w-5" />
+              {cta.secondaryButton.text}
+            </Button>
           </div>
         </div>
       </Container>

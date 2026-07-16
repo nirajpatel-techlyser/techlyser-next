@@ -1,9 +1,10 @@
 import Badge from "./Badge";
+import { ReactNode } from "react";
 
 interface SectionHeadingProps {
   caption: string;
   badge?: string;
-  title: string;
+  title: ReactNode;
   description?: string;
   align?: "left" | "center";
 }
