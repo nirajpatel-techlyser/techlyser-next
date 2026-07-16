@@ -40,11 +40,7 @@ export default function CTA() {
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
 
-              <Button
-                href={cta.secondaryButton.href}
-                variant="bg_secondBtn"
-                target="_blank"
-              >
+              <Button href={cta.secondaryButton.href} variant="bg_secondBtn">
                 <FaWhatsapp className="mr-2 h-5 w-5" />
                 {cta.secondaryButton.text}
               </Button>
