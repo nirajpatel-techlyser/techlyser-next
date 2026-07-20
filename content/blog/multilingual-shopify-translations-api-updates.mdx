@@ -1,0 +1,128 @@
+---
+title: "Shopify Multilingual – Shopify Translations API Updates: Speak Your Customer’s Language 2020 Update"
+slug: "multilingual-shopify-translations-api-updates"
+date: "2020-02-20 14:12:00"
+author: "clouding_niraj"
+excerpt: |
+  ""
+categories:
+  - All
+  - Ecommerce
+  - Shopify
+  - Shopify SEO
+  - Web Design
+  - Web Development
+tags:
+  - API
+  - Language
+  - merchants
+  - shop
+  - shopify
+---
+Been waiting for multilingual functionality on Shopify?  Sick and tired of using rubbish apps which don’t actually work?  Shopify has finally announced the release of native [multilingual functionality](https://blog.mementotech.in/2022/03/30/shopify-multilingua/) – a feature which has been sorely missed.
+
+
+
+Shopify translations now allow merchants to deliver a fully localised experience to customers and create more potential reach for your store. Luckily to aid this, Shopify has announced new APIs that enable Shopify merchants and developers to set up stores in multiple languages. The new APIs enabling Shopify multiple languages in stores include the following:
+
+
+
+### **The Shop Locale API Update**
+
+
+
+This API helps manage locales and languages available on the merchant storefront. Shopify merchants can easily choose between different Shopify translations and enable and publish locales from the Shopify admin.
+
+
+
+Merchants can choose between primary and alternate locales for their
+
+
+
+. For each locale, there are two attributes, *primary* and *published*. There can only be one primary locale, for all others, merchants can choose whether they are published or unpublished.
+
+
+
+Every Shopify store can have up to 5 alternate published locales (and additional unpublished ones on top of that).
+
+
+
+There are two locale formats that are accepted: with the *language subtag*, or the *language + region subtag* (so either “en” or “en-UK”).
+
+
+
+*Note: Locales have to be enabled and published before it becomes available for translation.*
+
+
+![API](/images/blog/2022/08/Banner-Images.png)
+
+
+
+### **The Shopify Translations API Update**
+
+
+
+The Shopify translations API enables a consistent customer experience for international buyers. Having localised apps as part of the [Shopify](https://techlyser.com/shopify-marketing-the-importance-of-storytelling-in-your-strategy/) store localisation plays a big role in that customer experience.
+
+
+
+Shopify developers can quickly check whether a merchant has a multi-language store by querying the ShopLocale object and retrieving a list of locales. If there’s more than one locale with *published* set to *true*, then the merchant does indeed offer localised Shopify storefronts.
+
+
+
+The GraphQL Admin API helps create and retrieve translated content, such as email notifications or product information. It also enables customers to view products in multiple languages and receive localised emails too!
+
+
+
+The same API will create and retrieve content when the app requests for *read\_translations* or *write\_translations* access scopes. To be able to do that, the app needs permission from the user that will authorise it for access.
+
+
+
+Some resource types that can be translated include:
+
+
+
+* Collections
+* Email and SMS templates
+* Links
+* Online store articles, blogs, pages, themes
+* Payment gateways and shipping rates
+* Price- and weight-based shipping rates
+* Shop and shop policies
+* Products and their options and variants
+
+
+
+Developers will be able to retrieve a list of translatable resources, content, and their current translations with *translatable resources* query for each. They can also use it to retrieve all translations for a locale at once.
+
+
+
+To create translations, the GraphQL API will use mutations. The *translationsRegister* mutation is used to create new translations, and once created, the original content will have to be added to the translatable content field for the translation to work. To remove translations that are no longer in use or needed, the translations remove mutation will help remove them.
+
+
+
+### **The Liquid API Update**
+
+
+
+The Liquid API needed some substantial changes in order for it to work well with the new Shopify translations and Locale APIs, and can now be used to create localised experiences directly from the Shopify admin.
+
+
+
+All these new APIs updates are available in the developer preview, and developers are free to visit the changelog to get a full list of what’s to come. The Unite developer preview also offers the exclusive ability to start selling in Shopify multiple languages immediately, so developers can build and modify apps right now to support multiple languages.
+
+
+
+### **The downside of Shopify's Multilingual**
+
+
+
+Our SEO was disappointed not to see the option for a unique URL for each language.  Each handle will serve the same piece of content, so you can’t have a German and an English URL – only one.  The impact of this will be felt in more competitive markets.
+
+
+
+### **Need Help with a Shopify Multilingual Setup?**
+
+
+
+If you’re looking to take advantage of the new multilingual features from Shopify, you’ve probably got a tonne of concerns and questions – any established retailer would.  It’s a feature we were excited to play with in beta, and are just in the process of working with our first multilingual – single domain Shopify site right now.   So talk to us if this is a functionality you would like to explore too.  Our Shopify Experts are here to help you scale into new markets with new languages.

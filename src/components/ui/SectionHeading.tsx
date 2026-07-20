@@ -7,6 +7,7 @@ interface SectionHeadingProps {
   title: ReactNode;
   description?: string;
   align?: "left" | "center";
+  captionClassName?: string;
 }
 
 export default function SectionHeading({
@@ -15,6 +16,7 @@ export default function SectionHeading({
   title,
   description,
   align = "center",
+  captionClassName = "text-blue-600",
 }: SectionHeadingProps) {
   return (
     <div
@@ -25,7 +27,9 @@ export default function SectionHeading({
       {badge && <Badge>{badge}</Badge>}
 
       {caption && (
-        <p className="text-sm font-semibold uppercase tracking-[0.3em] text-blue-600">
+        <p
+          className={`text-sm font-semibold uppercase tracking-[0.3em] ${captionClassName}`}
+        >
           {caption}
         </p>
       )}
