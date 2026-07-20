@@ -1,4 +1,8 @@
 import Navbar from "@/components/layout/Navbar";
+
+import ContactHero from "@/components/contact/ContactHero";
+import ContactForm from "@/components/contact/ContactForm";
+
 import Hero from "@/components/sections/Hero";
 import FeaturedIn from "@/components/sections/FeaturedIn";
 import Services from "@/components/sections/Services";
@@ -11,13 +15,10 @@ export default function Home() {
     <>
       <div className="bg-surface-dark">
         <Navbar />
-        <Hero />
 
-        <FeaturedIn />
+        <Portfolio />
+
         <WhyChoose />
-        <Services />
-
-        <Portfolio limit={4} />
         <FAQ />
         <CTA />
       </div>

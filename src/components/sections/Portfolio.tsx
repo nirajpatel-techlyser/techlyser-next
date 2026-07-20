@@ -9,9 +9,15 @@ import { cta } from "@/data/cta";
 import { ArrowRight } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 
-export default function Portfolio() {
-  const leftProjects = portfolio.filter((_, index) => index % 2 === 0);
-  const rightProjects = portfolio.filter((_, index) => index % 2 !== 0);
+interface PortfolioProps {
+  limit?: number;
+}
+
+export default function Portfolio({ limit }: PortfolioProps) {
+  const displayedProjects = limit ? portfolio.slice(0, limit) : portfolio;
+
+  const leftProjects = displayedProjects.filter((_, index) => index % 2 === 0);
+  const rightProjects = displayedProjects.filter((_, index) => index % 2 !== 0);
   return (
     <Section id="portolio" className="section-bg-grey portfolioClass">
       <Container className="portfolioClass">
