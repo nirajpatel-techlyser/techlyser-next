@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import AnalyticsTracker from "@/components/shared/AnalyticsTracker";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -13,9 +14,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Techlyser",
+  title: {
+    default: "Techlyser Web Solutions",
+    template: "%s | Techlyser Web Solutions",
+  },
   description:
-    "Techlyser shares practical growth, Shopify, and digital marketing insights for modern brands.",
+    "Techlyser Web Solutions builds high-performance Shopify stores, Next.js apps, and custom web solutions that help businesses grow online.",
   metadataBase: new URL("https://techlyser.com"),
 };
 
@@ -29,7 +33,10 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <AnalyticsTracker />
+        {children}
+      </body>
     </html>
   );
 }

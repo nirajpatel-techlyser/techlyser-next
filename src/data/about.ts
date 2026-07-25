@@ -1,7 +1,7 @@
 export const aboutHero = {
   title: "We Build Digital Experiences That Grow Businesses.",
   description:
-    "Techlyser is a team of passionate Shopify and Web Development experts helping businesses launch, optimize and scale their online presence with high-performance websites and custom solutions.",
+    "Techlyser Web Solutions is a team of passionate Shopify and Web Development experts helping businesses launch, optimize and scale their online presence with high-performance websites and custom solutions.",
   primaryCta: { label: "Let's Talk", href: "/contact" },
   secondaryCta: { label: "View Our Work", href: "/portfolio" },
 };
@@ -9,7 +9,7 @@ export const aboutHero = {
 export const aboutStory = {
   title: "Our Story",
   paragraphs: [
-    "Techlyser started with a simple mission—to build websites that are not only visually stunning but also deliver measurable business results.",
+    "Techlyser Web Solutions started with a simple mission—to build websites that are not only visually stunning but also deliver measurable business results.",
     "Over the years we've helped startups, entrepreneurs and established brands create modern Shopify stores, business websites and custom web applications.",
     "Today we continue helping businesses across the globe with reliable development, long-term support and scalable digital solutions.",
   ],

@@ -5,9 +5,9 @@ import { getAllPosts } from "@/lib/blog";
 import { Container } from "@/components/ui";
 
 export const metadata: Metadata = {
-  title: "Blog | Techlyser",
+  title: "Blog",
   description:
-    "Read practical eCommerce, Shopify, and digital marketing insights from the Techlyser team.",
+    "Read practical eCommerce, Shopify, and digital marketing insights from Techlyser Web Solutions.",
 };
 
 function formatDate(value: string) {
@@ -23,8 +23,13 @@ function formatDate(value: string) {
   }).format(date);
 }
 
-export default function BlogIndexPage() {
-  const posts = getAllPosts();
+export default async function BlogIndexPage() {
+  let posts: Awaited<ReturnType<typeof getAllPosts>> = [];
+  try {
+    posts = await getAllPosts();
+  } catch {
+    posts = [];
+  }
 
   return (
     <div className="bg-surface-dark min-h-screen">
@@ -36,7 +41,7 @@ export default function BlogIndexPage() {
               Blog
             </p>
             <h1 className="mt-4 text-4xl font-bold tracking-tight text-slate-900 lg:text-5xl">
-              Latest insights from Techlyser
+              Latest insights from Techlyser Web Solutions
             </h1>
           </header>
 

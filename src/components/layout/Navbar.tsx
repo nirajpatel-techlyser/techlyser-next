@@ -27,11 +27,11 @@ export default function Navbar() {
         <Link
           href="/"
           className="relative z-10 flex shrink-0 items-center"
-          aria-label="Techlyser home"
+          aria-label="Techlyser Web Solutions home"
         >
           <Image
             src="/images/TEXHLYSER_white_Logo.png"
-            alt="Techlyser"
+            alt="Techlyser Web Solutions"
             width={180}
             height={48}
             priority

@@ -32,7 +32,7 @@ export default function AboutHero() {
             transition={{ duration: 0.6, ease: "easeOut" }}
           >
             <p className="text-sm font-semibold uppercase tracking-[0.28em] text-primary">
-              About Techlyser
+              About Techlyser Web Solutions
             </p>
             <h1 className="mt-5 text-4xl font-bold leading-[1.08] tracking-tight text-slate-900 sm:text-5xl lg:text-[3.4rem]">
               {aboutHero.title}

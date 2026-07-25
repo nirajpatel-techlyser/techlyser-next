@@ -1,0 +1,136 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  EDITOR
+}
+
+enum BlogStatus {
+  DRAFT
+  PUBLISHED
+}
+
+enum CommentStatus {
+  PENDING
+  APPROVED
+  SPAM
+  REJECTED
+}
+
+model User {
+  id             String    @id @default(cuid())
+  name           String?
+  email          String    @unique
+  emailVerified  DateTime?
+  image          String?
+  passwordHash   String?
+  role           Role      @default(ADMIN)
+  accounts       Account[]
+  sessions       Session[]
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Blog {
+  id               String        @id @default(cuid())
+  title            String
+  slug             String        @unique
+  excerpt          String?       @db.Text
+  content          String        @db.Text
+  featuredImage    String?
+  category         String?
+  tags             String[]      @default([])
+  author           String        @default("Techlyser Web Solutions")
+  seoTitle         String?
+  seoDescription   String?       @db.Text
+  metaKeywords     String?
+  status           BlogStatus    @default(DRAFT)
+  featured         Boolean       @default(false)
+  commentsEnabled  Boolean       @default(false)
+  views            Int           @default(0)
+  readingTime      Int?
+  publishedAt      DateTime?
+  scheduledAt      DateTime?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  viewsLog         PageView[]
+  comments         BlogComment[]
+
+  @@index([status, publishedAt])
+  @@index([category])
+  @@index([featured])
+}
+
+model PageView {
+  id        String   @id @default(cuid())
+  path      String
+  blogId    String?
+  blog      Blog?    @relation(fields: [blogId], references: [id], onDelete: SetNull)
+  country   String?
+  city      String?
+  region    String?
+  referrer  String?
+  userAgent String?  @db.Text
+  ipHash    String?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([path])
+  @@index([blogId, createdAt])
+  @@index([country])
+}
+
+model BlogComment {
+  id        String        @id @default(cuid())
+  blogId    String
+  blog      Blog          @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  name      String
+  email     String
+  content   String        @db.Text
+  status    CommentStatus @default(PENDING)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@index([blogId, status, createdAt])
+}

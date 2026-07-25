@@ -1,120 +1,90 @@
-import fs from "fs";
-import path from "path";
-import matter from "gray-matter";
-import { BlogPost } from "@/types/blog";
+import { BlogStatus, type Blog } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
+import type { BlogPost } from "@/types/blog";
 
-const POSTS_PATH = path.join(process.cwd(), "content/blog");
-const WORDPRESS_UPLOADS_REGEX =
-  /(?:https?:)?\/\/(?:www\.)?techlyser\.com\/+wp-content\/uploads\/|\/+wp-content\/uploads\//gi;
-
-export function normalizeBlogImageUrl(url: string): string {
-  if (!url) {
-    return "";
-  }
-
-  return url.replace(WORDPRESS_UPLOADS_REGEX, "/images/blog/");
-}
-
-export function getPostSlugs(): string[] {
-  return fs
-    .readdirSync(POSTS_PATH)
-    .filter((file) => file.endsWith(".mdx"));
-}
-
-function normalizeBlogMarkdown(markdown: string): string {
-  return normalizeBlogImageUrl(
-    markdown.replace(/<(https?:\/\/[^>\s]+)>/g, "[$1]($1)")
-  );
-}
-
-function extractFirstImage(markdown: string): string {
-  const markdownImage = markdown.match(/!\[[^\]]*\]\(([^)]+)\)/);
-
-  if (markdownImage?.[1]) {
-    return normalizeBlogImageUrl(markdownImage[1].trim());
-  }
-
-  return "";
-}
-
-function resolveExcerpt(value: unknown, content: string): string {
-  if (typeof value === "string") {
-    const trimmed = value.trim();
-
-    if (
-      trimmed.length > 0 &&
-      trimmed !== '""' &&
-      trimmed !== "''"
-    ) {
-      return trimmed;
-    }
-  }
-
-  return createExcerpt(content);
-}
-
-function createExcerpt(content: string): string {
-  const plainText = content
-    .replace(/!\[[^\]]*\]\([^)]+\)/g, "")
-    .replace(/\[[^\]]+\]\([^)]+\)/g, "$1")
-    .replace(/[#>*`_-]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-
-  return plainText.slice(0, 180).trim();
-}
-
-export function getPostBySlug(slug: string): BlogPost {
-  const realSlug = slug.replace(/\.mdx$/, "");
-  const allFiles = getPostSlugs();
-  const matchingFile = allFiles.find((file) => {
-    if (file === `${realSlug}.mdx`) {
-      return true;
-    }
-
-    const fileContents = fs.readFileSync(path.join(POSTS_PATH, file), "utf8");
-    const { data } = matter(fileContents);
-    return data.slug === realSlug;
-  });
-
-  if (!matchingFile) {
-    throw new Error(`Post not found for slug: ${realSlug}`);
-  }
-
-  const fullPath = path.join(POSTS_PATH, matchingFile);
-  const fileContents = fs.readFileSync(fullPath, "utf8");
-
-  const { data, content } = matter(fileContents);
-  const normalizedContent = normalizeBlogMarkdown(content);
-  const excerpt = resolveExcerpt(data.excerpt, normalizedContent);
-  const coverImageFromFrontmatter =
-    typeof data.coverImage === "string"
-      ? normalizeBlogImageUrl(data.coverImage)
-      : "";
-
+function mapBlog(blog: Blog): BlogPost {
   return {
-    title: data.title ?? "",
-    slug: data.slug ?? realSlug,
-    description: data.description ?? "",
-    excerpt,
-    date: data.date ?? "",
-    author: data.author ?? "Techlyser",
-    categories: data.categories ?? [],
-    tags: data.tags ?? [],
-    coverImage: coverImageFromFrontmatter || extractFirstImage(normalizedContent),
-    featured: data.featured ?? false,
-    content: normalizedContent,
+    id: blog.id,
+    title: blog.title,
+    slug: blog.slug,
+    description: blog.seoDescription || blog.excerpt || "",
+    excerpt: blog.excerpt || "",
+    date: (blog.publishedAt || blog.createdAt).toISOString(),
+    author: blog.author,
+    categories: blog.category ? [blog.category] : [],
+    tags: blog.tags,
+    coverImage: blog.featuredImage || "",
+    featured: blog.featured,
+    commentsEnabled: blog.commentsEnabled,
+    content: blog.content,
+    readingTime: blog.readingTime ? `${blog.readingTime} min read` : undefined,
+    seoTitle: blog.seoTitle || undefined,
+    seoDescription: blog.seoDescription || undefined,
+    metaKeywords: blog.metaKeywords || undefined,
+    views: blog.views,
+    status: blog.status,
   };
 }
 
-export function getAllPosts(): BlogPost[] {
-  const slugs = getPostSlugs();
+export async function getAllPosts(): Promise<BlogPost[]> {
+  const posts = await prisma.blog.findMany({
+    where: { status: BlogStatus.PUBLISHED },
+    orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
+  });
 
-  const posts = slugs.map((slug) => getPostBySlug(slug));
+  return posts.map(mapBlog);
+}
 
-  return posts.sort(
-    (a, b) =>
-      new Date(b.date).getTime() -
-      new Date(a.date).getTime()
-  );
+export async function getPostBySlug(slug: string): Promise<BlogPost> {
+  const post = await prisma.blog.findFirst({
+    where: {
+      slug,
+      status: BlogStatus.PUBLISHED,
+    },
+  });
+
+  if (!post) {
+    throw new Error(`Post not found for slug: ${slug}`);
+  }
+
+  return mapBlog(post);
+}
+
+export async function getRelatedPosts(
+  slug: string,
+  category?: string,
+  limit = 3,
+): Promise<BlogPost[]> {
+  const posts = await prisma.blog.findMany({
+    where: {
+      status: BlogStatus.PUBLISHED,
+      slug: { not: slug },
+      ...(category ? { category } : {}),
+    },
+    orderBy: { publishedAt: "desc" },
+    take: limit,
+  });
+
+  return posts.map(mapBlog);
+}
+
+export async function getAdjacentPosts(slug: string) {
+  const posts = await prisma.blog.findMany({
+    where: { status: BlogStatus.PUBLISHED },
+    orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
+    select: { slug: true, title: true },
+  });
+
+  const index = posts.findIndex((post) => post.slug === slug);
+  return {
+    previous: index > 0 ? posts[index - 1] : null,
+    next: index >= 0 && index < posts.length - 1 ? posts[index + 1] : null,
+  };
+}
+
+export async function incrementPostViews(slug: string) {
+  await prisma.blog.updateMany({
+    where: { slug, status: BlogStatus.PUBLISHED },
+    data: { views: { increment: 1 } },
+  });
 }
