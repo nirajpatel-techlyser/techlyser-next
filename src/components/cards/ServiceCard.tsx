@@ -1,20 +1,28 @@
 import { ArrowRight } from "lucide-react";
 
 import { Button, Card } from "@/components/ui";
+import ServiceDrawIcon from "@/components/cards/ServiceDrawIcon";
 
 import type { Service } from "@/data/services";
 
 interface ServiceCardProps {
   service: Service;
+  index?: number;
 }
 
-export default function ServiceCard({ service }: ServiceCardProps) {
+export default function ServiceCard({ service, index = 0 }: ServiceCardProps) {
   const Icon = service.icon;
+
   return (
     <Card className="flex h-full flex-col">
-      <div className="mb-6 text-5xl">
-        <Icon className="h-12 w-12 text-primary" />
-      </div>
+      <ServiceDrawIcon index={index}>
+        <Icon
+          className="h-12 w-12"
+          strokeWidth={1.65}
+          absoluteStrokeWidth
+          aria-hidden
+        />
+      </ServiceDrawIcon>
 
       <h3 className="text-2xl font-semibold text-slate-900">{service.title}</h3>
 

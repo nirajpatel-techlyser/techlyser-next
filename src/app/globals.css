@@ -214,6 +214,96 @@ h6 {
   animation: logo-marquee-scroll 20s linear infinite;
 }
 
+@keyframes hero-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes hero-bounce {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  40% {
+    transform: translateY(-16px) scale(1.06);
+  }
+  65% {
+    transform: translateY(-6px) scale(1.02);
+  }
+}
+
+.hero-icon-bounce {
+  animation-name: hero-bounce;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  will-change: transform;
+}
+
+@keyframes service-icon-draw {
+  0% {
+    stroke-dashoffset: 1;
+    opacity: 0.2;
+  }
+  45%,
+  58% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: -1;
+    opacity: 0.2;
+  }
+}
+
+.service-icon-draw svg {
+  overflow: visible;
+}
+
+.service-icon-draw svg path,
+.service-icon-draw svg line,
+.service-icon-draw svg circle,
+.service-icon-draw svg polyline,
+.service-icon-draw svg polygon,
+.service-icon-draw svg rect,
+.service-icon-draw svg ellipse {
+  fill: none !important;
+  stroke: currentColor;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation-name: service-icon-draw;
+  animation-duration: var(--service-icon-duration, 3s);
+  animation-delay: var(--service-icon-delay, 0s);
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+}
+
+@keyframes hero-services-sheen {
+  0% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(120%);
+  }
+}
+
+.hero-services-badge-sheen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    transparent 35%,
+    rgba(255, 255, 255, 0.12) 50%,
+    transparent 65%
+  );
+  animation: hero-services-sheen 4.5s ease-in-out infinite;
+}
+
 .section-bg-grey {
   background-color: var(--background-section-grey);
 }

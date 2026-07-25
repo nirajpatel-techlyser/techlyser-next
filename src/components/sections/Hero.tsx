@@ -1,7 +1,9 @@
 import Link from "next/link";
-import Image from "next/image";
 
-import { Badge, Container, Section } from "@/components/ui";
+import { Container, Section } from "@/components/ui";
+import ShopifyExpertsTypewriter from "@/components/sections/ShopifyExpertsTypewriter";
+import HeroVisual from "@/components/sections/HeroVisual";
+import HeroServicesBadge from "@/components/sections/HeroServicesBadge";
 
 import { Star, BadgeCheck } from "lucide-react";
 
@@ -14,13 +16,58 @@ const avatars = [
 
 export default function Hero() {
   return (
-
     <Section className="relative overflow-x-clip bg-surface-dark text-hero-fg">
-      <Container className="defaultClass">
-        <div className="relative z-10 mx-auto grid max-w-[90rem] items-start gap-6 px-4 py-8 sm:px-6 lg:grid-cols-2 lg:gap-8 lg:px-8 lg:py-10">
-          {/* LEFT */}
-          <div className="relative z-10 max-w-2xl pt-1">
-            {/* Avatars + rating / social proof */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-primary/10 blur-[2px] sm:h-96 sm:w-96"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -bottom-28 -left-20 h-64 w-64 rounded-full bg-primary/5 sm:h-80 sm:w-80"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute bottom-0 right-1/4 h-40 w-80 -translate-y-1/4 rounded-full bg-primary/[0.06] blur-2xl"
+      />
+
+      <Container className="defaultClass relative z-10">
+        <div className="relative z-10 mx-auto grid max-w-[90rem] items-center gap-8 px-4 py-8 sm:px-6 lg:grid-cols-2 lg:gap-10 lg:px-8 lg:py-10">
+          {/* VISUAL — first on mobile, right on desktop */}
+          <div className="relative z-10 order-1 w-full self-start pb-8 lg:order-2 lg:pb-6">
+            <div className="relative">
+              <HeroVisual />
+
+              {/* Review overlaps the mockup image */}
+              <div className="absolute bottom-2 left-2 right-2 z-40 sm:bottom-3 sm:left-4 sm:right-4">
+                <div className="keep-light bg-solid-white flex w-full items-start gap-3 rounded-[5px] border border-black/10 p-3 pr-5 shadow-[0_12px_40px_rgba(0,0,0,0.28)] sm:gap-4 sm:p-3.5 sm:pr-6">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-medium text-white sm:h-12 sm:w-12">
+                    LV
+                  </span>
+                  <div className="min-w-0 flex-1 pt-0.5">
+                    <p className="text-on-light-muted text-[13px] italic leading-snug sm:text-sm">
+                      &ldquo;I was very impressed with TECHLYSER and their
+                      expertise in customizing my Shopify store.&rdquo;
+                    </p>
+                    <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                      <span className="text-on-light text-sm font-medium">
+                        Luca van Paassen
+                      </span>
+                      <BadgeCheck
+                        className="h-4 w-4 fill-emerald-500 text-white"
+                        aria-hidden
+                      />
+                      <span className="text-[11px] font-medium uppercase tracking-wide text-emerald-600">
+                        Verified Review
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* CONTENT — second on mobile, left on desktop */}
+          <div className="relative z-10 order-2 max-w-2xl pt-1 lg:order-1">
             <div className="mb-5 flex flex-wrap items-center gap-3">
               <div className="flex -space-x-2.5">
                 {avatars.map((avatar) => (
@@ -32,7 +79,6 @@ export default function Hero() {
                   </span>
                 ))}
               </div>
-
 
               <div>
                 <div className="flex items-center gap-2">
@@ -53,7 +99,7 @@ export default function Hero() {
               </div>
             </div>
 
-            <Badge>Shopify • Next.js • WordPress Agency</Badge>
+            <HeroServicesBadge />
 
             <h1 className="mt-4 font-heading text-3xl font-semibold leading-[1.15] tracking-tight text-hero-fg sm:text-4xl lg:text-[2.65rem]">
               Building High-Performance{" "}
@@ -81,58 +127,7 @@ export default function Hero() {
               </Link>
             </div>
 
-            <div className="mt-5 flex flex-wrap gap-2.5">
-              <span className="rounded-[5px] border-2 border-hero-pill-border bg-hero-pill-bg px-4 py-2 text-sm font-medium text-hero-fg shadow-[0_0_0_1px_rgba(255,255,255,0.06)]">
-                ✔ Shopify Expert
-              </span>
-              <span className="rounded-[5px] border-2 border-hero-pill-border bg-hero-pill-bg px-4 py-2 text-sm font-medium text-hero-fg shadow-[0_0_0_1px_rgba(255,255,255,0.06)]">
-                ✔ Performance First
-              </span>
-              <span className="rounded-[5px] border-2 border-hero-pill-border bg-hero-pill-bg px-4 py-2 text-sm font-medium text-hero-fg shadow-[0_0_0_1px_rgba(255,255,255,0.06)]">
-                ✔ SEO Optimized
-              </span>
-            </div>
-          </div>
-
-          {/* RIGHT */}
-          <div className="relative z-10 w-full self-start pb-10 sm:pb-12">
-            <div className="relative aspect-[5/4] overflow-hidden rounded-2xl bg-surface-black shadow-[0_28px_70px_-24px_rgba(255,0,0,0.35)] ring-1 ring-hero-border sm:aspect-[4/3]">
-              <Image
-                src="/images/tech-hero.png"
-                alt="Techlyser ecommerce and modern web development"
-                fill
-                priority
-                sizes="(max-width: 1024px) 100vw, 50vw"
-                className="object-cover object-[center_42%]"
-              />
-            </div>
-
-            {/* Floating review — full width over image bottom */}
-            <div className="absolute bottom-0 left-0 right-0 z-20 px-3 sm:px-4">
-              <div className="keep-light bg-solid-white flex w-full items-start gap-3 rounded-[5px] border-2 border-hero-review-border p-3 pr-5 shadow-[0_12px_40px_rgba(0,0,0,0.32)] sm:gap-4 sm:p-3.5 sm:pr-6">
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-medium text-white sm:h-12 sm:w-12">
-                  LV
-                </span>
-                <div className="min-w-0 flex-1 pt-0.5">
-                  <p className="text-on-light-muted text-[13px] italic leading-snug sm:text-sm">
-                    &ldquo;I was very impressed with TECHLYSER and their
-                    expertise in customizing my Shopify store.&rdquo;
-                  </p>
-                  <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                    <span className="text-on-light text-sm font-medium">
-                      Luca van Paassen
-                    </span>
-                    <BadgeCheck
-                      className="h-4 w-4 fill-emerald-500 text-white"
-                      aria-hidden
-                    />
-                    <span className="text-[11px] font-medium uppercase tracking-wide text-emerald-600">
-                      Verified Review
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <ShopifyExpertsTypewriter />
           </div>
         </div>
       </Container>

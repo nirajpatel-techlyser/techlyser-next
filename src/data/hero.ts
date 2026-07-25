@@ -1,5 +1,5 @@
 export const hero = {
-  badge: "🚀 Shopify • Next.js • WordPress Agency",
+  badge: "Shopify • Next.js • Webdesign Agency",
 
   title: {
     line1: "Building High-Performance",
