@@ -1,10 +1,20 @@
 import { getAllPosts } from "@/lib/blog";
+import { connection } from "next/server";
 
-export const revalidate = 300;
+// Must stay fully dynamic — `revalidate` would force prerender and break Vercel builds
+// whenever DATABASE_URL auth fails during `next build`.
+export const dynamic = "force-dynamic";
 
 export async function GET() {
+  await connection();
+
   const baseUrl = "https://techlyser.com";
-  const posts = await getAllPosts();
+  let posts: Awaited<ReturnType<typeof getAllPosts>> = [];
+  try {
+    posts = await getAllPosts();
+  } catch (error) {
+    console.error("RSS feed failed to load posts:", error);
+  }
 
   const items = posts
     .map(
@@ -32,6 +42,7 @@ export async function GET() {
   return new Response(xml, {
     headers: {
       "Content-Type": "application/rss+xml; charset=utf-8",
+      "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
     },
   });
 }

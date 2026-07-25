@@ -1,7 +1,12 @@
 import type { MetadataRoute } from "next";
+import { connection } from "next/server";
 import { getAllPosts } from "@/lib/blog";
 
+export const dynamic = "force-dynamic";
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  await connection();
+
   const baseUrl = "https://techlyser.com";
   const staticRoutes = ["", "/about", "/blog", "/contact", "/portfolio"].map(
     (path) => ({
