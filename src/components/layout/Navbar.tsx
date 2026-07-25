@@ -35,7 +35,7 @@ export default function Navbar() {
             width={180}
             height={48}
             priority
-            className="h-9 w-auto object-contain sm:h-10 md:h-11"
+            className="site-logo h-9 w-auto object-contain sm:h-10 md:h-11"
           />
         </Link>
 
@@ -45,7 +45,7 @@ export default function Navbar() {
             <Link
               key={item.id}
               href={item.href}
-              className="relative text-sm font-medium text-slate-300 transition hover:text-primary"
+              className="relative text-sm font-medium text-[var(--nav-link)] transition hover:text-primary"
             >
               {item.label}
             </Link>
@@ -55,7 +55,7 @@ export default function Navbar() {
         {/* CTA */}
         <Link
           href="/contact"
-          className="hidden items-center gap-2 rounded-xl bg-primary px-6 py-3 font-medium text-white transition duration-300 hover:bg-primary-hover md:flex"
+          className="btn-brand hidden items-center gap-2 rounded-[5px] px-6 py-3 font-medium transition duration-300 md:flex"
         >
           Start Project
           <ArrowRight size={18} />
@@ -65,7 +65,7 @@ export default function Navbar() {
 
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="text-white md:hidden"
+          className="text-heading md:hidden"
         >
           {isOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
@@ -73,7 +73,7 @@ export default function Navbar() {
 
       {/* Mobile Menu */}
       {isOpen && (
-        <div className="border-t border-white/10 bg-surface-dark md:hidden">
+        <div className="border-t border-header-border bg-surface-dark md:hidden">
           <nav className="flex flex-col px-6 py-4">
             {navigation.map((item) => (
               <Link
@@ -83,7 +83,7 @@ export default function Navbar() {
                 className={`py-3 text-base font-medium transition ${
                   pathname === item.href
                     ? "text-primary"
-                    : "text-slate-300 hover:text-primary"
+                    : "text-[var(--nav-link)] hover:text-primary"
                 }`}
               >
                 {item.label}
@@ -94,7 +94,7 @@ export default function Navbar() {
           <Link
             href="/contact"
             onClick={() => setIsOpen(false)}
-            className="mx-6 mb-6 flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 font-medium text-white transition hover:bg-primary-hover"
+            className="btn-brand mx-6 mb-6 flex items-center justify-center gap-2 rounded-[5px] px-6 py-3 font-medium transition"
           >
             Start Project
             <ArrowRight size={18} />

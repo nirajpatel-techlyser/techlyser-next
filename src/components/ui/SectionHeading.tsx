@@ -16,7 +16,7 @@ export default function SectionHeading({
   title,
   description,
   align = "center",
-  captionClassName = "text-blue-600",
+  captionClassName = "text-primary",
 }: SectionHeadingProps) {
   return (
     <div
@@ -28,20 +28,20 @@ export default function SectionHeading({
 
       {caption && (
         <p
-          className={`text-sm font-semibold uppercase tracking-[0.3em] ${captionClassName}`}
+          className={`text-sm font-medium uppercase tracking-[0.3em] ${captionClassName}`}
         >
           {caption}
         </p>
       )}
 
       {title && (
-        <h2 className="mt-6 text-4xl font-bold tracking-tight text-slate-900 lg:text-5xl">
+        <h2 className="mt-6 text-4xl font-semibold tracking-tight text-heading lg:text-5xl">
           {title}
         </h2>
       )}
 
       {description && (
-        <p className="mt-6 text-lg leading-8 text-slate-600">{description}</p>
+        <p className="mt-6 text-lg font-normal leading-8 text-slate-600">{description}</p>
       )}
     </div>
   );

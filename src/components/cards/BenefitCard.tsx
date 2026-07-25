@@ -12,7 +12,7 @@ export default function BenefitCard({ benefit }: BenefitCardProps) {
   return (
     <Card className="flex h-full flex-col">
       <div className="mb-6">
-        <Icon className="h-12 w-12 text-blue-600" />
+        <Icon className="h-12 w-12 text-primary" />
       </div>
 
       <h3 className="text-xl font-semibold text-slate-900">{benefit.title}</h3>

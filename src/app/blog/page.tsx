@@ -37,7 +37,7 @@ export default async function BlogIndexPage() {
       <main className="bg-white py-16">
         <Container>
           <header className="mb-12">
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-600">
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary">
               Blog
             </p>
             <h1 className="mt-4 text-4xl font-bold tracking-tight text-slate-900 lg:text-5xl">

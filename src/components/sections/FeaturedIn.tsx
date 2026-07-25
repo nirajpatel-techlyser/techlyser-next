@@ -40,9 +40,8 @@ function LogoTrack({ suffix }: { suffix: string }) {
 
 export default function FeaturedIn() {
   return (
-    <section className="border-y border-slate-200/80 bg-[#f6f4ef]">
+    <section className="keep-light border-y border-slate-200/80 bg-[#f6f4ef]">
       <div className="relative mx-auto max-w-[90rem] overflow-hidden px-4 py-7 sm:px-6 lg:px-8 lg:py-9">
-        {/* Logos scroll right → left continuously */}
         <div className="overflow-hidden pl-[8.5rem] sm:pl-[10.5rem] lg:pl-[12.5rem]">
           <div
             className="logo-marquee"
@@ -55,10 +54,9 @@ export default function FeaturedIn() {
           </div>
         </div>
 
-        {/* Left heading — logos exit underneath */}
         <div className="pointer-events-none absolute inset-y-0 left-0 z-20 flex items-center pl-4 sm:pl-6 lg:pl-8">
           <div className="relative flex h-full items-center bg-[#f6f4ef] pr-4 sm:pr-6">
-            <p className="whitespace-nowrap text-xs font-semibold uppercase tracking-[0.18em] text-slate-800 sm:text-sm">
+            <p className="text-on-light whitespace-nowrap text-xs font-medium uppercase tracking-[0.18em] sm:text-sm">
               Featured In
             </p>
             <div

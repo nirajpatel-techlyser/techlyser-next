@@ -134,3 +134,20 @@ model BlogComment {
 
   @@index([blogId, status, createdAt])
 }
+
+enum SiteTheme {
+  DARK
+  LIGHT
+}
+
+/// Singleton site-wide settings (always use id = "default")
+model SiteSettings {
+  id           String    @id @default("default")
+  theme        SiteTheme @default(DARK)
+  whatsappUrl  String?
+  facebookUrl  String?
+  googleUrl    String?
+  instagramUrl String?
+  linkedinUrl  String?
+  updatedAt    DateTime  @updatedAt
+}

@@ -16,7 +16,7 @@ export default function ContactHero() {
           title={
             <>
               {contactHero.title}{" "}
-              <span className="text-blue-600">
+              <span className="text-primary">
                 {contactHero.titleHighlight}
               </span>
             </>

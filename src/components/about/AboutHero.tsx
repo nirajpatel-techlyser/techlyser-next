@@ -44,14 +44,14 @@ export default function AboutHero() {
             <div className="mt-10 flex flex-col gap-4 sm:flex-row">
               <Link
                 href={aboutHero.primaryCta.href}
-                className="inline-flex items-center justify-center gap-2 rounded-2xl bg-primary px-7 py-4 text-sm font-semibold text-white shadow-[0_18px_40px_-18px_rgba(0,95,213,0.55)] transition hover:-translate-y-0.5 hover:bg-primary-hover"
+                className="btn-brand inline-flex items-center justify-center gap-2 rounded-[5px] px-7 py-4 text-sm font-medium shadow-[0_18px_40px_-18px_rgba(255,0,0,0.55)] transition hover:-translate-y-0.5"
               >
                 {aboutHero.primaryCta.label}
                 <ArrowRight className="h-4 w-4" aria-hidden />
               </Link>
               <Link
                 href={aboutHero.secondaryCta.href}
-                className="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-7 py-4 text-sm font-semibold text-slate-900 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50"
+                className="inline-flex items-center justify-center rounded-[5px] border border-slate-200 bg-solid-white px-7 py-4 text-sm font-medium text-[#0a0a0a] shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50"
               >
                 {aboutHero.secondaryCta.label}
               </Link>

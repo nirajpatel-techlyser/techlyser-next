@@ -1,11 +1,20 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { headers } from "next/headers";
+import { Geist_Mono, Nunito, Roboto } from "next/font/google";
 import AnalyticsTracker from "@/components/shared/AnalyticsTracker";
+import { getSiteSettings } from "@/lib/settings";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const nunito = Nunito({
+  variable: "--font-nunito",
   subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+});
+
+const roboto = Roboto({
+  variable: "--font-roboto",
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "700"],
 });
 
 const geistMono = Geist_Mono({
@@ -23,17 +32,36 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://techlyser.com"),
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const headerList = await headers();
+  const pathname = headerList.get("x-pathname") || "";
+  const isAdminRoute = pathname.startsWith("/admin");
+
+  const settings = await getSiteSettings();
+  // Admin UI must stay light even when the public site theme is dark.
+  const theme = isAdminRoute
+    ? "light"
+    : settings.theme === "LIGHT"
+      ? "light"
+      : "dark";
+
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      data-theme={theme}
+      className={`${nunito.variable} ${roboto.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body
+        className={`min-h-full flex flex-col font-sans ${
+          isAdminRoute
+            ? "bg-slate-50 text-slate-900"
+            : "bg-background text-foreground"
+        }`}
+      >
         <AnalyticsTracker />
         {children}
       </body>

@@ -39,7 +39,7 @@ export default function PortfolioCard({ project, index }: PortfolioCardProps) {
             <Tag
               className="
     border-blue-100
-    bg-blue-50
+    bg-primary-soft
     text-blue-700
   "
               key={tech}
@@ -51,13 +51,13 @@ export default function PortfolioCard({ project, index }: PortfolioCardProps) {
 
         {/* Title */}
 
-        <h3 className="mt-3 text-2xl font-bold text-slate-900 group-hover:text-blue-600">
+        <h3 className="mt-3 text-2xl font-bold text-slate-900 group-hover:text-primary">
           {project.title}
         </h3>
 
         {/* Category */}
 
-        <p className="text-sm font-medium uppercase tracking-wider text-blue-600">
+        <p className="text-sm font-medium uppercase tracking-wider text-primary">
           {project.category}
         </p>
 

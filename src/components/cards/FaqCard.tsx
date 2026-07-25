@@ -28,7 +28,7 @@ export default function FaqCard({ item, isOpen, onToggle }: FaqCardProps) {
         <span
           className={`mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border transition-colors duration-300 ${
             isOpen
-              ? "border-blue-600 bg-blue-50 text-blue-600"
+              ? "border-primary bg-primary-soft text-primary"
               : "border-slate-200 text-slate-500"
           }`}
         >

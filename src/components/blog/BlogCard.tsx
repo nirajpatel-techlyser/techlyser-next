@@ -28,7 +28,7 @@ export default function BlogCard({ post, formattedDate }: BlogCardProps) {
       <div className="p-6">
         <p className="text-sm text-slate-500">{formattedDate}</p>
         <h2 className="mt-3 text-xl font-semibold text-slate-900 lg:text-2xl">
-          <Link href={`/${post.slug}`} className="hover:text-blue-600">
+          <Link href={`/${post.slug}`} className="hover:text-primary">
             {post.title}
           </Link>
         </h2>
@@ -37,7 +37,7 @@ export default function BlogCard({ post, formattedDate }: BlogCardProps) {
         ) : null}
         <Link
           href={`/${post.slug}`}
-          className="mt-5 inline-flex text-sm font-semibold text-blue-600 hover:text-blue-700"
+          className="mt-5 inline-flex text-sm font-semibold text-primary hover:text-primary-hover"
         >
           Read article →
         </Link>

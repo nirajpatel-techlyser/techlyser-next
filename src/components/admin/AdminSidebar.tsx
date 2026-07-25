@@ -10,6 +10,7 @@ import {
   LogOut,
   MessageSquare,
   PlusCircle,
+  Settings,
 } from "lucide-react";
 
 const navItems = [
@@ -17,6 +18,7 @@ const navItems = [
   { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/admin/blogs", label: "Blogs", icon: FileText },
   { href: "/admin/comments", label: "Comments", icon: MessageSquare },
+  { href: "/admin/settings", label: "Settings", icon: Settings },
   { href: "/admin/blogs/new", label: "New Blog", icon: PlusCircle },
 ];
 

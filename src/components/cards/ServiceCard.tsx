@@ -13,7 +13,7 @@ export default function ServiceCard({ service }: ServiceCardProps) {
   return (
     <Card className="flex h-full flex-col">
       <div className="mb-6 text-5xl">
-        <Icon className="h-12 w-12 text-blue-600" />
+        <Icon className="h-12 w-12 text-primary" />
       </div>
 
       <h3 className="text-2xl font-semibold text-slate-900">{service.title}</h3>
@@ -25,7 +25,7 @@ export default function ServiceCard({ service }: ServiceCardProps) {
       <Button
         href={service.href}
         variant="ghost"
-        className="group mt-8 self-start p-0 text-blue-600 hover:bg-transparent"
+        className="group mt-8 self-start p-0 text-primary hover:bg-transparent"
       >
         Learn More
         <ArrowRight

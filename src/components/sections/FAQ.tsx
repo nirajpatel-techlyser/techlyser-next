@@ -36,7 +36,7 @@ export default function FAQ({ items, category }: FAQProps) {
               title={
                 <>
                   {faqSectionMeta.title}{" "}
-                  <span className="text-blue-600">
+                  <span className="text-primary">
                     {faqSectionMeta.titleHighlight}
                   </span>
                 </>

@@ -1,17 +1,74 @@
 @import "tailwindcss";
 
-:root {
-  /* Backgrounds */
+:root,
+html[data-theme="light"] {
+  /* Page */
   --background: #ffffff;
   --background-soft: #f8fafc;
   --background-muted: #f1f5f9;
   --background-section-grey: #f6f4ef;
 
-  /* Dark surfaces — shared pure black for header + hero */
+  /* Surfaces (header / hero follow theme) */
+  --surface-black: #ffffff;
+  --surface-dark: #ffffff;
+  --header-bg: #ffffff;
+  --hero-bg: #ffffff;
+  --hero-fg: #0a0a0a;
+  --hero-fg-muted: rgba(15, 23, 42, 0.72);
+  --hero-border: rgba(15, 23, 42, 0.12);
+  --hero-pill-bg: rgba(15, 23, 42, 0.04);
+  --hero-pill-border: rgba(15, 23, 42, 0.18);
+  --hero-review-border: rgba(0, 0, 0, 0.12);
+  --hero-btn-secondary-border: rgba(15, 23, 42, 0.2);
+  --hero-btn-secondary-hover: rgba(15, 23, 42, 0.06);
+  --header-border: rgba(15, 23, 42, 0.1);
+  --header-shadow: 0 1px 0 rgba(15, 23, 42, 0.04), 0 12px 40px rgba(15, 23, 42, 0.08);
+  --nav-link: #334155;
+  --nav-link-hover: #ff5400;
+  --logo-filter: invert(1);
+
+  /* Text */
+  --foreground: #101828;
+  --foreground-secondary: #344054;
+  --foreground-muted: #667085;
+  --heading: #0a0a0a;
+
+  /* Brand / highlighter (same in both themes) */
+  --primary: #ff5400;
+  --primary-hover: #ff0000;
+  --primary-light: #fff0e8;
+  --primary-gradient: linear-gradient(125deg, #ff5400, #ff0000);
+  --primary-gradient-hover: linear-gradient(125deg, #e64c00, #e60000);
+  --accent: #ff5400;
+  --accent-light: #fff0e8;
+
+  /* Success / warning / error */
+  --success: #12b76a;
+  --success-light: #ecfdf3;
+  --warning: #f79009;
+  --warning-light: #fffaeb;
+  --danger: #f04438;
+  --danger-light: #fef3f2;
+
+  /* UI */
+  --border: #eaecf0;
+  --border-light: #f2f4f7;
+  --card: #ffffff;
+  --card-hover: #fcfcfd;
+  --shadow: rgba(16, 24, 40, 0.08);
+  --radius: 20px;
+}
+
+html[data-theme="dark"] {
+  --background: #000000;
+  --background-soft: #0a0a0a;
+  --background-muted: #111111;
+  --background-section-grey: #0d0d0d;
+
   --surface-black: #000000;
-  --surface-dark: var(--surface-black);
-  --header-bg: var(--surface-dark);
-  --hero-bg: var(--surface-dark);
+  --surface-dark: #000000;
+  --header-bg: #000000;
+  --hero-bg: #000000;
   --hero-fg: #ffffff;
   --hero-fg-muted: rgba(255, 255, 255, 0.72);
   --hero-border: rgba(255, 255, 255, 0.2);
@@ -23,53 +80,29 @@
   --header-border: rgba(255, 255, 255, 0.1);
   --header-shadow:
     0 1px 0 rgba(255, 255, 255, 0.05), 0 12px 40px rgba(0, 0, 0, 0.55);
+  --nav-link: rgba(255, 255, 255, 0.78);
+  --nav-link-hover: #ff5400;
+  --logo-filter: none;
 
-  /* Text */
-  --foreground: #101828;
-  --foreground-secondary: #344054;
-  --foreground-muted: #667085;
+  --foreground: #f5f5f5;
+  --foreground-secondary: #e5e5e5;
+  --foreground-muted: rgba(255, 255, 255, 0.65);
+  --heading: #ffffff;
 
-  /* Brand */
-  --primary: #005fd5;
-  --primary-hover: #004bb0;
-  --primary-light: #e8f1fc;
-
-  /* Tech Accent */
-  --accent: #005fd5;
-  --accent-light: #e8f1fc;
-
-  /* Success */
-  --success: #12b76a;
-  --success-light: #ecfdf3;
-
-  /* Warning */
-  --warning: #f79009;
-  --warning-light: #fffaeb;
-
-  /* Error */
-  --danger: #f04438;
-  --danger-light: #fef3f2;
-
-  /* UI */
-  --border: #eaecf0;
-  --border-light: #f2f4f7;
-
-  --card: #ffffff;
-  --card-hover: #fcfcfd;
-
-  /* Shadow */
-  --shadow: rgba(16, 24, 40, 0.08);
-
-  /* Radius */
-  --radius: 20px;
+  --border: rgba(255, 255, 255, 0.12);
+  --border-light: rgba(255, 255, 255, 0.08);
+  --card: #111111;
+  --card-hover: #161616;
+  --shadow: rgba(0, 0, 0, 0.45);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --color-primary: var(--primary);
-  --color-primary-hover: var(--primary-hover);
-  --color-primary-soft: var(--primary-light);
+  --color-heading: var(--heading);
+  --color-primary: #ff5400;
+  --color-primary-hover: #ff0000;
+  --color-primary-soft: #fff0e8;
   --color-surface-black: var(--surface-black);
   --color-surface-dark: var(--surface-dark);
   --color-header-bg: var(--header-bg);
@@ -83,22 +116,85 @@
   --color-hero-btn-secondary-border: var(--hero-btn-secondary-border);
   --color-hero-btn-secondary-hover: var(--hero-btn-secondary-hover);
   --color-header-border: var(--header-border);
+  --color-nav-link: var(--nav-link);
   --shadow-header: var(--header-shadow);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-roboto);
+  --font-heading: var(--font-nunito);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Light panels that must stay readable in dark theme */
+.bg-solid-white,
+.keep-light {
+  background-color: #ffffff !important;
+  color: #0a0a0a !important;
+}
+
+.keep-light,
+.keep-light *,
+.bg-solid-white,
+.bg-solid-white * {
+  --heading: #0a0a0a;
+}
+
+.keep-light .text-slate-900,
+.keep-light .text-slate-800,
+.bg-solid-white .text-slate-900,
+.bg-solid-white .text-slate-800,
+.text-on-light {
+  color: #0a0a0a !important;
+}
+
+.keep-light .text-slate-700,
+.keep-light .text-slate-600,
+.bg-solid-white .text-slate-700,
+.bg-solid-white .text-slate-600,
+.text-on-light-muted {
+  color: #475569 !important;
+}
+
+.keep-light .text-slate-500,
+.bg-solid-white .text-slate-500 {
+  color: #64748b !important;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-roboto), Roboto, Arial, Helvetica, sans-serif;
+  font-weight: 400;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-nunito), Nunito, Arial, Helvetica, sans-serif;
+  color: var(--heading);
+  font-weight: 600;
+}
+
+/* Do not name this `bg-*` — Tailwind v4 treats that as a color utility and overrides it. */
+.btn-brand {
+  background-color: #ff5400;
+  background-image: linear-gradient(125deg, #ff5400, #ff0000);
+  color: #ffffff;
+  border: none;
+  border-radius: 5px;
+  font-weight: 500;
+}
+
+.btn-brand:hover {
+  background-image: none;
+  background-color: #ff0000;
+  color: #ffffff;
+}
+
+.site-logo {
+  filter: var(--logo-filter);
 }
 
 @keyframes logo-marquee-scroll {
@@ -122,13 +218,131 @@ body {
   background-color: var(--background-section-grey);
 }
 
+/* Soft remaps for public site only — never touch admin UI */
+html[data-theme="dark"] .bg-white:not(.bg-solid-white):not(.keep-light):not(.admin-shell):not(.admin-shell *) {
+  background-color: #111111;
+}
+
+html[data-theme="dark"]
+  :is(.text-slate-900, .text-slate-800):not(.keep-light):not(.keep-light *):not(.admin-shell):not(.admin-shell *) {
+  color: #ffffff;
+}
+
+html[data-theme="dark"]
+  :is(.text-slate-700, .text-slate-600):not(.keep-light):not(.keep-light *):not(.admin-shell):not(.admin-shell *) {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+html[data-theme="dark"]
+  .text-slate-500:not(.keep-light):not(.keep-light *):not(.admin-shell):not(.admin-shell *) {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+html[data-theme="dark"]
+  :is(.border-slate-200, .border-slate-100):not(.keep-light):not(.keep-light *):not(.admin-shell):not(.admin-shell *) {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+html[data-theme="dark"]
+  :is(.bg-slate-50, .bg-slate-100):not(.keep-light):not(.keep-light *):not(.admin-shell):not(.admin-shell *) {
+  background-color: #1a1a1a;
+}
+
+.font-heading {
+  font-family: var(--font-nunito), Nunito, Arial, Helvetica, sans-serif;
+}
+
+.text-heading {
+  color: var(--heading);
+}
+
+/* Admin panel is always light, regardless of public site theme */
+.admin-shell {
+  color-scheme: light;
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+  --background: #ffffff;
+  --background-soft: #f8fafc;
+  --foreground: #101828;
+  --heading: #0a0a0a;
+  --border: #eaecf0;
+  --primary: #ff5400;
+  --primary-hover: #ff0000;
+  --primary-light: #fff0e8;
+}
+
+.admin-shell h1,
+.admin-shell h2,
+.admin-shell h3,
+.admin-shell h4,
+.admin-shell h5,
+.admin-shell h6 {
+  color: #0a0a0a !important;
+}
+
+.admin-shell .bg-white {
+  background-color: #ffffff !important;
+}
+
+.admin-shell .bg-slate-50 {
+  background-color: #f8fafc !important;
+}
+
+.admin-shell .bg-slate-100 {
+  background-color: #f1f5f9 !important;
+}
+
+.admin-shell .text-slate-900,
+.admin-shell .text-slate-800 {
+  color: #0f172a !important;
+}
+
+.admin-shell .text-slate-700 {
+  color: #334155 !important;
+}
+
+.admin-shell .text-slate-600 {
+  color: #475569 !important;
+}
+
+.admin-shell .text-slate-500 {
+  color: #64748b !important;
+}
+
+.admin-shell .border-slate-200,
+.admin-shell .border-slate-100 {
+  border-color: #e2e8f0 !important;
+}
+
+.admin-shell .bg-primary\/5 {
+  background-color: rgba(255, 84, 0, 0.05) !important;
+}
+
+.admin-shell .text-primary {
+  color: #ff5400 !important;
+}
+
+.admin-shell .border-primary {
+  border-color: #ff5400 !important;
+}
+
+.admin-shell aside {
+  background-color: #ffffff !important;
+}
+
+.admin-shell header {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  color: #0f172a !important;
+}
+
 .blog-content h2,
 .blog-content h3,
 .blog-content h4 {
   margin-top: 1.75rem;
   margin-bottom: 0.75rem;
-  color: #0f172a;
-  font-weight: 700;
+  color: var(--heading);
+  font-family: var(--font-nunito), Nunito, Arial, Helvetica, sans-serif;
+  font-weight: 600;
   line-height: 1.25;
 }
 
@@ -142,7 +356,7 @@ body {
 
 .blog-content p,
 .blog-content li {
-  color: #334155;
+  color: var(--foreground-secondary);
   line-height: 1.9;
 }
 
@@ -157,7 +371,7 @@ body {
 }
 
 .blog-content a {
-  color: #005fd5;
+  color: #ff5400;
   text-decoration: underline;
 }
 
@@ -170,7 +384,7 @@ body {
   object-fit: contain;
   margin: 1.25rem auto;
   border-radius: 0.75rem;
-  background: #f8fafc;
+  background: var(--background-soft);
 }
 
 .blog-content figure {

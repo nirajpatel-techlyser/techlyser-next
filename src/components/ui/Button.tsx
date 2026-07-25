@@ -16,18 +16,19 @@ export default function Button({
   ...props
 }: ButtonProps) {
   const variantClasses = {
-    primary: "bg-primary text-white hover:bg-primary-hover",
+    primary:
+      "btn-brand shadow-[0_12px_28px_-12px_rgba(255,0,0,0.55)]",
 
     outline:
-      "rounded-none border border-black bg-transparent text-black hover:bg-black hover:text-white",
+      "rounded-[5px] border border-transparent bg-solid-white text-[#0a0a0a] hover:bg-slate-100",
 
-    ghost: "text-slate-700 hover:bg-slate-100",
-    bg_firstBtn: "",
-    bg_secondBtn: "bg-white text-black hover:bg-black hover:text-white",
+    ghost: "rounded-[5px] text-slate-700 hover:bg-slate-100",
+    bg_firstBtn: "rounded-[5px]",
+    bg_secondBtn: "rounded-[5px] bg-solid-white text-[#0a0a0a] hover:bg-slate-100",
   };
 
   const baseClasses =
-    "inline-flex items-center justify-center px-6 py-3 font-medium transition duration-300";
+    "inline-flex items-center justify-center rounded-[5px] px-6 py-3 text-sm font-medium transition duration-300";
 
   const classes = `${baseClasses} ${variantClasses[variant]} ${className}`;
 

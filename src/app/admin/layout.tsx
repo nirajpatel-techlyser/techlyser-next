@@ -16,7 +16,7 @@ export default async function AdminLayout({
 
   return (
     <AuthProvider>
-      <div className="flex min-h-screen bg-slate-50">
+      <div className="admin-shell flex min-h-screen bg-slate-50 text-slate-900">
         <div className="sticky top-0 hidden h-screen md:block">
           <AdminSidebar />
         </div>
