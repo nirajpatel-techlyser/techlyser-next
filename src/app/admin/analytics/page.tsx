@@ -52,42 +52,74 @@ function searchQueryFromReferrer(referrer: string | null) {
   }
 }
 
+async function safe<T>(label: string, fn: () => Promise<T>, fallback: T): Promise<T> {
+  try {
+    return await fn();
+  } catch (error) {
+    console.error(`[admin/analytics] ${label} failed:`, error);
+    return fallback;
+  }
+}
+
 export default async function SiteAnalyticsPage() {
-  const [visitCount, byCountry, byCity, byPath, byReferrer, recentVisits] =
-    await Promise.all([
-      prisma.pageView.count(),
+  // Sequential + safe queries to avoid Supabase session pool exhaustion.
+  const visitCount = await safe("visitCount", () => prisma.pageView.count(), 0);
+  const byCountry = await safe(
+    "byCountry",
+    () =>
       prisma.pageView.groupBy({
         by: ["country"],
         _count: { _all: true },
         orderBy: { _count: { country: "desc" } },
-        take: 50,
+        take: 30,
       }),
+    [],
+  );
+  const byCity = await safe(
+    "byCity",
+    () =>
       prisma.pageView.groupBy({
         by: ["country", "city"],
         _count: { _all: true },
         orderBy: { _count: { city: "desc" } },
-        take: 100,
+        take: 40,
       }),
+    [],
+  );
+  const byPath = await safe(
+    "byPath",
+    () =>
       prisma.pageView.groupBy({
         by: ["path"],
         _count: { _all: true },
         orderBy: { _count: { path: "desc" } },
-        take: 30,
+        take: 20,
       }),
+    [],
+  );
+  const byReferrer = await safe(
+    "byReferrer",
+    () =>
       prisma.pageView.groupBy({
         by: ["referrer"],
         _count: { _all: true },
         orderBy: { _count: { referrer: "desc" } },
         take: 30,
       }),
+    [],
+  );
+  const recentVisits = await safe(
+    "recentVisits",
+    () =>
       prisma.pageView.findMany({
         orderBy: { createdAt: "desc" },
-        take: 100,
+        take: 40,
         include: {
           blog: { select: { title: true, slug: true } },
         },
       }),
-    ]);
+    [],
+  );
 
   const referrerHosts = new Map<string, number>();
   for (const row of byReferrer) {
@@ -265,9 +297,7 @@ export default async function SiteAnalyticsPage() {
       <div className="grid gap-6 xl:grid-cols-2">
         <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
           <div className="border-b border-slate-200 px-5 py-4">
-            <h2 className="text-lg font-semibold text-slate-900">
-              Top Pages
-            </h2>
+            <h2 className="text-lg font-semibold text-slate-900">Top Pages</h2>
           </div>
           <div className="overflow-x-auto">
             <table className="min-w-full text-left text-sm">
@@ -278,16 +308,27 @@ export default async function SiteAnalyticsPage() {
                 </tr>
               </thead>
               <tbody>
-                {byPath.map((row) => (
-                  <tr key={row.path} className="border-t border-slate-100">
-                    <td className="px-5 py-3 font-medium text-slate-900">
-                      {row.path}
-                    </td>
-                    <td className="px-5 py-3 text-slate-600">
-                      {row._count._all}
+                {byPath.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={2}
+                      className="px-5 py-8 text-center text-slate-500"
+                    >
+                      No page data yet.
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  byPath.map((row) => (
+                    <tr key={row.path} className="border-t border-slate-100">
+                      <td className="px-5 py-3 font-medium text-slate-900">
+                        {row.path}
+                      </td>
+                      <td className="px-5 py-3 text-slate-600">
+                        {row._count._all}
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
