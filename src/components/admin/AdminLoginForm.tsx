@@ -2,11 +2,10 @@
 
 import { FormEvent, useState } from "react";
 import { signIn } from "next-auth/react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Loader2, Lock, Mail } from "lucide-react";
 
 export default function AdminLoginForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/admin";
 
@@ -44,8 +43,8 @@ export default function AdminLoginForm() {
       }
 
       if (result?.ok) {
-        router.push(callbackUrl);
-        router.refresh();
+        // Hard navigation so middleware sees the new HTTPS session cookie.
+        window.location.assign(callbackUrl);
         return;
       }
 

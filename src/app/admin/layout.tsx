@@ -1,4 +1,6 @@
 import { ReactNode } from "react";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import AuthProvider from "@/components/admin/AuthProvider";
@@ -9,8 +11,17 @@ export default async function AdminLayout({
   children: ReactNode;
 }) {
   const session = await auth();
+  const headerList = await headers();
+  const pathname = headerList.get("x-pathname") || "";
+  const isLoginPage = pathname.startsWith("/admin/login");
 
-  if (!session?.user) {
+  // Logged-in users should never stay on the login screen.
+  if (session?.user && isLoginPage) {
+    redirect("/admin");
+  }
+
+  // Login page stays chrome-free (no sidebar), even while AuthProvider wraps it.
+  if (!session?.user || isLoginPage) {
     return <AuthProvider>{children}</AuthProvider>;
   }
 
