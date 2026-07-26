@@ -45,7 +45,9 @@ function resolveExcerpt(value: unknown, content: string): string {
 }
 
 async function seedAdmin() {
-  const email = process.env.ADMIN_EMAIL || "admin@techlyser.com";
+  const email = (
+    process.env.ADMIN_EMAIL || "admin@techlyser.com"
+  ).toLowerCase();
   const password = process.env.ADMIN_PASSWORD || "TechlyserAdmin@2026";
   const name = process.env.ADMIN_NAME || "Techlyser Admin";
   const passwordHash = await bcrypt.hash(password, 12);
