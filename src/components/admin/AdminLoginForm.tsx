@@ -20,21 +20,41 @@ export default function AdminLoginForm() {
     setLoading(true);
     setError("");
 
-    const result = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-    });
+    try {
+      const result = await signIn("credentials", {
+        email: email.trim().toLowerCase(),
+        password,
+        redirect: false,
+        callbackUrl,
+      });
 
-    setLoading(false);
+      if (result?.error) {
+        const code = result.error;
+        if (code === "CredentialsSignin") {
+          setError("Invalid email or password.");
+        } else if (code === "Configuration") {
+          setError(
+            "Auth is misconfigured on the server. Check AUTH_SECRET and DATABASE_URL on Vercel.",
+          );
+        } else {
+          setError(`Sign-in failed (${code}). Try again or check server env.`);
+        }
+        setLoading(false);
+        return;
+      }
 
-    if (result?.error) {
-      setError("Invalid email or password.");
-      return;
+      if (result?.ok) {
+        router.push(callbackUrl);
+        router.refresh();
+        return;
+      }
+
+      setError("Sign-in failed. Please try again.");
+      setLoading(false);
+    } catch {
+      setError("Network error while signing in. Please try again.");
+      setLoading(false);
     }
-
-    router.push(callbackUrl);
-    router.refresh();
   }
 
   return (

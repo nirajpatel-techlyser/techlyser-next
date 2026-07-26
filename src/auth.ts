@@ -1,9 +1,11 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import { PrismaAdapter } from "@auth/prisma-adapter";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { getAuthSecret, normalizeAuthEnv } from "@/lib/env";
+
+normalizeAuthEnv();
 
 const credentialsSchema = z.object({
   email: z.string().email(),
@@ -11,8 +13,10 @@ const credentialsSchema = z.object({
 });
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  adapter: PrismaAdapter(prisma),
+  // Credentials + JWT only — PrismaAdapter is for OAuth/DB sessions and
+  // can break email/password sign-in in Auth.js v5.
   session: { strategy: "jwt" },
+  secret: getAuthSecret(),
   trustHost: true,
   pages: {
     signIn: "/admin/login",
@@ -30,29 +34,34 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           return null;
         }
 
-        const user = await prisma.user.findUnique({
-          where: { email: parsed.data.email.trim().toLowerCase() },
-        });
+        try {
+          const user = await prisma.user.findUnique({
+            where: { email: parsed.data.email.trim().toLowerCase() },
+          });
 
-        if (!user?.passwordHash) {
+          if (!user?.passwordHash) {
+            return null;
+          }
+
+          const valid = await bcrypt.compare(
+            parsed.data.password,
+            user.passwordHash,
+          );
+
+          if (!valid) {
+            return null;
+          }
+
+          return {
+            id: user.id,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+          };
+        } catch (error) {
+          console.error("[auth] authorize failed:", error);
           return null;
         }
-
-        const valid = await bcrypt.compare(
-          parsed.data.password,
-          user.passwordHash,
-        );
-
-        if (!valid) {
-          return null;
-        }
-
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-        };
       },
     }),
   ],

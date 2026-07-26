@@ -1,19 +1,7 @@
 import { PrismaClient } from "@prisma/client";
+import { normalizeAuthEnv } from "@/lib/env";
 
-function normalizeDatabaseUrl() {
-  const raw = process.env.DATABASE_URL?.trim();
-  if (!raw) return;
-
-  // Vercel/env UIs often keep wrapping quotes as part of the value.
-  if (
-    (raw.startsWith('"') && raw.endsWith('"')) ||
-    (raw.startsWith("'") && raw.endsWith("'"))
-  ) {
-    process.env.DATABASE_URL = raw.slice(1, -1);
-  }
-}
-
-normalizeDatabaseUrl();
+normalizeAuthEnv();
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
