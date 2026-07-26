@@ -11,13 +11,17 @@ export default function BenefitCard({ benefit }: BenefitCardProps) {
 
   return (
     <Card className="flex h-full flex-col">
-      <div className="mb-6">
-        <Icon className="h-12 w-12 text-primary" />
+      <div className="mb-4 sm:mb-6">
+        <Icon className="h-9 w-9 text-primary sm:h-12 sm:w-12" />
       </div>
 
-      <h3 className="text-xl font-semibold text-slate-900">{benefit.title}</h3>
+      <h3 className="text-lg font-semibold text-slate-900 sm:text-xl">
+        {benefit.title}
+      </h3>
 
-      <p className="mt-4 leading-7 text-slate-600">{benefit.description}</p>
+      <p className="mt-2.5 text-sm leading-6 text-slate-600 sm:mt-4 sm:leading-7">
+        {benefit.description}
+      </p>
     </Card>
   );
 }

@@ -28,7 +28,7 @@ export default function FAQ({ items, category }: FAQProps) {
   return (
     <Section id="faq" className="section-bg-grey">
       <Container>
-        <div className="flex flex-col justify-between gap-10 lg:flex-row lg:items-center">
+        <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-center lg:gap-10">
           {/* Left Side */}
           <div className="max-w-3xl">
             <SectionHeading
@@ -47,13 +47,13 @@ export default function FAQ({ items, category }: FAQProps) {
           </div>
 
           {/* Right Side */}
-          <Button href="/portfolio" variant="outline">
+          <Button href="/portfolio" variant="outline" className="self-start text-sm">
             Views All Projects
             <ArrowRight className="ml-2 h-4 w-4" aria-hidden />
           </Button>
         </div>
 
-        <div className="mt-14 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm sm:mt-16">
+        <div className="mt-6 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm sm:mt-10 sm:rounded-2xl lg:mt-14">
           {data.map((item) => (
             <FaqCard
               key={item.id}

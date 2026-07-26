@@ -25,7 +25,7 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-header-border bg-surface-dark shadow-[var(--header-shadow)]">
-      <Container className="flex h-20 items-center justify-between">
+      <Container className="flex h-14 items-center justify-between sm:h-20">
         <Link
           href="/"
           className="relative z-10 flex shrink-0 items-center"

@@ -14,7 +14,7 @@ export default function Services() {
             and beautiful digital experiences that help businesses grow online."
         />
 
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 md:gap-8 xl:grid-cols-3">
           {services.map((service, index) => (
             <ServiceCard key={service.id} service={service} index={index} />
           ))}

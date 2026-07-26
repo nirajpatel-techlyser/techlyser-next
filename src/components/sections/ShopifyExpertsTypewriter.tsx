@@ -54,18 +54,18 @@ export default function ShopifyExpertsTypewriter({
   }, []);
 
   return (
-    <div className={`mt-6 max-w-xl ${className}`}>
-      <div className="flex items-center gap-3">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[5px] bg-[#95bf47] text-white shadow-[0_8px_20px_-10px_rgba(149,191,71,0.8)]">
-          <FaShopify className="h-6 w-6" aria-hidden />
+    <div className={`mt-4 max-w-xl sm:mt-6 ${className}`}>
+      <div className="flex items-center gap-2.5 sm:gap-3">
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[5px] bg-[#95bf47] text-white shadow-[0_8px_20px_-10px_rgba(149,191,71,0.8)] sm:h-10 sm:w-10">
+          <FaShopify className="h-4 w-4 sm:h-6 sm:w-6" aria-hidden />
         </span>
-        <p className="font-heading text-xl font-semibold italic tracking-tight text-hero-fg sm:text-2xl">
+        <p className="font-heading text-lg font-semibold italic tracking-tight text-hero-fg sm:text-2xl">
           shopify experts
         </p>
       </div>
 
       <p
-        className="mt-3 min-h-[3.25rem] text-sm font-normal leading-6 text-hero-fg-muted sm:text-base sm:leading-7"
+        className="mt-2 min-h-[2.75rem] text-xs font-normal leading-5 text-hero-fg-muted sm:mt-3 sm:min-h-[3.25rem] sm:text-base sm:leading-7"
         aria-live="polite"
       >
         {displayed}

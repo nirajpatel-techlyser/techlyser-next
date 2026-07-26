@@ -20,7 +20,7 @@ export default function SectionHeading({
 }: SectionHeadingProps) {
   return (
     <div
-      className={`mx-auto mb-16 max-w-3xl ${
+      className={`mx-auto mb-8 max-w-3xl sm:mb-12 lg:mb-16 ${
         align === "center" ? "text-center" : "text-left"
       }`}
     >
@@ -28,20 +28,22 @@ export default function SectionHeading({
 
       {caption && (
         <p
-          className={`text-sm font-medium uppercase tracking-[0.3em] ${captionClassName}`}
+          className={`text-[11px] font-medium uppercase tracking-[0.28em] sm:text-sm sm:tracking-[0.3em] ${captionClassName}`}
         >
           {caption}
         </p>
       )}
 
       {title && (
-        <h2 className="mt-6 text-4xl font-semibold tracking-tight text-heading lg:text-5xl">
+        <h2 className="mt-3 font-heading text-2xl font-semibold tracking-tight text-heading sm:mt-5 sm:text-4xl lg:text-5xl">
           {title}
         </h2>
       )}
 
       {description && (
-        <p className="mt-6 text-lg font-normal leading-8 text-slate-600">{description}</p>
+        <p className="mt-3 text-sm font-normal leading-6 text-slate-600 sm:mt-5 sm:text-lg sm:leading-8">
+          {description}
+        </p>
       )}
     </div>
   );
