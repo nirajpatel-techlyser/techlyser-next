@@ -22,82 +22,127 @@ function formatDateTime(value: Date | null) {
   }).format(value);
 }
 
-export default async function AdminDashboardPage() {
-  const [
-    total,
-    published,
-    drafts,
-    viewsAgg,
-    visitCount,
-    pendingComments,
-    recent,
-    recentVisits,
-    topCountries,
-    blogViews,
-  ] = await Promise.all([
-    prisma.blog.count(),
-    prisma.blog.count({ where: { status: BlogStatus.PUBLISHED } }),
-    prisma.blog.count({ where: { status: BlogStatus.DRAFT } }),
-    prisma.blog.aggregate({ _sum: { views: true } }),
-    prisma.pageView.count(),
-    prisma.blogComment.count({ where: { status: CommentStatus.PENDING } }),
-    prisma.blog.findMany({
-      orderBy: { updatedAt: "desc" },
-      take: 8,
-      select: {
-        id: true,
-        title: true,
-        slug: true,
-        status: true,
-        views: true,
-        updatedAt: true,
-        publishedAt: true,
-      },
-    }),
-    prisma.pageView.findMany({
-      orderBy: { createdAt: "desc" },
-      take: 20,
-      include: {
-        blog: {
-          select: { title: true, slug: true },
-        },
-      },
-    }),
-    prisma.pageView.groupBy({
-      by: ["country"],
-      _count: { _all: true },
-      orderBy: { _count: { country: "desc" } },
-      take: 8,
-    }),
-    prisma.blog.findMany({
-      where: { status: BlogStatus.PUBLISHED },
-      orderBy: { views: "desc" },
-      take: 8,
-      select: {
-        id: true,
-        title: true,
-        slug: true,
-        views: true,
-      },
-    }),
-  ]);
+async function safe<T>(label: string, fn: () => Promise<T>, fallback: T): Promise<T> {
+  try {
+    return await fn();
+  } catch (error) {
+    console.error(`[admin/dashboard] ${label} failed:`, error);
+    return fallback;
+  }
+}
 
-  const blogGeo = await Promise.all(
-    blogViews.map(async (blog) => {
-      const geos = await prisma.pageView.groupBy({
-        by: ["country", "city"],
-        where: { blogId: blog.id },
+export default async function AdminDashboardPage() {
+  // Keep concurrency low — Supabase session pooler rejects too many parallel clients.
+  const total = await safe("total", () => prisma.blog.count(), 0);
+  const published = await safe(
+    "published",
+    () => prisma.blog.count({ where: { status: BlogStatus.PUBLISHED } }),
+    0,
+  );
+  const drafts = await safe(
+    "drafts",
+    () => prisma.blog.count({ where: { status: BlogStatus.DRAFT } }),
+    0,
+  );
+  const viewsAgg = await safe(
+    "viewsAgg",
+    () => prisma.blog.aggregate({ _sum: { views: true } }),
+    { _sum: { views: 0 } },
+  );
+  const visitCount = await safe("visitCount", () => prisma.pageView.count(), 0);
+  const pendingComments = await safe(
+    "pendingComments",
+    () =>
+      prisma.blogComment.count({ where: { status: CommentStatus.PENDING } }),
+    0,
+  );
+
+  const recent = await safe(
+    "recent",
+    () =>
+      prisma.blog.findMany({
+        orderBy: { updatedAt: "desc" },
+        take: 8,
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          status: true,
+          views: true,
+          updatedAt: true,
+          publishedAt: true,
+        },
+      }),
+    [],
+  );
+
+  const recentVisits = await safe(
+    "recentVisits",
+    () =>
+      prisma.pageView.findMany({
+        orderBy: { createdAt: "desc" },
+        take: 12,
+        include: {
+          blog: {
+            select: { title: true, slug: true },
+          },
+        },
+      }),
+    [],
+  );
+
+  const topCountries = await safe(
+    "topCountries",
+    () =>
+      prisma.pageView.groupBy({
+        by: ["country"],
         _count: { _all: true },
         orderBy: { _count: { country: "desc" } },
-        take: 3,
-      });
-
-      return {
-        ...blog,
-        geos,
-      };
-    }),
+        take: 8,
+      }),
+    [],
   );
+
+  const blogViews = await safe(
+    "blogViews",
+    () =>
+      prisma.blog.findMany({
+        where: { status: BlogStatus.PUBLISHED },
+        orderBy: { views: "desc" },
+        take: 5,
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          views: true,
+        },
+      }),
+    [],
+  );
+
+  // One grouped query instead of N+1 per blog.
+  const blogIds = blogViews.map((blog) => blog.id);
+  const geoRows = blogIds.length
+    ? await safe(
+        "blogGeo",
+        () =>
+          prisma.pageView.groupBy({
+            by: ["blogId", "country", "city"],
+            where: { blogId: { in: blogIds } },
+            _count: { _all: true },
+            orderBy: { _count: { blogId: "desc" } },
+            take: 40,
+          }),
+        [],
+      )
+    : [];
+
+  const blogGeo = blogViews.map((blog) => {
+    const geos = geoRows
+      .filter((row) => row.blogId === blog.id)
+      .slice(0, 3);
+    return { ...blog, geos };
+  });
 
   const stats = [
     {
