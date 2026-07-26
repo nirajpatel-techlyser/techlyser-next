@@ -1,6 +1,3 @@
-import DOMPurify from "isomorphic-dompurify";
-import { marked } from "marked";
-
 type BlogContentProps = {
   content: string;
   coverImage?: string | null;
@@ -31,7 +28,6 @@ function stripDuplicateCoverImage(html: string, coverImage?: string | null) {
     return html;
   }
 
-  // Remove first matching <img> (and optional wrapping <p>/<a>) when it is the cover.
   return html.replace(
     /(?:<p>\s*)?(?:<a[^>]*>\s*)?<img\b[^>]*src=["']([^"']+)["'][^>]*>\s*(?:<\/a>\s*)?(?:<\/p>\s*)?/i,
     (match, src: string) => {
@@ -56,21 +52,43 @@ function stripConsecutiveDuplicateImages(html: string) {
   );
 }
 
+/** Lightweight sanitizer — avoids jsdom/DOMPurify crashes on Vercel serverless. */
+function sanitizeHtml(html: string) {
+  return html
+    .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, "")
+    .replace(/<style[\s\S]*?>[\s\S]*?<\/style>/gi, "")
+    .replace(/\son[a-z]+\s*=\s*(".*?"|'.*?'|[^\s>]+)/gi, "")
+    .replace(/(href|src)\s*=\s*(['"])\s*javascript:[^'"]*\2/gi, '$1="#"')
+    .replace(/<\/?\s*(?:iframe|object|embed|link|meta)[^>]*>/gi, (tag) => {
+      // Keep YouTube/Vimeo iframes only.
+      if (/^<iframe\b/i.test(tag) && /youtube\.com|youtu\.be|vimeo\.com/i.test(tag)) {
+        return tag;
+      }
+      if (/^<\/iframe/i.test(tag)) {
+        return tag;
+      }
+      return "";
+    });
+}
+
 export default async function BlogContent({
   content,
   coverImage,
 }: BlogContentProps) {
-  const html = looksLikeHtml(content)
-    ? content
-    : await marked.parse(content, { gfm: true, breaks: true });
+  let html = content || "";
+
+  try {
+    if (!looksLikeHtml(html)) {
+      const { marked } = await import("marked");
+      html = await marked.parse(html, { gfm: true, breaks: true });
+    }
+  } catch (error) {
+    console.error("[BlogContent] markdown parse failed:", error);
+  }
 
   const withoutDuplicateCover = stripDuplicateCoverImage(html, coverImage);
   const dedupedHtml = stripConsecutiveDuplicateImages(withoutDuplicateCover);
-
-  const safeHtml = DOMPurify.sanitize(dedupedHtml, {
-    ADD_TAGS: ["iframe"],
-    ADD_ATTR: ["allow", "allowfullscreen", "frameborder", "scrolling"],
-  });
+  const safeHtml = sanitizeHtml(dedupedHtml);
 
   return (
     <div

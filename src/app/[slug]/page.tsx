@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
 import Navbar from "@/components/layout/Navbar";
 import BlogContent from "@/components/blog/BlogContent";
@@ -29,6 +28,7 @@ const RESERVED_PATHS = new Set([
 ]);
 
 export const revalidate = 0;
+export const runtime = "nodejs";
 
 function formatDate(value: string) {
   const date = new Date(value);
@@ -108,23 +108,47 @@ export default async function BlogPostPage({ params }: PageProps) {
     notFound();
   }
 
-  const [related, adjacent, approvedComments] = await Promise.all([
-    getRelatedPosts(slug, post.categories[0], 3),
-    getAdjacentPosts(slug),
-    post.id && post.commentsEnabled
-      ? prisma.blogComment.findMany({
-          where: { blogId: post.id, status: "APPROVED" },
-          orderBy: { createdAt: "desc" },
-          take: 50,
-          select: {
-            id: true,
-            name: true,
-            content: true,
-            createdAt: true,
-          },
-        })
-      : Promise.resolve([]),
-  ]);
+  let related: Awaited<ReturnType<typeof getRelatedPosts>> = [];
+  let adjacent: Awaited<ReturnType<typeof getAdjacentPosts>> = {
+    previous: null,
+    next: null,
+  };
+  let approvedComments: Array<{
+    id: string;
+    name: string;
+    content: string;
+    createdAt: Date;
+  }> = [];
+
+  try {
+    related = await getRelatedPosts(slug, post.categories[0], 3);
+  } catch (error) {
+    console.error("[blog] related posts failed:", error);
+  }
+
+  try {
+    adjacent = await getAdjacentPosts(slug);
+  } catch (error) {
+    console.error("[blog] adjacent posts failed:", error);
+  }
+
+  if (post.id && post.commentsEnabled) {
+    try {
+      approvedComments = await prisma.blogComment.findMany({
+        where: { blogId: post.id, status: "APPROVED" },
+        orderBy: { createdAt: "desc" },
+        take: 50,
+        select: {
+          id: true,
+          name: true,
+          content: true,
+          createdAt: true,
+        },
+      });
+    } catch (error) {
+      console.error("[blog] comments failed:", error);
+    }
+  }
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -175,13 +199,11 @@ export default async function BlogPostPage({ params }: PageProps) {
 
             {post.coverImage ? (
               <div className="relative mx-auto mt-8 aspect-video max-w-2xl overflow-hidden rounded-2xl bg-slate-100">
-                <Image
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
                   src={post.coverImage}
                   alt={post.title}
-                  fill
-                  className="object-contain"
-                  sizes="(max-width: 768px) 100vw, 672px"
-                  priority
+                  className="h-full w-full object-contain"
                 />
               </div>
             ) : null}
