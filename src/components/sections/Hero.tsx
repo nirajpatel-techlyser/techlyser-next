@@ -102,28 +102,28 @@ export default function Hero() {
             <HeroServicesBadge />
 
             <h1 className="mt-2.5 font-heading text-[1.45rem] font-semibold leading-[1.15] tracking-tight text-hero-fg sm:mt-4 sm:text-4xl lg:text-[2.65rem]">
-              Building High-Performance{" "}
-              <span className="text-primary">Ecommerce Experiences</span> That
-              Drive Sales.
+              Build a Shopify Store That{" "}
+              <span className="text-primary">Performs, Converts</span> & Scales.
             </h1>
 
             <p className="mt-2 hidden max-w-xl text-sm font-normal leading-6 text-hero-fg-muted sm:mt-4 sm:block sm:text-base sm:leading-7">
-              We help ambitious businesses grow with Shopify development, modern
-              Next.js apps, WordPress solutions, and conversion-focused UI/UX.
+              We design, develop, optimise and maintain Shopify stores that
+              deliver exceptional user experiences and measurable business
+              growth.
             </p>
 
             <div className="mt-3 flex flex-col gap-2 sm:mt-6 sm:flex-row sm:gap-3">
               <Link
-                href="/contact"
+                href="/free-shopify-audit"
                 className="btn-brand rounded-[5px] px-5 py-2.5 text-center text-sm shadow-[0_12px_28px_-12px_rgba(255,0,0,0.55)] transition sm:px-7 sm:py-3.5"
               >
-                Start Your Project
+                Book a Free Consultation
               </Link>
               <Link
                 href="/portfolio"
                 className="bg-solid-white rounded-[5px] px-5 py-2.5 text-center text-sm font-medium text-[#0a0a0a] transition hover:bg-slate-100 sm:px-7 sm:py-3.5"
               >
-                View Portfolio
+                View Our Work
               </Link>
             </div>
 

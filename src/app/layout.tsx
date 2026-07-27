@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { Geist_Mono, Nunito, Roboto } from "next/font/google";
 import AnalyticsTracker from "@/components/shared/AnalyticsTracker";
+import JsonLd from "@/components/seo/JsonLd";
 import { getSiteSettings } from "@/lib/settings";
+import { organizationJsonLd, siteConfig, webSiteJsonLd } from "@/lib/seo";
 import "./globals.css";
 
 const nunito = Nunito({
@@ -24,12 +26,34 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Techlyser Web Solutions",
-    template: "%s | Techlyser Web Solutions",
+    default: siteConfig.defaultTitle,
+    template: `%s | ${siteConfig.name}`,
   },
-  description:
-    "Techlyser Web Solutions builds high-performance Shopify stores, Next.js apps, and custom web solutions that help businesses grow online.",
-  metadataBase: new URL("https://techlyser.com"),
+  description: siteConfig.defaultDescription,
+  keywords: [...siteConfig.keywords],
+  metadataBase: new URL(siteConfig.url),
+  alternates: {
+    canonical: "/",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  openGraph: {
+    type: "website",
+    locale: siteConfig.locale,
+    url: siteConfig.url,
+    siteName: siteConfig.name,
+    title: siteConfig.defaultTitle,
+    description: siteConfig.defaultDescription,
+    images: [{ url: "/images/hero-image.png", alt: siteConfig.name }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: siteConfig.defaultTitle,
+    description: siteConfig.defaultDescription,
+    images: ["/images/hero-image.png"],
+  },
 };
 
 export default async function RootLayout({
@@ -63,6 +87,9 @@ export default async function RootLayout({
         }`}
       >
         <AnalyticsTracker />
+        {!isAdminRoute ? (
+          <JsonLd data={[organizationJsonLd(), webSiteJsonLd()]} />
+        ) : null}
         {children}
       </body>
     </html>

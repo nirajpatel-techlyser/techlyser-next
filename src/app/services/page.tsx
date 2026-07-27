@@ -3,22 +3,14 @@ import Navbar from "@/components/layout/Navbar";
 import ServicesPageHero from "@/components/services/ServicesPageHero";
 import ServicesListing from "@/components/services/ServicesListing";
 import CTA from "@/components/sections/CTA";
+import { buildPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Services",
+export const metadata: Metadata = buildPageMetadata({
+  title: "Web & Shopify Services",
   description:
-    "Explore Techlyser services — Shopify development, Next.js apps, WordPress, UI/UX design, performance optimization, and SEO & growth.",
-  alternates: {
-    canonical: "/services",
-  },
-  openGraph: {
-    title: "Services | Techlyser Web Solutions",
-    description:
-      "Shopify, Next.js, WordPress, UI/UX, performance, and SEO services built to help your business grow online.",
-    url: "/services",
-    type: "website",
-  },
-};
+    "Explore Techlyser services — Shopify development India, Next.js apps, WordPress, UI/UX design, performance optimization, and SEO & growth.",
+  path: "/services",
+});
 
 export default function ServicesPage() {
   return (

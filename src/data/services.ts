@@ -40,6 +40,9 @@ export interface Service {
   deliverables: string[];
   process: ServiceProcessStep[];
   gallery: ServiceImage[];
+  seoTitle?: string;
+  seoDescription?: string;
+  keywords?: string[];
 }
 
 const unsplash = (id: string, w = 1200, h = 800) =>
@@ -53,6 +56,16 @@ export const services: Service[] = [
     title: "Shopify Development",
     description:
       "High-converting Shopify stores designed for speed, scalability, and increased sales.",
+    seoTitle: "Shopify Development India",
+    seoDescription:
+      "Custom Shopify development in India — themes, migrations, Shopify Plus, apps, speed, and SEO. Trusted Shopify developers for brands in Indore, Mumbai, Ahmedabad, Bangalore, and Gujarat.",
+    keywords: [
+      "Shopify development India",
+      "Shopify developers India",
+      "best Shopify agency",
+      "Shopify Plus development",
+      "custom Shopify theme",
+    ],
     href: "/services/shopify",
     coverImage: unsplash("photo-1556742049-0cfed4f6a45d"),
     coverAlt: "Modern ecommerce checkout experience on a laptop",

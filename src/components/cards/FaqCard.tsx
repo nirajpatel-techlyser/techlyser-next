@@ -15,7 +15,7 @@ export default function FaqCard({ item, isOpen, onToggle }: FaqCardProps) {
 
   return (
     <div
-      className={`border-b border-slate-200 transition-colors duration-300 last:border-b-0 ${
+      className={`keep-light border-b border-slate-200 transition-colors duration-300 last:border-b-0 ${
         isOpen ? "bg-primary-soft" : "bg-white"
       }`}
     >

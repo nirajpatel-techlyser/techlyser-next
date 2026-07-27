@@ -8,7 +8,7 @@ export const hero = {
   },
 
   description:
-    "We help ambitious businesses grow with Shopify development, modern Next.js applications, WordPress solutions, and conversion-focused UI/UX.",
+    "We help ambitious businesses grow with expert Shopify development in India, modern Next.js applications, WordPress solutions, and conversion-focused UI/UX.",
 
   primaryButton: {
     text: "Start Your Project",

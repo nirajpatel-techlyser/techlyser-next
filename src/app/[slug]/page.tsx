@@ -25,6 +25,8 @@ const RESERVED_PATHS = new Set([
   "portfolio",
   "services",
   "admin",
+  "shopify-developers-india",
+  "shopify-developers",
 ]);
 
 export const revalidate = 0;

@@ -7,6 +7,7 @@ import {
   getAllServiceSlugs,
   getServiceBySlug,
 } from "@/data/services";
+import { buildPageMetadata } from "@/lib/seo";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -28,20 +29,13 @@ export async function generateMetadata({
     };
   }
 
-  return {
-    title: service.title,
-    description: service.description,
-    alternates: {
-      canonical: service.href,
-    },
-    openGraph: {
-      title: `${service.title} | Techlyser Web Solutions`,
-      description: service.intro,
-      url: service.href,
-      type: "website",
-      images: [{ url: service.coverImage, alt: service.coverAlt }],
-    },
-  };
+  return buildPageMetadata({
+    title: service.seoTitle || service.title,
+    description: service.seoDescription || service.description,
+    path: service.href,
+    keywords: service.keywords,
+    ogImage: service.coverImage,
+  });
 }
 
 export default async function ServiceDetailPage({ params }: PageProps) {

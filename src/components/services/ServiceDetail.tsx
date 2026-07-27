@@ -4,6 +4,7 @@ import { ArrowRight, Check } from "lucide-react";
 
 import type { Service } from "@/data/services";
 import { services } from "@/data/services";
+import { shopifyIndiaHub } from "@/data/shopify-locations";
 import { Badge, Container, Section } from "@/components/ui";
 
 interface ServiceDetailProps {
@@ -48,12 +49,21 @@ export default function ServiceDetail({ service }: ServiceDetailProps) {
                 >
                   Discuss this service
                 </Link>
-                <Link
-                  href="/services"
-                  className="rounded-[5px] border border-white/15 px-7 py-3.5 text-center font-medium text-hero-fg transition hover:bg-white/5"
-                >
-                  All services
-                </Link>
+                {service.slug === "shopify" ? (
+                  <Link
+                    href={shopifyIndiaHub.path}
+                    className="rounded-[5px] border border-white/15 px-7 py-3.5 text-center font-medium text-hero-fg transition hover:bg-white/5"
+                  >
+                    Shopify developers India
+                  </Link>
+                ) : (
+                  <Link
+                    href="/services"
+                    className="rounded-[5px] border border-white/15 px-7 py-3.5 text-center font-medium text-hero-fg transition hover:bg-white/5"
+                  >
+                    All services
+                  </Link>
+                )}
               </div>
             </div>
 
