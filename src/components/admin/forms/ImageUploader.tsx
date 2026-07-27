@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, DragEvent, useState } from "react";
 import { Loader2, Upload, X } from "lucide-react";
 
 type ImageUploaderProps = {
@@ -13,11 +13,9 @@ export default function ImageUploader({ value, onChange }: ImageUploaderProps) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
   const [progress, setProgress] = useState(0);
+  const [dragging, setDragging] = useState(false);
 
-  async function handleFile(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
+  async function uploadFile(file: File) {
     setUploading(true);
     setError("");
     setProgress(20);
@@ -45,8 +43,27 @@ export default function ImageUploader({ value, onChange }: ImageUploaderProps) {
     } finally {
       setUploading(false);
       setTimeout(() => setProgress(0), 500);
-      event.target.value = "";
     }
+  }
+
+  async function handleFile(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    await uploadFile(file);
+  }
+
+  async function handleDrop(event: DragEvent<HTMLLabelElement>) {
+    event.preventDefault();
+    setDragging(false);
+    if (uploading) return;
+    const file = event.dataTransfer.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setError("Only image files are allowed.");
+      return;
+    }
+    await uploadFile(file);
   }
 
   return (
@@ -58,6 +75,9 @@ export default function ImageUploader({ value, onChange }: ImageUploaderProps) {
               src={value}
               alt="Featured"
               fill
+              unoptimized={
+                value.startsWith("http://") || value.startsWith("https://")
+              }
               className="object-cover"
               sizes="(max-width: 768px) 100vw, 400px"
             />
@@ -71,7 +91,19 @@ export default function ImageUploader({ value, onChange }: ImageUploaderProps) {
           </button>
         </div>
       ) : (
-        <label className="flex cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-6 py-10 text-center transition hover:border-primary hover:bg-primary/5">
+        <label
+          className={`flex cursor-pointer flex-col items-center justify-center rounded-2xl border border-dashed px-6 py-10 text-center transition ${
+            dragging
+              ? "border-primary bg-primary/10"
+              : "border-slate-300 bg-slate-50 hover:border-primary hover:bg-primary/5"
+          }`}
+          onDragOver={(event) => {
+            event.preventDefault();
+            setDragging(true);
+          }}
+          onDragLeave={() => setDragging(false)}
+          onDrop={handleDrop}
+        >
           <Upload className="h-6 w-6 text-primary" />
           <p className="mt-3 text-sm font-medium text-slate-800">
             Drag & drop or click to upload
@@ -79,7 +111,7 @@ export default function ImageUploader({ value, onChange }: ImageUploaderProps) {
           <p className="mt-1 text-xs text-slate-500">PNG, JPG, WEBP up to 8MB</p>
           <input
             type="file"
-            accept="image/*"
+            accept="image/jpeg,image/png,image/webp,image/gif"
             className="hidden"
             onChange={handleFile}
             disabled={uploading}

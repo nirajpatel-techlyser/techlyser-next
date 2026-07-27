@@ -1,10 +1,9 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
-import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
-import Underline from "@tiptap/extension-underline";
 import Placeholder from "@tiptap/extension-placeholder";
 import Youtube from "@tiptap/extension-youtube";
 import Highlight from "@tiptap/extension-highlight";
@@ -25,6 +24,7 @@ import {
   Heading2,
   Heading3,
   Link2,
+  Unlink,
   ImageIcon,
   Undo2,
   Redo2,
@@ -38,16 +38,53 @@ type TiptapEditorProps = {
   onChange: (html: string) => void;
 };
 
+function normalizeUrl(raw: string) {
+  const trimmed = raw.trim();
+  if (!trimmed) return "";
+  if (/^(https?:\/\/|mailto:|tel:|\/)/i.test(trimmed)) return trimmed;
+  return `https://${trimmed}`;
+}
+
 export default function TiptapEditor({ value, onChange }: TiptapEditorProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const onChangeRef = useRef(onChange);
+  const lastEmittedHtml = useRef(value || "");
+  onChangeRef.current = onChange;
+
   const editor = useEditor({
     extensions: [
-      StarterKit,
-      Underline,
+      // TipTap v3 StarterKit already includes Link + Underline — do not add them again.
+      StarterKit.configure({
+        link: {
+          openOnClick: false,
+          autolink: true,
+          defaultProtocol: "https",
+          HTMLAttributes: {
+            class: "tiptap-link",
+            rel: "noopener noreferrer nofollow",
+            target: "_blank",
+          },
+        },
+        bulletList: {
+          HTMLAttributes: { class: "tiptap-ul" },
+        },
+        orderedList: {
+          HTMLAttributes: { class: "tiptap-ol" },
+        },
+        listItem: {
+          HTMLAttributes: { class: "tiptap-li" },
+        },
+        heading: {
+          levels: [2, 3, 4],
+        },
+      }),
       TextStyle,
       Color,
-      Highlight,
-      Link.configure({ openOnClick: false }),
-      Image,
+      Highlight.configure({ multicolor: false }),
+      Image.configure({
+        allowBase64: false,
+        HTMLAttributes: { class: "tiptap-image" },
+      }),
       Youtube.configure({ width: 640, height: 360 }),
       Table.configure({ resizable: true }),
       TableRow,
@@ -57,24 +94,46 @@ export default function TiptapEditor({ value, onChange }: TiptapEditorProps) {
         placeholder: "Write your blog content here...",
       }),
     ],
-    content: value,
+    content: value || "",
     immediatelyRender: false,
+    shouldRerenderOnTransaction: true,
     onUpdate: ({ editor: current }) => {
-      onChange(current.getHTML());
+      const html = current.getHTML();
+      lastEmittedHtml.current = html;
+      onChangeRef.current(html);
     },
     editorProps: {
       attributes: {
-        class:
-          "prose prose-slate max-w-none min-h-[320px] px-4 py-3 focus:outline-none",
+        class: "tiptap-editor-content focus:outline-none",
+      },
+      handleDOMEvents: {
+        click: (_view, event) => {
+          const target = event.target as HTMLElement | null;
+          if (target?.closest("a")) {
+            event.preventDefault();
+          }
+          return false;
+        },
       },
     },
   });
+
+  // Sync when parent loads/changes content from outside (edit page), not on every keystroke.
+  useEffect(() => {
+    if (!editor) return;
+    const next = value || "";
+    if (next === lastEmittedHtml.current) return;
+    lastEmittedHtml.current = next;
+    editor.commands.setContent(next, { emitUpdate: false });
+  }, [editor, value]);
 
   if (!editor) {
     return (
       <div className="min-h-[380px] animate-pulse rounded-2xl border border-slate-200 bg-slate-50" />
     );
   }
+
+  const activeEditor = editor;
 
   const buttonClass = (active?: boolean) =>
     `rounded-lg p-2 transition ${
@@ -83,121 +142,187 @@ export default function TiptapEditor({ value, onChange }: TiptapEditorProps) {
         : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
     }`;
 
+  function setLink() {
+    const previous = activeEditor.getAttributes("link").href as string | undefined;
+    const raw = window.prompt("Enter link URL", previous || "https://");
+    if (raw === null) return;
+
+    const url = normalizeUrl(raw);
+    if (!url) {
+      activeEditor.chain().focus().extendMarkRange("link").unsetLink().run();
+      return;
+    }
+
+    activeEditor
+      .chain()
+      .focus()
+      .extendMarkRange("link")
+      .setLink({ href: url, target: "_blank" })
+      .run();
+  }
+
+  async function uploadImageFile(file: File) {
+    const body = new FormData();
+    body.append("file", file);
+    const response = await fetch("/api/upload", {
+      method: "POST",
+      body,
+    });
+    const data = await response.json();
+    if (!response.ok || !data.url) {
+      throw new Error(data.error || "Upload failed");
+    }
+    activeEditor.chain().focus().setImage({ src: data.url }).run();
+  }
+
   return (
     <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
       <div className="flex flex-wrap gap-1 border-b border-slate-200 bg-slate-50 p-2">
         <button
           type="button"
-          className={buttonClass(editor.isActive("bold"))}
-          onClick={() => editor.chain().focus().toggleBold().run()}
+          title="Bold"
+          className={buttonClass(activeEditor.isActive("bold"))}
+          onClick={() => activeEditor.chain().focus().toggleBold().run()}
         >
           <Bold className="h-4 w-4" />
         </button>
         <button
           type="button"
-          className={buttonClass(editor.isActive("italic"))}
-          onClick={() => editor.chain().focus().toggleItalic().run()}
+          title="Italic"
+          className={buttonClass(activeEditor.isActive("italic"))}
+          onClick={() => activeEditor.chain().focus().toggleItalic().run()}
         >
           <Italic className="h-4 w-4" />
         </button>
         <button
           type="button"
-          className={buttonClass(editor.isActive("underline"))}
-          onClick={() => editor.chain().focus().toggleUnderline().run()}
+          title="Underline"
+          className={buttonClass(activeEditor.isActive("underline"))}
+          onClick={() => activeEditor.chain().focus().toggleUnderline().run()}
         >
           <UnderlineIcon className="h-4 w-4" />
         </button>
         <button
           type="button"
-          className={buttonClass(editor.isActive("heading", { level: 2 }))}
+          title="Heading 2"
+          className={buttonClass(activeEditor.isActive("heading", { level: 2 }))}
           onClick={() =>
-            editor.chain().focus().toggleHeading({ level: 2 }).run()
+            activeEditor.chain().focus().toggleHeading({ level: 2 }).run()
           }
         >
           <Heading2 className="h-4 w-4" />
         </button>
         <button
           type="button"
-          className={buttonClass(editor.isActive("heading", { level: 3 }))}
+          title="Heading 3"
+          className={buttonClass(activeEditor.isActive("heading", { level: 3 }))}
           onClick={() =>
-            editor.chain().focus().toggleHeading({ level: 3 }).run()
+            activeEditor.chain().focus().toggleHeading({ level: 3 }).run()
           }
         >
           <Heading3 className="h-4 w-4" />
         </button>
         <button
           type="button"
-          className={buttonClass(editor.isActive("bulletList"))}
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
+          title="Bullet list"
+          className={buttonClass(activeEditor.isActive("bulletList"))}
+          onClick={() => activeEditor.chain().focus().toggleBulletList().run()}
         >
           <List className="h-4 w-4" />
         </button>
         <button
           type="button"
-          className={buttonClass(editor.isActive("orderedList"))}
-          onClick={() => editor.chain().focus().toggleOrderedList().run()}
+          title="Numbered list"
+          className={buttonClass(activeEditor.isActive("orderedList"))}
+          onClick={() => activeEditor.chain().focus().toggleOrderedList().run()}
         >
           <ListOrdered className="h-4 w-4" />
         </button>
         <button
           type="button"
-          className={buttonClass(editor.isActive("blockquote"))}
-          onClick={() => editor.chain().focus().toggleBlockquote().run()}
+          title="Quote"
+          className={buttonClass(activeEditor.isActive("blockquote"))}
+          onClick={() => activeEditor.chain().focus().toggleBlockquote().run()}
         >
           <Quote className="h-4 w-4" />
         </button>
         <button
           type="button"
-          className={buttonClass(editor.isActive("codeBlock"))}
-          onClick={() => editor.chain().focus().toggleCodeBlock().run()}
+          title="Code block"
+          className={buttonClass(activeEditor.isActive("codeBlock"))}
+          onClick={() => activeEditor.chain().focus().toggleCodeBlock().run()}
         >
           <Code className="h-4 w-4" />
         </button>
         <button
           type="button"
-          className={buttonClass(editor.isActive("highlight"))}
-          onClick={() => editor.chain().focus().toggleHighlight().run()}
+          title="Highlight"
+          className={buttonClass(activeEditor.isActive("highlight"))}
+          onClick={() => activeEditor.chain().focus().toggleHighlight().run()}
         >
           <Highlighter className="h-4 w-4" />
         </button>
         <button
           type="button"
-          className={buttonClass()}
-          onClick={() => {
-            const url = window.prompt("Enter link URL");
-            if (!url) return;
-            editor.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
-          }}
+          title="Insert link"
+          className={buttonClass(activeEditor.isActive("link"))}
+          onClick={setLink}
         >
           <Link2 className="h-4 w-4" />
         </button>
         <button
           type="button"
+          title="Remove link"
           className={buttonClass()}
-          onClick={() => {
-            const url = window.prompt("Enter image URL");
-            if (!url) return;
-            editor.chain().focus().setImage({ src: url }).run();
-          }}
+          disabled={!activeEditor.isActive("link")}
+          onClick={() => activeEditor.chain().focus().unsetLink().run()}
         >
-          <ImageIcon className="h-4 w-4" />
+          <Unlink className="h-4 w-4" />
         </button>
         <button
           type="button"
+          title="Upload image"
+          className={buttonClass()}
+          onClick={() => fileInputRef.current?.click()}
+        >
+          <ImageIcon className="h-4 w-4" />
+        </button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp,image/gif"
+          className="hidden"
+          onChange={async (event) => {
+            const file = event.target.files?.[0];
+            event.target.value = "";
+            if (!file) return;
+            try {
+              await uploadImageFile(file);
+            } catch (err) {
+              window.alert(
+                err instanceof Error ? err.message : "Image upload failed",
+              );
+            }
+          }}
+        />
+        <button
+          type="button"
+          title="YouTube video"
           className={buttonClass()}
           onClick={() => {
             const url = window.prompt("YouTube URL");
             if (!url) return;
-            editor.commands.setYoutubeVideo({ src: url });
+            activeEditor.commands.setYoutubeVideo({ src: url.trim() });
           }}
         >
           <Video className="h-4 w-4" />
         </button>
         <button
           type="button"
+          title="Insert table"
           className={buttonClass()}
           onClick={() =>
-            editor
+            activeEditor
               .chain()
               .focus()
               .insertTable({ rows: 3, cols: 3, withHeaderRow: true })
@@ -208,15 +333,17 @@ export default function TiptapEditor({ value, onChange }: TiptapEditorProps) {
         </button>
         <button
           type="button"
+          title="Undo"
           className={buttonClass()}
-          onClick={() => editor.chain().focus().undo().run()}
+          onClick={() => activeEditor.chain().focus().undo().run()}
         >
           <Undo2 className="h-4 w-4" />
         </button>
         <button
           type="button"
+          title="Redo"
           className={buttonClass()}
-          onClick={() => editor.chain().focus().redo().run()}
+          onClick={() => activeEditor.chain().focus().redo().run()}
         >
           <Redo2 className="h-4 w-4" />
         </button>
@@ -224,7 +351,7 @@ export default function TiptapEditor({ value, onChange }: TiptapEditorProps) {
           type="color"
           className="ml-1 h-9 w-9 cursor-pointer rounded-lg border border-slate-200 bg-white p-1"
           onInput={(event) =>
-            editor
+            activeEditor
               .chain()
               .focus()
               .setColor((event.target as HTMLInputElement).value)
@@ -233,7 +360,7 @@ export default function TiptapEditor({ value, onChange }: TiptapEditorProps) {
           title="Text color"
         />
       </div>
-      <EditorContent editor={editor} />
+      <EditorContent editor={activeEditor} />
     </div>
   );
 }

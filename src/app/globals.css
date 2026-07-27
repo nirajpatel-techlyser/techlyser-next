@@ -457,12 +457,131 @@ html[data-theme="dark"]
 .blog-content ul,
 .blog-content ol {
   margin: 1rem 0;
-  padding-left: 1.4rem;
+  padding-left: 1.5rem;
+}
+
+.blog-content ul {
+  list-style-type: disc;
+}
+
+.blog-content ol {
+  list-style-type: decimal;
+}
+
+.blog-content li {
+  margin: 0.35rem 0;
+  padding-left: 0.25rem;
+  display: list-item;
 }
 
 .blog-content a {
   color: #ff5400;
   text-decoration: underline;
+}
+
+/* Admin TipTap editor — Tailwind preflight removes list markers */
+.tiptap-editor-content {
+  min-height: 320px;
+  padding: 0.85rem 1rem;
+  color: #334155;
+  line-height: 1.7;
+}
+
+.tiptap-editor-content p {
+  margin: 0.65rem 0;
+}
+
+.tiptap-editor-content h2 {
+  margin: 1.1rem 0 0.5rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.tiptap-editor-content h3 {
+  margin: 1rem 0 0.45rem;
+  font-size: 1.2rem;
+  font-weight: 650;
+  color: #0f172a;
+}
+
+.tiptap-editor-content ul,
+.tiptap-editor-content .tiptap-ul {
+  list-style-type: disc;
+  margin: 0.75rem 0;
+  padding-left: 1.5rem;
+}
+
+.tiptap-editor-content ol,
+.tiptap-editor-content .tiptap-ol {
+  list-style-type: decimal;
+  margin: 0.75rem 0;
+  padding-left: 1.5rem;
+}
+
+.tiptap-editor-content li,
+.tiptap-editor-content .tiptap-li {
+  margin: 0.3rem 0;
+  display: list-item;
+}
+
+.tiptap-editor-content a,
+.tiptap-editor-content .tiptap-link {
+  color: #ff5400;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.tiptap-editor-content blockquote {
+  margin: 0.85rem 0;
+  padding-left: 1rem;
+  border-left: 3px solid #ff5400;
+  color: #64748b;
+}
+
+.tiptap-editor-content pre {
+  margin: 0.85rem 0;
+  overflow-x: auto;
+  border-radius: 0.75rem;
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 0.85rem 1rem;
+  font-size: 0.875rem;
+}
+
+.tiptap-editor-content img,
+.tiptap-editor-content .tiptap-image {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 1rem auto;
+  border-radius: 0.75rem;
+}
+
+.tiptap-editor-content table {
+  width: 100%;
+  margin: 1rem 0;
+  border-collapse: collapse;
+}
+
+.tiptap-editor-content th,
+.tiptap-editor-content td {
+  border: 1px solid #e2e8f0;
+  padding: 0.5rem 0.65rem;
+  vertical-align: top;
+}
+
+.tiptap-editor-content th {
+  background: #f8fafc;
+  font-weight: 600;
+}
+
+.tiptap-editor-content .is-empty::before {
+  float: left;
+  height: 0;
+  color: #94a3b8;
+  content: attr(data-placeholder);
+  pointer-events: none;
 }
 
 .blog-content img {
