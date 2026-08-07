@@ -13,6 +13,41 @@ function createPrismaClient() {
   });
 }
 
-// Reuse one client per serverless isolate (prod + dev).
-export const prisma = globalForPrisma.prisma ?? createPrismaClient();
-globalForPrisma.prisma = prisma;
+/**
+ * Dev servers keep a global PrismaClient across HMR. After schema changes,
+ * that stale instance lacks new model delegates (opportunity, aiWriterRun, …).
+ * Recreate when required AI models are missing.
+ */
+function hasAiModels(client: PrismaClient) {
+  const c = client as PrismaClient & {
+    opportunity?: unknown;
+    contentPlan?: unknown;
+    aiWriterRun?: unknown;
+    aiSeoGeoRun?: unknown;
+    researchItem?: unknown;
+  };
+  return Boolean(
+    c.opportunity &&
+      c.contentPlan &&
+      c.aiWriterRun &&
+      c.aiSeoGeoRun &&
+      c.researchItem,
+  );
+}
+
+function getPrismaClient() {
+  const existing = globalForPrisma.prisma;
+  if (existing && hasAiModels(existing)) {
+    return existing;
+  }
+
+  if (existing) {
+    void existing.$disconnect().catch(() => undefined);
+  }
+
+  const client = createPrismaClient();
+  globalForPrisma.prisma = client;
+  return client;
+}
+
+export const prisma = getPrismaClient();

@@ -1,5 +1,11 @@
 import Link from "next/link";
-import { ArrowLeft, Eye, Globe2, MapPin, Search } from "lucide-react";
+import { ArrowLeft, CalendarDays, Eye, Globe2, Search } from "lucide-react";
+import VisitsTrendChart from "@/components/admin/analytics/VisitsTrendChart";
+import {
+  buildDailyVisitSeries,
+  getTodayYesterdayKeys,
+  startOfDayInZone,
+} from "@/lib/analytics-visits";
 import { prisma } from "@/lib/prisma";
 
 function formatDateTime(value: Date) {
@@ -62,8 +68,38 @@ async function safe<T>(label: string, fn: () => Promise<T>, fallback: T): Promis
 }
 
 export default async function SiteAnalyticsPage() {
+  const { today: todayKey, yesterday: yesterdayKey } = getTodayYesterdayKeys();
+  const rangeStart = startOfDayInZone(29);
+  const todayStart = startOfDayInZone(0);
+  const yesterdayStart = startOfDayInZone(1);
+
   // Sequential + safe queries to avoid Supabase session pool exhaustion.
   const visitCount = await safe("visitCount", () => prisma.pageView.count(), 0);
+  const todayViews = await safe(
+    "todayViews",
+    () => prisma.pageView.count({ where: { createdAt: { gte: todayStart } } }),
+    0,
+  );
+  const yesterdayViews = await safe(
+    "yesterdayViews",
+    () =>
+      prisma.pageView.count({
+        where: {
+          createdAt: { gte: yesterdayStart, lt: todayStart },
+        },
+      }),
+    0,
+  );
+  const recentTimestamps = await safe(
+    "recentTimestamps",
+    () =>
+      prisma.pageView.findMany({
+        where: { createdAt: { gte: rangeStart } },
+        select: { createdAt: true },
+        orderBy: { createdAt: "asc" },
+      }),
+    [],
+  );
   const byCountry = await safe(
     "byCountry",
     () =>
@@ -153,6 +189,11 @@ export default async function SiteAnalyticsPage() {
     .sort((a, b) => b.count - a.count)
     .slice(0, 30);
 
+  const dailySeries = buildDailyVisitSeries(
+    recentTimestamps.map((row) => row.createdAt),
+    30,
+  );
+
   return (
     <div className="space-y-8">
       <div>
@@ -172,13 +213,32 @@ export default async function SiteAnalyticsPage() {
         </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium text-slate-500">Today</p>
+            <CalendarDays className="h-4 w-4 text-primary" />
+          </div>
+          <p className="mt-3 text-3xl font-bold text-slate-900">{todayViews}</p>
+          <p className="mt-1 text-xs text-slate-500">IST calendar day</p>
+        </div>
+        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium text-slate-500">Yesterday</p>
+            <CalendarDays className="h-4 w-4 text-amber-500" />
+          </div>
+          <p className="mt-3 text-3xl font-bold text-slate-900">
+            {yesterdayViews}
+          </p>
+          <p className="mt-1 text-xs text-slate-500">Previous IST day</p>
+        </div>
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="flex items-center justify-between">
             <p className="text-sm font-medium text-slate-500">Total Visits</p>
             <Eye className="h-4 w-4 text-violet-600" />
           </div>
           <p className="mt-3 text-3xl font-bold text-slate-900">{visitCount}</p>
+          <p className="mt-1 text-xs text-slate-500">All time</p>
         </div>
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="flex items-center justify-between">
@@ -188,17 +248,17 @@ export default async function SiteAnalyticsPage() {
           <p className="mt-3 text-3xl font-bold text-slate-900">
             {byCountry.filter((row) => row.country).length}
           </p>
-        </div>
-        <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium text-slate-500">Cities</p>
-            <MapPin className="h-4 w-4 text-sky-600" />
-          </div>
-          <p className="mt-3 text-3xl font-bold text-slate-900">
-            {byCity.filter((row) => row.city).length}
+          <p className="mt-1 text-xs text-slate-500">
+            Cities: {byCity.filter((row) => row.city).length}
           </p>
         </div>
       </div>
+
+      <VisitsTrendChart
+        data={dailySeries}
+        todayKey={todayKey}
+        yesterdayKey={yesterdayKey}
+      />
 
       <div className="grid gap-6 xl:grid-cols-2">
         <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">

@@ -44,7 +44,7 @@ export default async function AdminBlogsPage({
     prisma.blog.count({ where }),
     prisma.blog.findMany({
       where,
-      orderBy: { updatedAt: "desc" },
+      orderBy: { createdAt: "desc" },
       skip: (page - 1) * PAGE_SIZE,
       take: PAGE_SIZE,
       select: {
@@ -55,6 +55,7 @@ export default async function AdminBlogsPage({
         status: true,
         views: true,
         publishedAt: true,
+        createdAt: true,
         updatedAt: true,
       },
     }),
@@ -70,7 +71,8 @@ export default async function AdminBlogsPage({
             Blogs
           </h1>
           <p className="mt-2 text-slate-600">
-            Search, filter, edit and publish blog posts.
+            Latest added first (draft or published). Search, filter, edit and
+            publish posts.
           </p>
         </div>
         <Link
@@ -110,6 +112,7 @@ export default async function AdminBlogsPage({
         posts={posts.map((post) => ({
           ...post,
           publishedAt: post.publishedAt?.toISOString() ?? null,
+          createdAt: post.createdAt.toISOString(),
           updatedAt: post.updatedAt.toISOString(),
         }))}
       />

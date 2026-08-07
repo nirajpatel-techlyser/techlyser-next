@@ -5,16 +5,26 @@ import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import {
   BarChart3,
+  Bot,
+  CalendarRange,
   FileText,
   LayoutDashboard,
   LogOut,
   MessageSquare,
+  PenLine,
   PlusCircle,
+  Search,
   Settings,
+  Sparkles,
 } from "lucide-react";
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/admin/ai", label: "AI Studio", icon: Bot },
+  { href: "/admin/ai/planner", label: "Content Planner", icon: CalendarRange },
+  { href: "/admin/ai/writer", label: "AI Writer", icon: PenLine },
+  { href: "/admin/ai/seo", label: "SEO + GEO", icon: Search },
+  { href: "/admin/ai/autopilot", label: "Daily Autopilot", icon: Sparkles },
   { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/admin/blogs", label: "Blogs", icon: FileText },
   { href: "/admin/comments", label: "Comments", icon: MessageSquare },

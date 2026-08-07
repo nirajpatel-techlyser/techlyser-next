@@ -14,6 +14,7 @@ export type BlogListItem = {
   status: BlogStatus;
   views: number;
   publishedAt: string | null;
+  createdAt: string;
   updatedAt: string;
 };
 
@@ -39,6 +40,7 @@ export default function BlogTable({ posts }: { posts: BlogListItem[] }) {
             <th className="px-5 py-3 font-medium">Category</th>
             <th className="px-5 py-3 font-medium">Status</th>
             <th className="px-5 py-3 font-medium">Views</th>
+            <th className="px-5 py-3 font-medium">Created</th>
             <th className="px-5 py-3 font-medium">Published</th>
             <th className="px-5 py-3 font-medium">Actions</th>
           </tr>
@@ -46,7 +48,7 @@ export default function BlogTable({ posts }: { posts: BlogListItem[] }) {
         <tbody>
           {posts.length === 0 ? (
             <tr>
-              <td colSpan={6} className="px-5 py-12 text-center text-slate-500">
+              <td colSpan={7} className="px-5 py-12 text-center text-slate-500">
                 No blogs found.
               </td>
             </tr>
@@ -79,6 +81,9 @@ export default function BlogTable({ posts }: { posts: BlogListItem[] }) {
                   >
                     {post.views}
                   </Link>
+                </td>
+                <td className="px-5 py-3 text-slate-600">
+                  {formatDate(post.createdAt)}
                 </td>
                 <td className="px-5 py-3 text-slate-600">
                   {formatDate(post.publishedAt)}

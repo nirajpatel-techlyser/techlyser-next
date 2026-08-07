@@ -10,6 +10,12 @@
     "db:push": "prisma db push",
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",
+    "ai:research": "tsx scripts/run-research-engine.ts",
+    "ai:opportunities": "tsx scripts/run-opportunity-engine.ts",
+    "ai:plan": "tsx scripts/run-content-planner.ts",
+    "ai:write": "tsx scripts/run-ai-writer.ts",
+    "ai:seo": "tsx scripts/run-seo-geo.ts",
+    "ai:daily": "tsx scripts/run-daily-autopilot.ts",
     "postinstall": "prisma generate",
     "env:check": "node scripts/check-auth-url.mjs"
   },

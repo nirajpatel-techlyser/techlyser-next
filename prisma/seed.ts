@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import fs from "fs";
 import path from "path";
 import matter from "gray-matter";
+import { seedWriterPrompts } from "./seed-writer-prompts";
 
 const prisma = new PrismaClient();
 
@@ -149,6 +150,7 @@ async function seedBlogs() {
 async function main() {
   await seedAdmin();
   await seedBlogs();
+  await seedWriterPrompts(prisma);
 }
 
 main()

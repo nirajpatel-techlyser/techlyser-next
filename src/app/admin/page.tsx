@@ -61,7 +61,7 @@ export default async function AdminDashboardPage() {
     "recent",
     () =>
       prisma.blog.findMany({
-        orderBy: { updatedAt: "desc" },
+        orderBy: { createdAt: "desc" },
         take: 8,
         select: {
           id: true,
@@ -70,6 +70,7 @@ export default async function AdminDashboardPage() {
           status: true,
           views: true,
           updatedAt: true,
+          createdAt: true,
           publishedAt: true,
         },
       }),
@@ -422,7 +423,7 @@ export default async function AdminDashboardPage() {
                 <th className="px-5 py-3 font-medium">Title</th>
                 <th className="px-5 py-3 font-medium">Status</th>
                 <th className="px-5 py-3 font-medium">Views</th>
-                <th className="px-5 py-3 font-medium">Updated</th>
+                <th className="px-5 py-3 font-medium">Created</th>
                 <th className="px-5 py-3 font-medium">Actions</th>
               </tr>
             </thead>
@@ -455,7 +456,7 @@ export default async function AdminDashboardPage() {
                     </td>
                     <td className="px-5 py-3 text-slate-600">{post.views}</td>
                     <td className="px-5 py-3 text-slate-600">
-                      {formatDateTime(post.updatedAt)}
+                      {formatDateTime(post.createdAt)}
                     </td>
                     <td className="px-5 py-3">
                       <div className="flex gap-3">

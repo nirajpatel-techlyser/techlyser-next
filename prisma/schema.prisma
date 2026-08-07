@@ -96,6 +96,10 @@ model Blog {
   updatedAt        DateTime      @updatedAt
   viewsLog         PageView[]
   comments         BlogComment[]
+  contentIdea      ContentIdea?
+  publishJobs      PublishingQueue[]
+  writerRuns       AiWriterRun[]
+  seoGeoRuns       AiSeoGeoRun[]
 
   @@index([status, publishedAt])
   @@index([category])
@@ -150,4 +154,566 @@ model SiteSettings {
   instagramUrl String?
   linkedinUrl  String?
   updatedAt    DateTime  @updatedAt
+}
+
+// =============================================================================
+// AI Growth Operating System — Phase 1 schema (architecture)
+// Runtime agents start Phase 2+. These models are the system of record.
+// =============================================================================
+
+enum KeywordIntent {
+  INFORMATIONAL
+  COMMERCIAL
+  TRANSACTIONAL
+  NAVIGATIONAL
+}
+
+enum KeywordStatus {
+  DISCOVERED
+  QUEUED
+  RESEARCHING
+  READY
+  ARCHIVED
+}
+
+enum TopicStatus {
+  IDEATION
+  PLANNED
+  IN_PROGRESS
+  PUBLISHED
+  ARCHIVED
+}
+
+enum ResearchStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+enum ContentIdeaStatus {
+  DRAFT
+  APPROVED
+  REJECTED
+  QUEUED
+  PUBLISHED
+}
+
+enum PublishQueueStatus {
+  PENDING
+  SCHEDULED
+  PROCESSING
+  PUBLISHED
+  FAILED
+  CANCELLED
+}
+
+enum ClusterStatus {
+  PLANNED
+  ACTIVE
+  COMPLETE
+}
+
+enum ContentPlanHorizon {
+  DAILY
+  WEEKLY
+  MONTHLY
+}
+
+enum ContentPlanStatus {
+  DRAFT
+  ACTIVE
+  COMPLETED
+  ARCHIVED
+}
+
+enum PlannedContentRole {
+  PILLAR
+  SUPPORTING
+}
+
+enum WriterRunStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+enum SeoGeoRunStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+enum PromptTemplateKind {
+  SYSTEM
+  RESEARCH
+  WRITER
+  SEO
+  GEO
+  PLANNER
+  ANALYTICS
+}
+
+enum AiAnalyticsSource {
+  GSC
+  BING
+  PAGEVIEW
+  AGENT
+  MANUAL
+}
+
+enum OpportunityStatus {
+  NEW
+  REVIEWED
+  QUEUED
+  CONVERTED
+  DISMISSED
+}
+
+enum ResearchItemStatus {
+  NEW
+  PROCESSED
+  ARCHIVED
+  IGNORED
+}
+
+enum ResearchSourceKind {
+  GOOGLE_TRENDS
+  SHOPIFY_BLOG
+  NEXTJS_BLOG
+  VERCEL_BLOG
+  OPENAI
+  ANTHROPIC
+  CLOUDFLARE
+  GOOGLE_SEARCH_CENTRAL
+  GITHUB_TRENDING
+  PRODUCT_HUNT
+  HACKER_NEWS
+  REDDIT
+  COMPETITOR_BLOG
+  OTHER
+}
+
+/// Target search keyword / entity for growth planning
+model Keyword {
+  id              String         @id @default(cuid())
+  term            String
+  locale          String         @default("en-IN")
+  intent          KeywordIntent  @default(INFORMATIONAL)
+  status          KeywordStatus  @default(DISCOVERED)
+  searchVolume    Int?
+  difficulty      Float?
+  cpc             Float?
+  priority        Int            @default(0)
+  clusterId       String?
+  cluster         ContentCluster? @relation(fields: [clusterId], references: [id], onDelete: SetNull)
+  topicId         String?
+  topic           Topic?         @relation(fields: [topicId], references: [id], onDelete: SetNull)
+  notes           String?        @db.Text
+  metadata        Json?
+  research        Research[]
+  ideas           ContentIdea[]
+  analytics       AiAnalytics[]
+  opportunities   Opportunity[]
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@unique([term, locale])
+  @@index([status, priority])
+  @@index([clusterId])
+  @@index([topicId])
+}
+
+/// Thematic container above keywords (e.g. "Shopify Plus India")
+model Topic {
+  id          String      @id @default(cuid())
+  title       String
+  slug        String      @unique
+  description String?     @db.Text
+  status      TopicStatus @default(IDEATION)
+  pillarPath  String?
+  clusterId   String?
+  cluster     ContentCluster? @relation(fields: [clusterId], references: [id], onDelete: SetNull)
+  keywords    Keyword[]
+  research    Research[]
+  ideas       ContentIdea[]
+  metadata    Json?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@index([status])
+  @@index([clusterId])
+}
+
+/// Competitor domain / page tracked for gap analysis
+model Competitor {
+  id          String   @id @default(cuid())
+  name        String
+  domain      String
+  pageUrl     String?
+  notes       String?  @db.Text
+  strengths   String[] @default([])
+  weaknesses  String[] @default([])
+  metadata    Json?
+  research    Research[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([domain])
+  @@index([name])
+}
+
+/// Research run / brief produced by the Research Engine
+model Research {
+  id            String         @id @default(cuid())
+  title         String
+  status        ResearchStatus @default(PENDING)
+  summary       String?        @db.Text
+  sourceUrls    String[]       @default([])
+  entities      String[]       @default([])
+  gaps          String[]       @default([])
+  rawPayload    Json?
+  keywordId     String?
+  keyword       Keyword?       @relation(fields: [keywordId], references: [id], onDelete: SetNull)
+  topicId       String?
+  topic         Topic?         @relation(fields: [topicId], references: [id], onDelete: SetNull)
+  competitorId  String?
+  competitor    Competitor?    @relation(fields: [competitorId], references: [id], onDelete: SetNull)
+  ideas         ContentIdea[]
+  items         ResearchItem[]
+  errorMessage  String?        @db.Text
+  startedAt     DateTime?
+  completedAt   DateTime?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@index([status, createdAt])
+  @@index([keywordId])
+  @@index([topicId])
+}
+
+/// Normalized market research signal (one article/thread/trend item)
+model ResearchItem {
+  id              String              @id @default(cuid())
+  title           String
+  url             String
+  category        String
+  keywords        String[]            @default([])
+  source          ResearchSourceKind
+  sourceLabel     String?
+  publishedAt     DateTime?
+  summary         String?             @db.Text
+  relevanceScore  Float               @default(0)
+  status          ResearchItemStatus  @default(NEW)
+  raw             Json?
+  researchId      String?
+  research        Research?           @relation(fields: [researchId], references: [id], onDelete: SetNull)
+  opportunity     Opportunity?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  @@unique([url])
+  @@index([source, status])
+  @@index([relevanceScore])
+  @@index([publishedAt])
+  @@index([category])
+  @@index([researchId])
+}
+
+/// Ranked growth opportunity derived from research analysis
+model Opportunity {
+  id                       String            @id @default(cuid())
+  title                    String
+  summary                  String?           @db.Text
+  url                      String?
+  category                 String?
+  keywords                 String[]          @default([])
+  intentLabel              String?
+  /// Weighted composite 0–1
+  opportunityScore         Float             @default(0)
+  rank                     Int?
+  searchIntentScore        Float             @default(0)
+  commercialIntentScore    Float             @default(0)
+  competitionScore         Float             @default(0)
+  trendScore               Float             @default(0)
+  freshnessScore           Float             @default(0)
+  techlyserRelevanceScore  Float             @default(0)
+  existingContentScore     Float             @default(0)
+  keywordGapScore          Float             @default(0)
+  authorityGapScore        Float             @default(0)
+  rationale                String?           @db.Text
+  factors                  Json?
+  status                   OpportunityStatus @default(NEW)
+  researchItemId           String?           @unique
+  researchItem             ResearchItem?     @relation(fields: [researchItemId], references: [id], onDelete: SetNull)
+  keywordId                String?
+  keyword                  Keyword?          @relation(fields: [keywordId], references: [id], onDelete: SetNull)
+  contentIdeaId            String?
+  contentIdea              ContentIdea?      @relation(fields: [contentIdeaId], references: [id], onDelete: SetNull)
+  planItems                ContentPlanItem[]
+  createdAt                DateTime          @default(now())
+  updatedAt                DateTime          @updatedAt
+
+  @@index([status, opportunityScore])
+  @@index([opportunityScore])
+  @@index([rank])
+  @@index([keywordId])
+}
+
+/// Editable content opportunity before CMS draft
+model ContentIdea {
+  id            String            @id @default(cuid())
+  title         String
+  slug          String?           @unique
+  angle         String?           @db.Text
+  outline       String?           @db.Text
+  status        ContentIdeaStatus @default(DRAFT)
+  priority      Int               @default(0)
+  targetWords   Int?
+  keywordId     String?
+  keyword       Keyword?          @relation(fields: [keywordId], references: [id], onDelete: SetNull)
+  topicId       String?
+  topic         Topic?            @relation(fields: [topicId], references: [id], onDelete: SetNull)
+  clusterId     String?
+  cluster       ContentCluster?   @relation(fields: [clusterId], references: [id], onDelete: SetNull)
+  researchId    String?
+  research      Research?         @relation(fields: [researchId], references: [id], onDelete: SetNull)
+  blogId        String?           @unique
+  blog          Blog?             @relation(fields: [blogId], references: [id], onDelete: SetNull)
+  queueItems    PublishingQueue[]
+  opportunities Opportunity[]
+  planItems     ContentPlanItem[]
+  writerRuns    AiWriterRun[]
+  metadata      Json?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  @@index([status, priority])
+  @@index([clusterId])
+  @@index([keywordId])
+}
+
+/// Scheduled / in-flight publish jobs into Blog CMS
+model PublishingQueue {
+  id             String             @id @default(cuid())
+  status         PublishQueueStatus @default(PENDING)
+  scheduledFor   DateTime?
+  startedAt      DateTime?
+  publishedAt    DateTime?
+  errorMessage   String?            @db.Text
+  ideaId         String?
+  idea           ContentIdea?       @relation(fields: [ideaId], references: [id], onDelete: SetNull)
+  blogId         String?
+  blog           Blog?              @relation(fields: [blogId], references: [id], onDelete: SetNull)
+  payload        Json?
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  @@index([status, scheduledFor])
+  @@index([ideaId])
+  @@index([blogId])
+}
+
+/// Pillar + supporting topic cluster (DB counterpart to src/data/content-clusters.ts)
+model ContentCluster {
+  id           String           @id @default(cuid())
+  name         String
+  slug         String           @unique
+  description  String?          @db.Text
+  pillarPath   String?
+  status       ClusterStatus    @default(PLANNED)
+  locale       String           @default("en-IN")
+  planId       String?
+  plan         ContentPlan?     @relation(fields: [planId], references: [id], onDelete: SetNull)
+  keywords     Keyword[]
+  topics       Topic[]
+  ideas        ContentIdea[]
+  planItems    ContentPlanItem[]
+  metadata     Json?
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  @@index([status])
+  @@index([planId])
+}
+
+/// Editorial plan for a daily / weekly / monthly horizon
+model ContentPlan {
+  id           String            @id @default(cuid())
+  name         String
+  horizon      ContentPlanHorizon
+  status       ContentPlanStatus @default(DRAFT)
+  periodStart  DateTime
+  periodEnd    DateTime
+  summary      String?           @db.Text
+  /// Nodes + edges for internal linking
+  linkMap      Json?
+  metadata     Json?
+  items        ContentPlanItem[]
+  clusters     ContentCluster[]
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  @@index([horizon, status])
+  @@index([periodStart, periodEnd])
+}
+
+/// Planned pillar or supporting article inside a ContentPlan
+model ContentPlanItem {
+  id              String             @id @default(cuid())
+  planId          String
+  plan            ContentPlan        @relation(fields: [planId], references: [id], onDelete: Cascade)
+  role            PlannedContentRole
+  title           String
+  slugSuggestion  String?
+  angle           String?            @db.Text
+  suggestedPath   String?
+  scheduledFor    DateTime?
+  sortOrder       Int                @default(0)
+  status          String             @default("PLANNED")
+  opportunityId   String?
+  opportunity     Opportunity?       @relation(fields: [opportunityId], references: [id], onDelete: SetNull)
+  contentIdeaId   String?
+  contentIdea     ContentIdea?       @relation(fields: [contentIdeaId], references: [id], onDelete: SetNull)
+  clusterId       String?
+  cluster         ContentCluster?    @relation(fields: [clusterId], references: [id], onDelete: SetNull)
+  outboundLinks   Json?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  @@index([planId, sortOrder])
+  @@index([scheduledFor])
+  @@index([clusterId])
+  @@index([opportunityId])
+}
+
+/// Singleton AI runtime settings (id = "default")
+model AiSettings {
+  id                    String   @id @default("default")
+  defaultLocale         String   @default("en-IN")
+  defaultModelProvider  String   @default("openai")
+  defaultModel          String   @default("gpt-4.1")
+  maxMonthlyTokens      Int?
+  requireHumanApproval  Boolean  @default(true)
+  brandVoice            String?  @db.Text
+  disallowedClaims      String[] @default([])
+  enabledModules        String[] @default(["research", "planner", "writer", "seo", "geo"])
+  metadata              Json?
+  updatedAt             DateTime @updatedAt
+}
+
+/// Versioned prompt templates for agents
+model PromptTemplate {
+  id          String             @id @default(cuid())
+  key         String
+  name        String
+  kind        PromptTemplateKind
+  version     Int                @default(1)
+  active      Boolean            @default(true)
+  template    String             @db.Text
+  variables   String[]           @default([])
+  notes       String?            @db.Text
+  metadata    Json?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  @@unique([key, version])
+  @@index([kind, active])
+}
+
+/// AI growth metrics / opportunity events (separate from PageView)
+model AiAnalytics {
+  id          String            @id @default(cuid())
+  source      AiAnalyticsSource
+  metric      String
+  value       Float?
+  dimensions  Json?
+  keywordId   String?
+  keyword     Keyword?          @relation(fields: [keywordId], references: [id], onDelete: SetNull)
+  path        String?
+  recordedAt  DateTime          @default(now())
+  createdAt   DateTime          @default(now())
+
+  @@index([source, metric, recordedAt])
+  @@index([keywordId])
+  @@index([path])
+}
+
+/// SEO + GEO optimization run against a Blog draft/post (never auto-publishes)
+model AiSeoGeoRun {
+  id            String          @id @default(cuid())
+  status        SeoGeoRunStatus @default(PENDING)
+  applied       Boolean         @default(false)
+  seoScore      Float?
+  geoScore      Float?
+  input         Json
+  seoOutput     Json?
+  geoOutput     Json?
+  errorMessage  String?         @db.Text
+  blogId        String?
+  blog          Blog?           @relation(fields: [blogId], references: [id], onDelete: SetNull)
+  startedAt     DateTime?
+  completedAt   DateTime?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  @@index([status, createdAt])
+  @@index([blogId])
+}
+
+/// AI Writer generation run — always saves Blog as DRAFT (never auto-publish)
+model AiWriterRun {
+  id            String          @id @default(cuid())
+  status        WriterRunStatus @default(PENDING)
+  keyword       String
+  input         Json
+  output        Json?
+  promptVersion String?
+  model         String?
+  errorMessage  String?         @db.Text
+  contentIdeaId String?
+  contentIdea   ContentIdea?    @relation(fields: [contentIdeaId], references: [id], onDelete: SetNull)
+  blogId        String?         @unique
+  blog          Blog?           @relation(fields: [blogId], references: [id], onDelete: SetNull)
+  startedAt     DateTime?
+  completedAt   DateTime?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  @@index([status, createdAt])
+  @@index([contentIdeaId])
+}
+
+/// Optional agent run audit trail for observability
+model AiAgentRun {
+  id           String   @id @default(cuid())
+  workflowId   String
+  status       String   @default("QUEUED")
+  currentStep  String?
+  input        Json?
+  output       Json?
+  errorMessage String?  @db.Text
+  startedAt    DateTime?
+  completedAt  DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([workflowId, status])
+  @@index([createdAt])
+}
+
+/// Durable memory records for brand / run context
+model AiMemory {
+  id        String   @id @default(cuid())
+  scope     String
+  key       String
+  value     String   @db.Text
+  metadata  Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([scope, key])
+  @@index([scope])
 }
