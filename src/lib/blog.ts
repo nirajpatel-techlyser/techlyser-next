@@ -142,6 +142,45 @@ export async function getPostsByCategory(
   return { category: match.name, posts: posts.map(mapBlog) };
 }
 
+export async function getSitemapEntries(): Promise<
+  { slug: string; lastModified: Date }[]
+> {
+  const posts = await prisma.blog.findMany({
+    where: { status: BlogStatus.PUBLISHED },
+    select: {
+      slug: true,
+      updatedAt: true,
+      publishedAt: true,
+      createdAt: true,
+    },
+    orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
+  });
+
+  return posts.map((post) => ({
+    slug: post.slug,
+    lastModified: post.updatedAt || post.publishedAt || post.createdAt,
+  }));
+}
+
+export async function getAllCategorySlugs(): Promise<string[]> {
+  const rows = await prisma.blog.groupBy({
+    by: ["category"],
+    where: {
+      status: BlogStatus.PUBLISHED,
+      category: { not: null },
+    },
+  });
+
+  return rows
+    .filter((row) => row.category)
+    .map((row) => slugifyTaxonomy(row.category as string));
+}
+
+export async function getAllTagSlugs(limit = 100): Promise<string[]> {
+  const tags = await getAllTags();
+  return tags.slice(0, limit).map((tag) => tag.slug);
+}
+
 export async function getAllTags(): Promise<
   { name: string; slug: string; count: number }[]
 > {
