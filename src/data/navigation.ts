@@ -27,11 +27,16 @@ export const navigation: NavigationItem[] = [
   },
   {
     id: 5,
+    label: "Resources",
+    href: "/resources",
+  },
+  {
+    id: 6,
     label: "About",
     href: "/about",
   },
   {
-    id: 6,
+    id: 7,
     label: "Contact",
     href: "/contact",
   },

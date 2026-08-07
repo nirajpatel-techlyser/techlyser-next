@@ -1,5 +1,6 @@
 import { BlogStatus, type Blog } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
+import { slugifyTaxonomy } from "@/lib/blog-html";
 import type { BlogPost } from "@/types/blog";
 
 function mapBlog(blog: Blog): BlogPost {
@@ -10,6 +11,7 @@ function mapBlog(blog: Blog): BlogPost {
     description: blog.seoDescription || blog.excerpt || "",
     excerpt: blog.excerpt || "",
     date: (blog.publishedAt || blog.createdAt).toISOString(),
+    updatedAt: blog.updatedAt.toISOString(),
     author: blog.author,
     categories: blog.category ? [blog.category] : [],
     tags: blog.tags,
@@ -18,6 +20,7 @@ function mapBlog(blog: Blog): BlogPost {
     commentsEnabled: blog.commentsEnabled,
     content: blog.content,
     readingTime: blog.readingTime ? `${blog.readingTime} min read` : undefined,
+    readingTimeMinutes: blog.readingTime || undefined,
     seoTitle: blog.seoTitle || undefined,
     seoDescription: blog.seoDescription || undefined,
     metaKeywords: blog.metaKeywords || undefined,
@@ -65,7 +68,20 @@ export async function getRelatedPosts(
     take: limit,
   });
 
-  return posts.map(mapBlog);
+  if (posts.length >= limit || !category) {
+    return posts.map(mapBlog);
+  }
+
+  const filler = await prisma.blog.findMany({
+    where: {
+      status: BlogStatus.PUBLISHED,
+      slug: { notIn: [slug, ...posts.map((p) => p.slug)] },
+    },
+    orderBy: { publishedAt: "desc" },
+    take: limit - posts.length,
+  });
+
+  return [...posts, ...filler].map(mapBlog);
 }
 
 export async function getAdjacentPosts(slug: string) {
@@ -87,4 +103,85 @@ export async function incrementPostViews(slug: string) {
     where: { slug, status: BlogStatus.PUBLISHED },
     data: { views: { increment: 1 } },
   });
+}
+
+export async function getAllCategories(): Promise<
+  { name: string; slug: string; count: number }[]
+> {
+  const rows = await prisma.blog.groupBy({
+    by: ["category"],
+    where: {
+      status: BlogStatus.PUBLISHED,
+      category: { not: null },
+    },
+    _count: { _all: true },
+    orderBy: { _count: { category: "desc" } },
+  });
+
+  return rows
+    .filter((row) => row.category)
+    .map((row) => ({
+      name: row.category as string,
+      slug: slugifyTaxonomy(row.category as string),
+      count: row._count._all,
+    }));
+}
+
+export async function getPostsByCategory(
+  categorySlug: string,
+): Promise<{ category: string; posts: BlogPost[] } | null> {
+  const categories = await getAllCategories();
+  const match = categories.find((item) => item.slug === categorySlug);
+  if (!match) return null;
+
+  const posts = await prisma.blog.findMany({
+    where: { status: BlogStatus.PUBLISHED, category: match.name },
+    orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
+  });
+
+  return { category: match.name, posts: posts.map(mapBlog) };
+}
+
+export async function getAllTags(): Promise<
+  { name: string; slug: string; count: number }[]
+> {
+  const posts = await prisma.blog.findMany({
+    where: { status: BlogStatus.PUBLISHED },
+    select: { tags: true },
+  });
+
+  const counts = new Map<string, number>();
+  for (const post of posts) {
+    for (const tag of post.tags) {
+      const key = tag.trim();
+      if (!key) continue;
+      counts.set(key, (counts.get(key) || 0) + 1);
+    }
+  }
+
+  return [...counts.entries()]
+    .map(([name, count]) => ({
+      name,
+      slug: slugifyTaxonomy(name),
+      count,
+    }))
+    .sort((a, b) => b.count - a.count);
+}
+
+export async function getPostsByTag(
+  tagSlug: string,
+): Promise<{ tag: string; posts: BlogPost[] } | null> {
+  const tags = await getAllTags();
+  const match = tags.find((item) => item.slug === tagSlug);
+  if (!match) return null;
+
+  const posts = await prisma.blog.findMany({
+    where: {
+      status: BlogStatus.PUBLISHED,
+      tags: { has: match.name },
+    },
+    orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
+  });
+
+  return { tag: match.name, posts: posts.map(mapBlog) };
 }

@@ -1,9 +1,18 @@
 import { ReactNode } from "react";
+import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import AuthProvider from "@/components/admin/AuthProvider";
+
+export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: false,
+    googleBot: { index: false, follow: false },
+  },
+};
 
 export default async function AdminLayout({
   children,

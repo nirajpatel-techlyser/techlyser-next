@@ -1,9 +1,14 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import Image from "next/image";
 import Link from "next/link";
 import Navbar from "@/components/layout/Navbar";
 import BlogContent from "@/components/blog/BlogContent";
 import BlogComments from "@/components/blog/BlogComments";
+import TOC from "@/components/blog/TOC";
+import RelatedPosts from "@/components/blog/RelatedPosts";
+import ReadingTime from "@/components/blog/ReadingTime";
+import JsonLd from "@/components/seo/JsonLd";
 import { Container } from "@/components/ui";
 import { prisma } from "@/lib/prisma";
 import {
@@ -12,6 +17,14 @@ import {
   getPostBySlug,
   getRelatedPosts,
 } from "@/lib/blog";
+import { prepareBlogHtml } from "@/lib/prepare-blog-html";
+import { slugifyTaxonomy } from "@/lib/blog-html";
+import {
+  blogPostingJsonLd,
+  breadcrumbJsonLd,
+  buildPageMetadata,
+  siteConfig,
+} from "@/lib/seo";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -27,9 +40,15 @@ const RESERVED_PATHS = new Set([
   "admin",
   "shopify-developers-india",
   "shopify-developers",
+  "free-shopify-audit",
+  "resources",
+  "category",
+  "tag",
+  "rss.xml",
+  "llms.txt",
 ]);
 
-export const revalidate = 0;
+export const revalidate = 3600;
 export const runtime = "nodejs";
 
 function formatDate(value: string) {
@@ -38,7 +57,7 @@ function formatDate(value: string) {
     return value;
   }
 
-  return new Intl.DateTimeFormat("en-US", {
+  return new Intl.DateTimeFormat("en-IN", {
     day: "2-digit",
     month: "long",
     year: "numeric",
@@ -69,28 +88,19 @@ export async function generateMetadata({
     const description =
       post.seoDescription || post.description || post.excerpt || "";
 
-    return {
-      title: `${title} | Techlyser Web Solutions`,
+    return buildPageMetadata({
+      title,
       description,
-      keywords: post.metaKeywords || post.tags.join(", "),
-      alternates: {
-        canonical: `/${post.slug}`,
-      },
-      openGraph: {
-        title,
-        description,
-        type: "article",
-        url: `/${post.slug}`,
-        images: post.coverImage ? [{ url: post.coverImage }] : undefined,
-        siteName: "Techlyser Web Solutions",
-      },
-      twitter: {
-        card: "summary_large_image",
-        title,
-        description,
-        images: post.coverImage ? [post.coverImage] : undefined,
-      },
-    };
+      path: `/${post.slug}`,
+      keywords: post.metaKeywords
+        ? post.metaKeywords.split(",").map((k) => k.trim())
+        : post.tags,
+      ogImage: post.coverImage || siteConfig.defaultOgImage,
+      type: "article",
+      publishedTime: post.date,
+      modifiedTime: post.updatedAt || post.date,
+      authors: [post.author],
+    });
   } catch {
     return {};
   }
@@ -152,78 +162,167 @@ export default async function BlogPostPage({ params }: PageProps) {
     }
   }
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Article",
-    headline: post.title,
-    description: post.seoDescription || post.excerpt,
-    image: post.coverImage || undefined,
-    datePublished: post.date,
-    author: {
-      "@type": "Person",
-      name: post.author,
-    },
-    publisher: {
-      "@type": "Organization",
-      name: "Techlyser Web Solutions",
-    },
-    mainEntityOfPage: `https://techlyser.com/${post.slug}`,
-  };
+  const prepared = await prepareBlogHtml(
+    post.content,
+    post.coverImage,
+    post.title,
+  );
+
+  const jsonLd = [
+    breadcrumbJsonLd([
+      { name: "Home", path: "/" },
+      { name: "Blog", path: "/blog" },
+      ...(post.categories[0]
+        ? [
+            {
+              name: post.categories[0],
+              path: `/category/${slugifyTaxonomy(post.categories[0])}`,
+            },
+          ]
+        : []),
+      { name: post.title, path: `/${post.slug}` },
+    ]),
+    blogPostingJsonLd({
+      title: post.title,
+      description: post.seoDescription || post.excerpt || "",
+      slug: post.slug,
+      image: post.coverImage || undefined,
+      datePublished: post.date,
+      dateModified: post.updatedAt || post.date,
+      author: post.author,
+      keywords: post.tags,
+      wordCount: prepared.wordCount,
+      readingTimeMinutes: post.readingTimeMinutes,
+    }),
+  ];
+
+  const isRemoteCover =
+    !!post.coverImage &&
+    (post.coverImage.startsWith("http://") ||
+      post.coverImage.startsWith("https://"));
 
   return (
     <div className="bg-surface-dark min-h-screen">
+      <JsonLd data={jsonLd} />
       <Navbar />
       <main className="bg-white py-14">
         <Container className="max-w-4xl">
-          <Link
-            href="/blog"
-            className="text-sm font-semibold text-primary hover:text-primary-hover"
-          >
-            ← Back to blog
-          </Link>
+          <nav aria-label="Breadcrumb" className="text-sm text-slate-500">
+            <ol className="flex flex-wrap items-center gap-2">
+              <li>
+                <Link href="/" className="hover:text-primary">
+                  Home
+                </Link>
+              </li>
+              <li aria-hidden>/</li>
+              <li>
+                <Link href="/blog" className="hover:text-primary">
+                  Blog
+                </Link>
+              </li>
+              {post.categories[0] ? (
+                <>
+                  <li aria-hidden>/</li>
+                  <li>
+                    <Link
+                      href={`/category/${slugifyTaxonomy(post.categories[0])}`}
+                      className="hover:text-primary"
+                    >
+                      {post.categories[0]}
+                    </Link>
+                  </li>
+                </>
+              ) : null}
+              <li aria-hidden>/</li>
+              <li className="text-slate-800 line-clamp-1">{post.title}</li>
+            </ol>
+          </nav>
 
           <article className="mt-6">
             <header className="border-b border-slate-200 pb-6">
               <div className="flex flex-wrap items-center gap-3 text-sm text-slate-500">
-                <span>{formatDate(post.date)}</span>
-                {post.readingTime ? <span>· {post.readingTime}</span> : null}
+                <time dateTime={post.date}>{formatDate(post.date)}</time>
+                {post.readingTime ? (
+                  <>
+                    <span aria-hidden>·</span>
+                    <ReadingTime value={post.readingTime} />
+                  </>
+                ) : null}
                 {post.categories[0] ? (
-                  <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary">
+                  <Link
+                    href={`/category/${slugifyTaxonomy(post.categories[0])}`}
+                    className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary"
+                  >
                     {post.categories[0]}
-                  </span>
+                  </Link>
                 ) : null}
               </div>
               <h1 className="mt-3 text-4xl font-bold tracking-tight text-slate-900">
                 {post.title}
               </h1>
-              <p className="mt-3 text-slate-600">By {post.author}</p>
+              <p className="mt-3 text-slate-600">
+                By{" "}
+                <Link href="/about" className="font-medium hover:text-primary">
+                  {post.author}
+                </Link>
+              </p>
             </header>
+
+            <TOC items={prepared.toc} />
 
             {post.coverImage ? (
               <div className="relative mx-auto mt-8 aspect-video max-w-2xl overflow-hidden rounded-2xl bg-slate-100">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <Image
                   src={post.coverImage}
                   alt={post.title}
-                  className="h-full w-full object-contain"
+                  fill
+                  className="object-contain"
+                  sizes="(max-width: 768px) 100vw, 672px"
+                  priority
+                  unoptimized={!isRemoteCover && !post.coverImage.startsWith("/")}
                 />
               </div>
             ) : null}
 
-            <BlogContent content={post.content} coverImage={post.coverImage} />
+            <BlogContent html={prepared.html} />
 
             {post.tags.length > 0 ? (
               <div className="mt-10 flex flex-wrap gap-2 border-t border-slate-200 pt-6">
                 {post.tags.map((tag) => (
-                  <span
+                  <Link
                     key={tag}
-                    className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-700"
+                    href={`/tag/${slugifyTaxonomy(tag)}`}
+                    className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-700 transition hover:border-primary/40 hover:text-primary"
                   >
                     #{tag}
-                  </span>
+                  </Link>
                 ))}
               </div>
             ) : null}
+
+            <aside className="mt-10 rounded-2xl border border-primary/20 bg-primary/5 p-6">
+              <h2 className="text-lg font-semibold text-slate-900">
+                Need a Shopify partner in India?
+              </h2>
+              <p className="mt-2 text-sm text-slate-600">
+                Techlyser builds conversion-focused Shopify stores, migrations,
+                and Next.js headless commerce. Book a free Shopify Growth Audit.
+              </p>
+              <div className="mt-4 flex flex-wrap gap-3">
+                <Link
+                  href="/free-shopify-audit"
+                  className="btn-brand rounded-[5px] px-5 py-2.5 text-sm"
+                >
+                  Free Shopify audit
+                </Link>
+                <Link
+                  href="/shopify-developers-india"
+                  className="rounded-[5px] border border-slate-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-800"
+                >
+                  Shopify developers India
+                </Link>
+              </div>
+            </aside>
 
             {post.commentsEnabled && post.id ? (
               <BlogComments
@@ -266,37 +365,10 @@ export default async function BlogPostPage({ params }: PageProps) {
               ) : null}
             </div>
 
-            {related.length > 0 ? (
-              <section className="mt-12 border-t border-slate-200 pt-8">
-                <h2 className="text-2xl font-bold text-slate-900">
-                  Related Posts
-                </h2>
-                <div className="mt-5 grid gap-4 sm:grid-cols-3">
-                  {related.map((item) => (
-                    <Link
-                      key={item.slug}
-                      href={`/${item.slug}`}
-                      className="rounded-2xl border border-slate-200 p-4 transition hover:border-primary/30 hover:shadow-sm"
-                    >
-                      <p className="font-semibold text-slate-900">
-                        {item.title}
-                      </p>
-                      <p className="mt-2 line-clamp-3 text-sm text-slate-600">
-                        {item.excerpt}
-                      </p>
-                    </Link>
-                  ))}
-                </div>
-              </section>
-            ) : null}
+            <RelatedPosts posts={related} />
           </article>
         </Container>
       </main>
-
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-      />
     </div>
   );
 }

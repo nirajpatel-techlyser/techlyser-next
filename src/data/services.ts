@@ -158,6 +158,15 @@ export const services: Service[] = [
     title: "Next.js Development",
     description:
       "Fast, SEO-friendly web applications built with React and Next.js.",
+    seoTitle: "Next.js Development Company India",
+    seoDescription:
+      "Hire a Next.js development company in India for App Router sites, headless Shopify, SaaS dashboards, and Core Web Vitals–focused builds from Techlyser.",
+    keywords: [
+      "Next.js development company India",
+      "Headless commerce India",
+      "Next.js agency India",
+      "React developers India",
+    ],
     href: "/services/nextjs",
     coverImage: unsplash("photo-1461749280684-dccba630e2f6"),
     coverAlt: "Developer working on modern web application code",
@@ -250,6 +259,14 @@ export const services: Service[] = [
     title: "WordPress Development",
     description:
       "Custom WordPress websites with modern design and easy content management.",
+    seoTitle: "WordPress Development India",
+    seoDescription:
+      "WordPress and WooCommerce development in India — custom themes, performance, security, and migrations from Techlyser.",
+    keywords: [
+      "WordPress development India",
+      "WooCommerce development India",
+      "WordPress agency India",
+    ],
     href: "/services/wordpress",
     coverImage: unsplash("photo-1432888498266-38ffec3eaf0a"),
     coverAlt: "Content-rich website design on a workspace desk",
@@ -342,6 +359,14 @@ export const services: Service[] = [
     title: "UI / UX Design",
     description:
       "Beautiful user interfaces focused on conversion and usability.",
+    seoTitle: "UI UX Design Agency India",
+    seoDescription:
+      "Conversion-focused UI/UX design for Shopify and web products. Techlyser designs interfaces that look refined and drive action.",
+    keywords: [
+      "UI UX design agency India",
+      "ecommerce UX design",
+      "Shopify UI design",
+    ],
     href: "/services/ui-ux",
     coverImage: unsplash("photo-1561070791-2526d30994b5"),
     coverAlt: "UI design system and interface components on screen",
@@ -433,6 +458,14 @@ export const services: Service[] = [
     icon: Gauge,
     title: "Performance Optimization",
     description: "Improve Core Web Vitals, loading speed, and user experience.",
+    seoTitle: "Core Web Vitals & Performance Optimization India",
+    seoDescription:
+      "Fix LCP, CLS, and INP on Shopify and Next.js sites. Techlyser improves Core Web Vitals, speed, and conversion for Indian ecommerce brands.",
+    keywords: [
+      "Core Web Vitals optimization",
+      "Shopify speed optimization India",
+      "website performance agency",
+    ],
     href: "/services/performance",
     coverImage: unsplash("photo-1551288049-bebda4e38f71"),
     coverAlt: "Performance analytics dashboard on a monitor",
@@ -525,6 +558,15 @@ export const services: Service[] = [
     title: "SEO & Growth",
     description:
       "Technical SEO and performance strategies to increase visibility.",
+    seoTitle: "Ecommerce SEO Agency India",
+    seoDescription:
+      "Technical SEO, content strategy, and ecommerce growth for Shopify brands in India. Schema, CWV, and search visibility from Techlyser.",
+    keywords: [
+      "ecommerce SEO India",
+      "Shopify SEO agency",
+      "AI search optimization",
+      "technical SEO India",
+    ],
     href: "/services/seo",
     coverImage: unsplash("photo-1553877522-43269d4ea984"),
     coverAlt: "SEO strategy planning with analytics and search insights",

@@ -6,6 +6,7 @@ export interface BlogPost {
   excerpt?: string;
 
   date: string;
+  updatedAt?: string;
   author: string;
 
   categories: string[];
@@ -18,6 +19,7 @@ export interface BlogPost {
   content: string;
 
   readingTime?: string;
+  readingTimeMinutes?: number;
   seoTitle?: string;
   seoDescription?: string;
   metaKeywords?: string;

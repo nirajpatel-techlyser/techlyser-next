@@ -9,21 +9,19 @@ import AboutTechnologies from "@/components/about/AboutTechnologies";
 import AboutProcess from "@/components/about/AboutProcess";
 import CTA from "@/components/sections/CTA";
 
-export const metadata: Metadata = {
-  title: "About Us | Techlyser Web Solutions",
+import { buildPageMetadata } from "@/lib/seo";
+
+export const metadata: Metadata = buildPageMetadata({
+  title: "About Techlyser — Shopify Agency India",
   description:
-    "Meet Techlyser — a premium Shopify and web development agency helping businesses launch, optimize and scale with high-performance digital experiences.",
-  alternates: {
-    canonical: "/about",
-  },
-  openGraph: {
-    title: "About Us | Techlyser Web Solutions",
-    description:
-      "Meet the Techlyser team of Shopify experts, developers and designers building modern digital experiences for growing businesses.",
-    url: "/about",
-    type: "website",
-  },
-};
+    "Meet Techlyser — a premium Shopify, Shopify Plus, Next.js, and AI automation agency in India helping brands launch, optimize, and scale high-performance digital experiences.",
+  path: "/about",
+  keywords: [
+    "About Techlyser",
+    "Shopify agency India team",
+    "Shopify experts Indore",
+  ],
+});
 
 export default function AboutPage() {
   return (

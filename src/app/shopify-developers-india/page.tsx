@@ -163,6 +163,75 @@ export default function ShopifyDevelopersIndiaPage() {
 
         <ShopifyLocationLinks variant="full" />
 
+        <Section className="py-16">
+          <Container>
+            <h2 className="font-heading text-2xl font-semibold text-slate-900">
+              Free guides for Shopify buyers in India
+            </h2>
+            <p className="mt-3 max-w-2xl text-slate-600">
+              Practical cluster content from our{" "}
+              <Link href="/resources" className="font-medium text-primary underline">
+                Free Resources
+              </Link>{" "}
+              hub — built to answer the questions brands ask before hiring.
+            </p>
+            <ul className="mt-6 grid gap-4 md:grid-cols-2">
+              <li>
+                <Link
+                  href="/hire-shopify-developers-india-cost-timeline-checklist"
+                  className="block rounded-xl border border-slate-200 p-4 transition hover:border-primary/40"
+                >
+                  <p className="font-semibold text-slate-900">
+                    Hire Shopify developers — cost & checklist
+                  </p>
+                  <p className="mt-1 text-sm text-slate-600">
+                    Budgets, timelines, and red flags.
+                  </p>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/shopify-plus-vs-shopify-indian-brands"
+                  className="block rounded-xl border border-slate-200 p-4 transition hover:border-primary/40"
+                >
+                  <p className="font-semibold text-slate-900">
+                    Shopify Plus vs Shopify
+                  </p>
+                  <p className="mt-1 text-sm text-slate-600">
+                    When Plus is worth it for Indian brands.
+                  </p>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/nextjs-headless-shopify-development-india"
+                  className="block rounded-xl border border-slate-200 p-4 transition hover:border-primary/40"
+                >
+                  <p className="font-semibold text-slate-900">
+                    Next.js headless Shopify
+                  </p>
+                  <p className="mt-1 text-sm text-slate-600">
+                    When headless pays off — and when it doesn’t.
+                  </p>
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/shopify-vs-woocommerce-india-2026"
+                  className="block rounded-xl border border-slate-200 p-4 transition hover:border-primary/40"
+                >
+                  <p className="font-semibold text-slate-900">
+                    Shopify vs WooCommerce (2026)
+                  </p>
+                  <p className="mt-1 text-sm text-slate-600">
+                    India-first platform decision guide.
+                  </p>
+                </Link>
+              </li>
+            </ul>
+          </Container>
+        </Section>
+
         <Section className="border-t border-slate-200 bg-slate-50 py-16">
           <Container className="max-w-3xl">
             <h2 className="font-heading text-2xl font-semibold text-slate-900">

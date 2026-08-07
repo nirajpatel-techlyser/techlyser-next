@@ -7,7 +7,8 @@ import {
   getAllServiceSlugs,
   getServiceBySlug,
 } from "@/data/services";
-import { buildPageMetadata } from "@/lib/seo";
+import { buildPageMetadata, breadcrumbJsonLd, serviceJsonLd } from "@/lib/seo";
+import JsonLd from "@/components/seo/JsonLd";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -46,8 +47,23 @@ export default async function ServiceDetailPage({ params }: PageProps) {
     notFound();
   }
 
+  const jsonLd = [
+    breadcrumbJsonLd([
+      { name: "Home", path: "/" },
+      { name: "Services", path: "/services" },
+      { name: service.title, path: service.href },
+    ]),
+    serviceJsonLd({
+      name: service.title,
+      description: service.seoDescription || service.description,
+      url: service.href,
+      serviceType: service.title,
+    }),
+  ];
+
   return (
     <div className="min-h-screen bg-white">
+      <JsonLd data={jsonLd} />
       <Navbar />
       <main>
         <ServiceDetail service={service} />

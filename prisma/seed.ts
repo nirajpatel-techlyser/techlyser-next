@@ -103,6 +103,15 @@ async function seedBlogs() {
       ? new Date()
       : dateValue;
 
+    const seoTitle =
+      typeof data.seoTitle === "string" && data.seoTitle.trim()
+        ? data.seoTitle.trim()
+        : title;
+    const seoDescription =
+      typeof data.seoDescription === "string" && data.seoDescription.trim()
+        ? data.seoDescription.trim()
+        : excerpt;
+
     const payload = {
       title,
       slug,
@@ -115,8 +124,8 @@ async function seedBlogs() {
         typeof data.author === "string" && data.author
           ? data.author
           : "Techlyser Web Solutions",
-      seoTitle: title,
-      seoDescription: excerpt,
+      seoTitle,
+      seoDescription,
       metaKeywords: tags.join(", "),
       status: BlogStatus.PUBLISHED,
       featured: Boolean(data.featured),
