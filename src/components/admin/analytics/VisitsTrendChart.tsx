@@ -6,6 +6,8 @@ type Props = {
   yesterdayKey: string;
 };
 
+const CHART_HEIGHT_PX = 180;
+
 export default function VisitsTrendChart({
   data,
   todayKey,
@@ -43,17 +45,18 @@ export default function VisitsTrendChart({
           No visits in this period yet.
         </p>
       ) : (
-        <div className="mt-6 overflow-x-auto">
+        <div className="mt-6 overflow-x-auto pb-2">
           <div
-            className="flex h-56 items-end gap-1.5 min-w-[640px] pb-8"
+            className="flex min-w-[720px] items-end gap-1.5 border-b border-slate-100 pt-8"
+            style={{ height: CHART_HEIGHT_PX + 32 }}
             role="img"
             aria-label="Daily website visits chart"
           >
             {data.map((point) => {
-              const heightPct = Math.max(
-                point.views > 0 ? 6 : 0,
-                (point.views / max) * 100,
-              );
+              const heightPx =
+                point.views > 0
+                  ? Math.max(8, Math.round((point.views / max) * CHART_HEIGHT_PX))
+                  : 0;
               const isToday = point.date === todayKey;
               const isYesterday = point.date === yesterdayKey;
               const barColor = isToday
@@ -65,17 +68,19 @@ export default function VisitsTrendChart({
               return (
                 <div
                   key={point.date}
-                  className="group relative flex min-w-0 flex-1 flex-col items-center justify-end"
+                  className="group relative flex h-full min-w-0 flex-1 flex-col items-center justify-end"
                 >
-                  <div className="pointer-events-none absolute bottom-full mb-2 hidden rounded-lg bg-slate-900 px-2 py-1 text-[11px] font-medium text-white group-hover:block">
-                    {point.label}: {point.views}
-                  </div>
+                  {point.views > 0 ? (
+                    <span className="mb-1 text-[10px] font-semibold text-slate-600 opacity-0 transition group-hover:opacity-100">
+                      {point.views}
+                    </span>
+                  ) : null}
                   <div
-                    className={`w-full max-w-[28px] rounded-t-md transition ${barColor}`}
-                    style={{ height: `${heightPct}%` }}
+                    className={`w-full max-w-[26px] rounded-t-md transition ${barColor}`}
+                    style={{ height: `${heightPx}px` }}
                     title={`${point.label}: ${point.views} visits`}
                   />
-                  <span className="absolute -bottom-7 rotate-[-45deg] text-[10px] text-slate-500 origin-top-left whitespace-nowrap">
+                  <span className="mt-2 max-w-full truncate text-center text-[10px] leading-none text-slate-500">
                     {point.label}
                   </span>
                 </div>
