@@ -51,7 +51,8 @@ export default async function AdminAutopilotPage() {
             </strong>
           </span>
           <span>
-            Cron: <strong className="text-slate-900">02:30 UTC daily</strong> (8:00 AM IST)
+            Cron: <strong className="text-slate-900">03:30 UTC daily</strong>{" "}
+            (9:00 AM IST)
           </span>
         </div>
         <div className="mt-5">
