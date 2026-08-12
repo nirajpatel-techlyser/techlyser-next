@@ -85,6 +85,10 @@ model Blog {
   seoTitle         String?
   seoDescription   String?       @db.Text
   metaKeywords     String?
+  /// Admin-only: LinkedIn personal profile post (not shown on public site)
+  linkedinPersonalPost String?   @db.Text
+  /// Admin-only: LinkedIn company page post (not shown on public site)
+  linkedinPagePost     String?   @db.Text
   status           BlogStatus    @default(DRAFT)
   featured         Boolean       @default(false)
   commentsEnabled  Boolean       @default(false)

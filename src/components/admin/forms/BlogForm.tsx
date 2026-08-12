@@ -6,6 +6,7 @@ import { BlogStatus } from "@prisma/client";
 import { createBlog, updateBlog, type BlogInput } from "@/actions/blogs";
 import TiptapEditor from "@/components/admin/editor/TiptapEditor";
 import ImageUploader from "@/components/admin/forms/ImageUploader";
+import LinkedInPostEditor from "@/components/admin/forms/LinkedInPostEditor";
 
 function slugify(value: string) {
   return value
@@ -29,6 +30,8 @@ export type BlogFormValues = {
   seoTitle: string;
   seoDescription: string;
   metaKeywords: string;
+  linkedinPersonalPost: string;
+  linkedinPagePost: string;
   status: BlogStatus;
   featured: boolean;
   commentsEnabled: boolean;
@@ -52,6 +55,8 @@ const defaults: BlogFormValues = {
   seoTitle: "",
   seoDescription: "",
   metaKeywords: "",
+  linkedinPersonalPost: "",
+  linkedinPagePost: "",
   status: BlogStatus.DRAFT,
   featured: false,
   commentsEnabled: false,
@@ -99,6 +104,8 @@ export default function BlogForm({ initialValues }: BlogFormProps) {
       seoTitle: values.seoTitle || values.title,
       seoDescription: values.seoDescription || values.excerpt,
       metaKeywords: values.metaKeywords || tagList.join(", "),
+      linkedinPersonalPost: values.linkedinPersonalPost || null,
+      linkedinPagePost: values.linkedinPagePost || null,
       status,
       featured: values.featured,
       commentsEnabled: values.commentsEnabled,
@@ -324,6 +331,30 @@ export default function BlogForm({ initialValues }: BlogFormProps) {
             </div>
           </div>
         </div>
+      </div>
+
+      <div className="space-y-4">
+        <div>
+          <h2 className="text-lg font-semibold text-slate-900">
+            LinkedIn posts (admin only)
+          </h2>
+          <p className="mt-1 text-sm text-slate-500">
+            Not shown on the website. AI fills these when a draft is generated —
+            edit if needed, then Copy for LinkedIn.
+          </p>
+        </div>
+        <LinkedInPostEditor
+          label="LinkedIn personal profile"
+          hint="1st-person post for your personal LinkedIn profile"
+          value={values.linkedinPersonalPost}
+          onChange={(html) => updateField("linkedinPersonalPost", html)}
+        />
+        <LinkedInPostEditor
+          label="LinkedIn company page"
+          hint="Brand post for the Techlyser LinkedIn page"
+          value={values.linkedinPagePost}
+          onChange={(html) => updateField("linkedinPagePost", html)}
+        />
       </div>
 
       {error ? (

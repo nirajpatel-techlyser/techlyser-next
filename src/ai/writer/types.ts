@@ -57,6 +57,8 @@ export type WriterLlmPayload = {
   cta: WriterCta;
   featuredImagePrompt: string;
   tags?: string[];
+  linkedinPersonalPost?: string;
+  linkedinPagePost?: string;
 };
 
 export type WriterOutput = {
@@ -76,6 +78,8 @@ export type WriterOutput = {
   featuredImagePrompt: string;
   wordCount: number;
   tags: string[];
+  linkedinPersonalPostHtml: string;
+  linkedinPagePostHtml: string;
 };
 
 export type WriterRunReport = {

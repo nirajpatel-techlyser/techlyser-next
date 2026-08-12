@@ -45,6 +45,8 @@ export async function saveWriterDraftBlog(input: {
         seoTitle: input.output.seoTitle,
         seoDescription: input.output.metaDescription,
         metaKeywords: input.input.keyword,
+        linkedinPersonalPost: input.output.linkedinPersonalPostHtml || null,
+        linkedinPagePost: input.output.linkedinPagePostHtml || null,
         status: BlogStatus.DRAFT,
         featured: false,
         commentsEnabled: false,

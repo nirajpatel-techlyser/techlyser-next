@@ -42,6 +42,8 @@ export default async function EditBlogPage({ params }: PageProps) {
           seoTitle: blog.seoTitle || "",
           seoDescription: blog.seoDescription || "",
           metaKeywords: blog.metaKeywords || "",
+          linkedinPersonalPost: blog.linkedinPersonalPost || "",
+          linkedinPagePost: blog.linkedinPagePost || "",
           status: blog.status,
           featured: blog.featured,
           commentsEnabled: blog.commentsEnabled,

@@ -21,6 +21,8 @@ Requirements:
 10. cta — { headline, body, buttonText, href } — href must start with / (internal page)
 11. featuredImagePrompt — one detailed prompt for a professional blog hero image (no text in image)
 12. tags — 3–6 lowercase slug-friendly tags
+13. linkedinPersonalPost — markdown post for a personal LinkedIn profile (1st-person founder/expert voice, ~150–250 words, line breaks, 3–6 hashtags, soft CTA + mention the article topic; no HTML)
+14. linkedinPagePost — markdown post for Techlyser company LinkedIn page (brand voice, ~120–200 words, line breaks, 3–6 hashtags, CTA to contact/consult; no HTML). Different angle from the personal post — more brand/agency oriented
 
 Return JSON:
 {
@@ -35,5 +37,7 @@ Return JSON:
   "comparisonTable": { "headers": string[], "rows": string[][] } | null,
   "cta": { "headline": string, "body": string, "buttonText": string, "href": string },
   "featuredImagePrompt": string,
-  "tags": string[]
+  "tags": string[],
+  "linkedinPersonalPost": string,
+  "linkedinPagePost": string
 }`;

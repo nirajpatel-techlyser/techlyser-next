@@ -130,5 +130,27 @@ export function generateFallbackPayload(input: WriterInput): WriterLlmPayload {
       slugifyTaxonomy(input.keyword.split(" ")[0] || "commerce"),
       "techlyser",
     ].filter(Boolean),
+    linkedinPersonalPost: [
+      `I've been getting a lot of questions about ${input.keyword}.`,
+      ``,
+      `For ${input.audience}, the biggest unlock is usually clarity: scope, timeline, and the right partner — not just the cheapest hourly rate.`,
+      ``,
+      `We put together a practical guide covering what to check before you start.`,
+      ``,
+      `If you're evaluating this right now, happy to compare notes.`,
+      ``,
+      `#Shopify #Ecommerce #${slugifyTaxonomy(input.category).replace(/-/g, "")} #Techlyser`,
+    ].join("\n"),
+    linkedinPagePost: [
+      `New Techlyser guide: ${input.keyword}`,
+      ``,
+      `Built for ${input.audience} who need a clear path from planning to launch — without the fluff.`,
+      ``,
+      `Inside: practical considerations, delivery expectations, and how we approach this at Techlyser.`,
+      ``,
+      `Want a scoped roadmap? Book a free consultation.`,
+      ``,
+      `#ShopifyDevelopersIndia #Ecommerce #Techlyser #${slugifyTaxonomy(input.category).replace(/-/g, "")}`,
+    ].join("\n"),
   };
 }

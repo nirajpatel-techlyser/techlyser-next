@@ -83,6 +83,12 @@ function normalizePayload(
     tags: Array.isArray(raw.tags)
       ? raw.tags.map((t) => slugifyTaxonomy(String(t))).filter(Boolean)
       : [slugifyTaxonomy(input.category)].filter(Boolean),
+    linkedinPersonalPost:
+      raw.linkedinPersonalPost?.trim() ||
+      `Working with ${input.audience} on ${input.keyword}?\n\nA few practical takeaways from our latest Techlyser guide — timelines, costs, and what actually matters before you hire.\n\nHappy to share more if useful.\n\n#Shopify #Ecommerce #Techlyser`,
+    linkedinPagePost:
+      raw.linkedinPagePost?.trim() ||
+      `New from Techlyser: a practical guide on ${input.keyword} for ${input.audience}.\n\nWe cover planning, delivery expectations, and how brands in India approach this work with less risk.\n\nNeed a scoped plan? Reach out for a free consultation.\n\n#ShopifyDevelopers #EcommerceIndia #Techlyser`,
   };
 }
 
@@ -154,6 +160,19 @@ export async function composeWriterOutput(
 
   const tags = payload.tags ?? [];
 
+  const [personalPrepared, pagePrepared] = await Promise.all([
+    prepareBlogHtml(
+      payload.linkedinPersonalPost || "",
+      null,
+      "LinkedIn personal post",
+    ),
+    prepareBlogHtml(
+      payload.linkedinPagePost || "",
+      null,
+      "LinkedIn page post",
+    ),
+  ]);
+
   const schema = buildWriterSchema({
     seoTitle: payload.seoTitle,
     metaDescription: payload.metaDescription,
@@ -182,6 +201,8 @@ export async function composeWriterOutput(
     featuredImagePrompt: payload.featuredImagePrompt,
     wordCount: prepared.wordCount,
     tags,
+    linkedinPersonalPostHtml: personalPrepared.html,
+    linkedinPagePostHtml: pagePrepared.html,
   };
 }
 
