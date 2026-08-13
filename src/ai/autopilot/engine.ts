@@ -6,6 +6,7 @@ import { generateArticleDraft } from "@/ai/writer";
 import { optimizeSeoAndGeo } from "@/ai/seo";
 import {
   AUTOPILOT_WORKFLOW_ID,
+  autopilotGenerateImageEnabled,
   autopilotOncePerDay,
   autopilotPublishEnabled,
   isAutopilotEnabled,
@@ -66,7 +67,8 @@ export async function runDailyAutopilot(
   const oncePerDay = options.oncePerDay ?? autopilotOncePerDay();
   const refreshMarket = options.refreshMarket !== false;
   const applySeo = options.applySeo !== false;
-  const generateImage = options.generateImage !== false;
+  const generateImage =
+    options.generateImage ?? autopilotGenerateImageEnabled();
 
   const report: DailyAutopilotReport = {
     workflowId: AUTOPILOT_WORKFLOW_ID,

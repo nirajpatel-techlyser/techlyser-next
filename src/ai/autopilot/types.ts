@@ -41,7 +41,7 @@ export type DailyAutopilotOptions = {
   refreshMarket?: boolean;
   /** Apply SEO/GEO to blog (default true). */
   applySeo?: boolean;
-  /** Generate featured image via OpenAI (default true when OPENAI_API_KEY set). */
+  /** Featured image via DALL-E (default false — upload manually in admin). */
   generateImage?: boolean;
   dryRun?: boolean;
 };

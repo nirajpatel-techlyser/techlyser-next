@@ -13,6 +13,12 @@ export function autopilotPublishEnabled(): boolean {
   return flag === "true" || flag === "1";
 }
 
+export function autopilotGenerateImageEnabled(): boolean {
+  const flag = process.env.AI_AUTOPILOT_GENERATE_IMAGE?.trim().toLowerCase();
+  // Default OFF — upload featured images manually in admin
+  return flag === "true" || flag === "1";
+}
+
 export function getImageModel(): string {
   return process.env.OPENAI_IMAGE_MODEL?.trim() || "dall-e-3";
 }

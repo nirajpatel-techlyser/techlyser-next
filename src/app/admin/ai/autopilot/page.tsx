@@ -1,6 +1,7 @@
 import Link from "next/link";
 import RunAutopilotButton from "@/components/admin/ai/RunAutopilotButton";
 import { isAutopilotEnabled, autopilotPublishEnabled } from "@/ai/autopilot/config";
+import { resolveLlmProvider, getWriterModel } from "@/ai/writer/config";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -24,6 +25,8 @@ export default async function AdminAutopilotPage() {
 
   const enabled = isAutopilotEnabled();
   const autoPublish = autopilotPublishEnabled();
+  const llmProvider = resolveLlmProvider();
+  const llmModel = llmProvider ? getWriterModel(llmProvider) : null;
 
   return (
     <div className="space-y-8">
@@ -33,15 +36,23 @@ export default async function AdminAutopilotPage() {
         </p>
         <h1 className="mt-2 text-2xl font-bold text-slate-900">Daily Autopilot</h1>
         <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-          Har din automatically: market research → opportunities → article draft →
-          featured image (DALL-E) → SEO + GEO. Default:{" "}
-          <strong>DRAFT only</strong> — aap review karke publish karo.
+          Har din automatically: market research → opportunities → article draft
+          (+ LinkedIn posts) → SEO + GEO. Featured images aap admin se upload
+          karo. Default: <strong>DRAFT only</strong> — review karke publish karo.
         </p>
         <div className="mt-4 flex flex-wrap gap-4 text-sm text-slate-600">
           <span>
             Status:{" "}
             <strong className={enabled ? "text-emerald-700" : "text-amber-700"}>
               {enabled ? "enabled" : "disabled"}
+            </strong>
+          </span>
+          <span>
+            LLM:{" "}
+            <strong className={llmProvider ? "text-emerald-700" : "text-red-600"}>
+              {llmProvider
+                ? `${llmProvider} / ${llmModel}`
+                : "not configured (set GEMINI_API_KEY)"}
             </strong>
           </span>
           <span>
@@ -59,8 +70,9 @@ export default async function AdminAutopilotPage() {
           <RunAutopilotButton />
         </div>
         <p className="mt-3 text-xs text-slate-500">
-          CLI: <code className="text-xs">npm run ai:daily</code> · Needs OPENAI_API_KEY +
-          Cloudinary on Vercel for images.
+          CLI: <code className="text-xs">npm run ai:daily</code> · Prefer{" "}
+          <code className="text-xs">GEMINI_API_KEY</code> (free) — OpenAI not
+          required. Images: upload in Blog edit.
         </p>
         <div className="mt-4">
           <Link href="/admin/ai" className="text-sm font-medium text-primary">
