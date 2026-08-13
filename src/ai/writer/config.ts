@@ -26,7 +26,7 @@ export function resolveLlmProvider(): LlmProviderId | null {
 export function getWriterModel(provider?: LlmProviderId | null): string {
   const p = provider ?? resolveLlmProvider();
   if (p === "gemini") {
-    return process.env.GEMINI_MODEL?.trim() || "gemini-2.0-flash";
+    return process.env.GEMINI_MODEL?.trim() || "gemini-2.5-flash";
   }
   if (p === "groq") {
     return process.env.GROQ_MODEL?.trim() || "llama-3.3-70b-versatile";
