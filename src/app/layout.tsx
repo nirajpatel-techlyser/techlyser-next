@@ -2,9 +2,11 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { Geist_Mono, Nunito, Roboto } from "next/font/google";
 import AnalyticsTracker from "@/components/shared/AnalyticsTracker";
+import FloatingContactButtons from "@/components/layout/FloatingContactButtons";
 import SiteFooter from "@/components/layout/SiteFooter";
 import JsonLd from "@/components/seo/JsonLd";
 import { getSiteSettings } from "@/lib/settings";
+import { contactInfo } from "@/data/contact";
 import { navigation } from "@/data/navigation";
 import {
   localBusinessJsonLd,
@@ -166,6 +168,12 @@ export default async function RootLayout({
         ) : null}
         <div className="flex min-h-full flex-1 flex-col">{children}</div>
         {!isAdminRoute ? <SiteFooter /> : null}
+        {!isAdminRoute ? (
+          <FloatingContactButtons
+            email={siteConfig.email || contactInfo.email}
+            whatsappUrl={settings.whatsappUrl || contactInfo.whatsapp}
+          />
+        ) : null}
       </body>
     </html>
   );
