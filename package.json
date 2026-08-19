@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "db:push": "prisma db push",
+    "db:rls": "prisma db execute --file prisma/sql/enable-rls.sql --schema prisma/schema.prisma",
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",
     "ai:research": "tsx --env-file=.env.local scripts/run-research-engine.ts",
