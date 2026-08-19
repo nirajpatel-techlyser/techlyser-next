@@ -14,9 +14,11 @@ export async function POST(request: Request) {
       dryRun?: boolean;
       refreshMarket?: boolean;
     };
+    // Admin manual runs always generate; cron still enforces once-per-day.
     const report = await runDailyAutopilot({
       dryRun: body.dryRun,
       refreshMarket: body.refreshMarket,
+      oncePerDay: false,
     });
     return NextResponse.json({ success: true, report });
   } catch (err) {

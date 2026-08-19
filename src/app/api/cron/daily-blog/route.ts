@@ -23,7 +23,8 @@ export async function GET(request: Request) {
   }
 
   try {
-    const report = await runDailyAutopilot();
+    // Cron always respects once-per-day (env default true).
+    const report = await runDailyAutopilot({ oncePerDay: true });
     return NextResponse.json({ success: true, report });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Autopilot failed";

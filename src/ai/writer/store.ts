@@ -1,6 +1,7 @@
 import { BlogStatus, Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import type { WriterInput, WriterOutput } from "./types";
+import { articleHtmlLooksLikeEmbeddedJson } from "./llm/coerce-body";
 
 export async function createWriterRun(input: WriterInput) {
   return prisma.aiWriterRun.create({
@@ -31,6 +32,12 @@ export async function saveWriterDraftBlog(input: {
   output: WriterOutput;
   runId: string;
 }): Promise<{ slug: string; blogId: string }> {
+  if (articleHtmlLooksLikeEmbeddedJson(input.output.articleHtml)) {
+    throw new Error(
+      "Refusing to save blog: article HTML still contains embedded LLM JSON payload",
+    );
+  }
+
   const slug = await resolveUniqueSlug(input.output.slug);
 
   const blog = await prisma.$transaction(async (tx) => {

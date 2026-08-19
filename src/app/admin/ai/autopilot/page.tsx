@@ -70,9 +70,11 @@ export default async function AdminAutopilotPage() {
           <RunAutopilotButton />
         </div>
         <p className="mt-3 text-xs text-slate-500">
-          CLI: <code className="text-xs">npm run ai:daily</code> · Prefer{" "}
-          <code className="text-xs">GEMINI_API_KEY</code> (free) — OpenAI not
-          required. Images: upload in Blog edit.
+          Admin button har click pe naya DRAFT banata hai. Daily cron (9:00 AM
+          IST) max 1 successful run/day. CLI:{" "}
+          <code className="text-xs">npm run ai:daily</code> · Prefer{" "}
+          <code className="text-xs">GEMINI_API_KEY</code> (free). Images: upload
+          in Blog edit.
         </p>
         <div className="mt-4">
           <Link href="/admin/ai" className="text-sm font-medium text-primary">

@@ -4,6 +4,7 @@ import { prepareBlogHtml } from "@/lib/prepare-blog-html";
 import { renderPrompt } from "@/ai/prompts/render";
 import { WRITER_PROMPT_KEYS } from "./prompts";
 import { callWriterLlm } from "./llm/client";
+import { coerceArticleMarkdown, unwrapEmbeddedWriterPayload, articleHtmlLooksLikeEmbeddedJson } from "./llm/coerce-body";
 import { generateFallbackPayload } from "./llm/fallback";
 import { assembleArticleHtml } from "./compose/html";
 import { buildWriterSchema } from "./compose/schema";
@@ -49,45 +50,56 @@ function normalizePayload(
   raw: WriterLlmPayload,
   input: WriterInput,
 ): WriterLlmPayload {
+  const unwrapped = unwrapEmbeddedWriterPayload(raw);
+
   return {
-    seoTitle: raw.seoTitle?.trim() || `${input.keyword} — Techlyser Guide`,
+    seoTitle: unwrapped.seoTitle?.trim() || `${input.keyword} — Techlyser Guide`,
     metaDescription:
-      raw.metaDescription?.trim() ||
+      unwrapped.metaDescription?.trim() ||
       `Guide to ${input.keyword} for ${input.audience}.`,
-    slug: normalizeSlug(raw.slug, input.keyword),
-    outline: raw.outline?.trim() || "",
+    slug: normalizeSlug(unwrapped.slug, input.keyword),
+    outline: unwrapped.outline?.trim() || "",
     excerpt:
-      raw.excerpt?.trim() ||
+      unwrapped.excerpt?.trim() ||
       `Insights on ${input.keyword} for ${input.audience}.`,
-    articleMarkdown: raw.articleMarkdown?.trim() || "",
-    faqs: Array.isArray(raw.faqs)
-      ? raw.faqs.filter((f) => f.question && f.answer)
+    articleMarkdown: coerceArticleMarkdown(unwrapped.articleMarkdown ?? ""),
+    faqs: Array.isArray(unwrapped.faqs)
+      ? unwrapped.faqs.filter((f) => f.question && f.answer)
       : [],
-    howTo: raw.howTo?.steps?.length ? raw.howTo : null,
+    howTo: (() => {
+      if (!unwrapped.howTo?.name || !unwrapped.howTo.description) return null;
+      const steps = unwrapped.howTo.steps?.filter((step) => step.name && step.text) ?? [];
+      if (!steps.length) return null;
+      return {
+        name: unwrapped.howTo.name,
+        description: unwrapped.howTo.description,
+        steps,
+      };
+    })(),
     comparisonTable:
-      raw.comparisonTable?.headers?.length &&
-      raw.comparisonTable?.rows?.length
-        ? raw.comparisonTable
+      unwrapped.comparisonTable?.headers?.length &&
+      unwrapped.comparisonTable?.rows?.length
+        ? unwrapped.comparisonTable
         : null,
     cta: {
-      headline: raw.cta?.headline || WRITER_DEFAULT_CTA.headline,
-      body: raw.cta?.body || WRITER_DEFAULT_CTA.body,
-      buttonText: raw.cta?.buttonText || WRITER_DEFAULT_CTA.buttonText,
-      href: raw.cta?.href?.startsWith("/")
-        ? raw.cta.href
+      headline: unwrapped.cta?.headline || WRITER_DEFAULT_CTA.headline,
+      body: unwrapped.cta?.body || WRITER_DEFAULT_CTA.body,
+      buttonText: unwrapped.cta?.buttonText || WRITER_DEFAULT_CTA.buttonText,
+      href: unwrapped.cta?.href?.startsWith("/")
+        ? unwrapped.cta.href
         : WRITER_DEFAULT_CTA.href,
     },
     featuredImagePrompt:
-      raw.featuredImagePrompt?.trim() ||
+      unwrapped.featuredImagePrompt?.trim() ||
       `Blog hero image about ${input.keyword}, professional ecommerce theme, no text`,
-    tags: Array.isArray(raw.tags)
-      ? raw.tags.map((t) => slugifyTaxonomy(String(t))).filter(Boolean)
+    tags: Array.isArray(unwrapped.tags)
+      ? unwrapped.tags.map((t) => slugifyTaxonomy(String(t))).filter(Boolean)
       : [slugifyTaxonomy(input.category)].filter(Boolean),
     linkedinPersonalPost:
-      raw.linkedinPersonalPost?.trim() ||
+      unwrapped.linkedinPersonalPost?.trim() ||
       `Working with ${input.audience} on ${input.keyword}?\n\nA few practical takeaways from our latest Techlyser guide — timelines, costs, and what actually matters before you hire.\n\nHappy to share more if useful.\n\n#Shopify #Ecommerce #Techlyser`,
     linkedinPagePost:
-      raw.linkedinPagePost?.trim() ||
+      unwrapped.linkedinPagePost?.trim() ||
       `New from Techlyser: a practical guide on ${input.keyword} for ${input.audience}.\n\nWe cover planning, delivery expectations, and how brands in India approach this work with less risk.\n\nNeed a scoped plan? Reach out for a free consultation.\n\n#ShopifyDevelopers #EcommerceIndia #Techlyser`,
   };
 }
@@ -152,6 +164,12 @@ export async function composeWriterOutput(
     comparisonTable: payload.comparisonTable || undefined,
     cta: payload.cta,
   });
+
+  if (articleHtmlLooksLikeEmbeddedJson(articleHtml)) {
+    throw new Error(
+      "Writer produced invalid article HTML (embedded JSON detected). Autopilot aborted before save.",
+    );
+  }
 
   const readingTimeMinutes = Math.max(
     1,
