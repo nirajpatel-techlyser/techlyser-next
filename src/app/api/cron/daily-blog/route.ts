@@ -6,11 +6,29 @@ export const maxDuration = 300;
 
 function isAuthorized(request: Request) {
   const secret = process.env.CRON_SECRET?.trim();
-  if (!secret) {
-    return process.env.NODE_ENV === "development";
-  }
   const auth = request.headers.get("authorization");
-  return auth === `Bearer ${secret}`;
+  const isVercelCron = request.headers.get("x-vercel-cron") === "1";
+
+  // Preferred: CRON_SECRET (Vercel sends Authorization: Bearer <CRON_SECRET>)
+  if (secret) {
+    return auth === `Bearer ${secret}`;
+  }
+
+  // Local/dev without secret
+  if (process.env.NODE_ENV === "development") {
+    return true;
+  }
+
+  // Production fallback when CRON_SECRET was never set — still allow Vercel Cron
+  // invocations. Set CRON_SECRET in Vercel env for proper security.
+  if (isVercelCron) {
+    console.warn(
+      "[cron.daily-blog] CRON_SECRET is missing. Allowing x-vercel-cron request. Set CRON_SECRET in Vercel.",
+    );
+    return true;
+  }
+
+  return false;
 }
 
 /**
@@ -19,12 +37,20 @@ function isAuthorized(request: Request) {
  */
 export async function GET(request: Request) {
   if (!isAuthorized(request)) {
+    console.error("[cron.daily-blog] Unauthorized cron request");
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
     // Cron always respects once-per-day (env default true).
     const report = await runDailyAutopilot({ oncePerDay: true });
+    console.info("[cron.daily-blog] result", {
+      skipped: report.skipped,
+      skipReason: report.skipReason,
+      slug: report.slug,
+      blogId: report.blogId,
+      status: report.steps.done?.detail,
+    });
     return NextResponse.json({ success: true, report });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Autopilot failed";

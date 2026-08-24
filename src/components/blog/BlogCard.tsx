@@ -1,5 +1,5 @@
-import Image from "next/image";
 import Link from "next/link";
+import CoverImage from "@/components/media/CoverImage";
 import type { BlogPost } from "@/types/blog";
 
 type BlogCardProps = {
@@ -13,14 +13,14 @@ export default function BlogCard({ post, formattedDate }: BlogCardProps) {
       {post.coverImage ? (
         <Link
           href={`/${post.slug}`}
-          className="relative block aspect-video overflow-hidden bg-slate-50"
+          className="block overflow-hidden border-b border-slate-100 bg-white"
         >
-          <Image
+          <CoverImage
             src={post.coverImage}
             alt={post.title}
-            fill
+            fit="natural"
             sizes="(max-width: 1024px) 100vw, 33vw"
-            className="object-contain p-2"
+            className="h-auto w-full"
           />
         </Link>
       ) : null}

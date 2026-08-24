@@ -32,11 +32,15 @@ const navItems = [
   { href: "/admin/blogs/new", label: "New Blog", icon: PlusCircle },
 ];
 
-export default function AdminSidebar() {
+type AdminSidebarProps = {
+  onNavigate?: () => void;
+};
+
+export default function AdminSidebar({ onNavigate }: AdminSidebarProps = {}) {
   const pathname = usePathname();
 
   return (
-    <aside className="flex h-full w-64 flex-col border-r border-slate-200 bg-white">
+    <aside className="flex h-full w-full flex-col border-r border-slate-200 bg-white md:w-64">
       <div className="border-b border-slate-200 px-6 py-5">
         <p className="text-xs font-semibold uppercase tracking-[0.24em] text-primary">
           Techlyser
@@ -44,7 +48,7 @@ export default function AdminSidebar() {
         <h1 className="mt-1 text-lg font-bold text-slate-900">Admin Panel</h1>
       </div>
 
-      <nav className="flex-1 space-y-1 px-3 py-4">
+      <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
         {navItems.map(({ href, label, icon: Icon }) => {
           const active =
             href === "/admin"
@@ -55,6 +59,7 @@ export default function AdminSidebar() {
             <Link
               key={href}
               href={href}
+              onClick={onNavigate}
               className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${
                 active
                   ? "bg-primary text-white"

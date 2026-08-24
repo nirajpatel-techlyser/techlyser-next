@@ -33,6 +33,24 @@ async function alreadyRanToday(): Promise<boolean> {
   return Boolean(run);
 }
 
+/** Mark timed-out / crashed cron runs so they don't linger as RUNNING forever. */
+async function failStaleRunningJobs(maxAgeMinutes = 15) {
+  const cutoff = new Date(Date.now() - maxAgeMinutes * 60_000);
+  await prisma.aiAgentRun.updateMany({
+    where: {
+      workflowId: AUTOPILOT_WORKFLOW_ID,
+      status: "RUNNING",
+      createdAt: { lt: cutoff },
+    },
+    data: {
+      status: "FAILED",
+      currentStep: "failed",
+      errorMessage: "Timed out or interrupted (stale RUNNING run)",
+      completedAt: new Date(),
+    },
+  });
+}
+
 async function createRun() {
   return prisma.aiAgentRun.create({
     data: {
@@ -89,6 +107,8 @@ export async function runDailyAutopilot(
     return report;
   }
 
+  await failStaleRunningJobs();
+
   if (options.dryRun) {
     const topic = await pickNextAutopilotTopic();
     report.skipped = true;
@@ -102,23 +122,43 @@ export async function runDailyAutopilot(
 
   try {
     if (refreshMarket) {
+      // Research can be slow / flaky (Reddit 403, RSS 404). Never block the draft.
       report.steps.research = { ok: false };
-      const research = await runMarketResearch({
-        createRun: true,
-        runTitle: `Autopilot research ${new Date().toISOString().slice(0, 10)}`,
-        locale: "en-IN",
-      });
-      report.steps.research = {
-        ok: true,
-        detail: `collected ${research.collected}, upserted ${research.upserted}`,
-      };
+      try {
+        const research = await runMarketResearch({
+          createRun: true,
+          runTitle: `Autopilot research ${new Date().toISOString().slice(0, 10)}`,
+          locale: "en-IN",
+        });
+        report.steps.research = {
+          ok: true,
+          detail: `collected ${research.collected}, upserted ${research.upserted}`,
+        };
+      } catch (err) {
+        report.steps.research = {
+          ok: false,
+          detail: err instanceof Error ? err.message : "research failed",
+        };
+      }
 
       report.steps.opportunities = { ok: false };
-      const opp = await runOpportunityEngine({ limit: 80 });
-      report.steps.opportunities = {
-        ok: true,
-        detail: `analyzed ${opp.analyzed}, upserted ${opp.upserted}`,
-      };
+      try {
+        const opp = await runOpportunityEngine({ limit: 80 });
+        report.steps.opportunities = {
+          ok: true,
+          detail: `analyzed ${opp.analyzed}, upserted ${opp.upserted}`,
+        };
+      } catch (err) {
+        report.steps.opportunities = {
+          ok: false,
+          detail: err instanceof Error ? err.message : "opportunities failed",
+        };
+      }
+
+      await prisma.aiAgentRun.update({
+        where: { id: run.id },
+        data: { currentStep: "pickTopic" },
+      });
     }
 
     report.steps.pickTopic = { ok: false };
@@ -131,6 +171,11 @@ export async function runDailyAutopilot(
     }
     report.topic = topic;
     report.steps.pickTopic = { ok: true, detail: `${topic.source}: ${topic.keyword}` };
+
+    await prisma.aiAgentRun.update({
+      where: { id: run.id },
+      data: { currentStep: "write" },
+    });
 
     report.steps.write = { ok: false };
     const draft = await generateArticleDraft({

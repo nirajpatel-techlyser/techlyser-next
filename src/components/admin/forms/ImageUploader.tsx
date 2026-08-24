@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import { ChangeEvent, DragEvent, useState } from "react";
 import { Loader2, Upload, X } from "lucide-react";
+import CoverImage from "@/components/media/CoverImage";
 
 type ImageUploaderProps = {
   value?: string | null;
@@ -71,13 +71,9 @@ export default function ImageUploader({ value, onChange }: ImageUploaderProps) {
       {value ? (
         <div className="relative overflow-hidden rounded-2xl border border-slate-200">
           <div className="relative aspect-video bg-slate-100">
-            <Image
+            <CoverImage
               src={value}
               alt="Featured"
-              fill
-              unoptimized={
-                value.startsWith("http://") || value.startsWith("https://")
-              }
               className="object-cover"
               sizes="(max-width: 768px) 100vw, 400px"
             />

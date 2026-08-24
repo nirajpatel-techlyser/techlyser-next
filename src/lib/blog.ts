@@ -189,21 +189,25 @@ export async function getAllTags(): Promise<
     select: { tags: true },
   });
 
-  const counts = new Map<string, number>();
+  // Merge case variants ("Shopify" / "shopify") into one slug bucket.
+  const bySlug = new Map<string, { name: string; count: number }>();
   for (const post of posts) {
     for (const tag of post.tags) {
-      const key = tag.trim();
-      if (!key) continue;
-      counts.set(key, (counts.get(key) || 0) + 1);
+      const name = tag.trim();
+      if (!name) continue;
+      const slug = slugifyTaxonomy(name);
+      if (!slug) continue;
+      const existing = bySlug.get(slug);
+      if (existing) {
+        existing.count += 1;
+      } else {
+        bySlug.set(slug, { name, count: 1 });
+      }
     }
   }
 
-  return [...counts.entries()]
-    .map(([name, count]) => ({
-      name,
-      slug: slugifyTaxonomy(name),
-      count,
-    }))
+  return [...bySlug.entries()]
+    .map(([slug, { name, count }]) => ({ name, slug, count }))
     .sort((a, b) => b.count - a.count);
 }
 
@@ -217,10 +221,13 @@ export async function getPostsByTag(
   const posts = await prisma.blog.findMany({
     where: {
       status: BlogStatus.PUBLISHED,
-      tags: { has: match.name },
     },
     orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
   });
 
-  return { tag: match.name, posts: posts.map(mapBlog) };
+  const filtered = posts.filter((post) =>
+    post.tags.some((tag) => slugifyTaxonomy(tag) === tagSlug),
+  );
+
+  return { tag: match.name, posts: filtered.map(mapBlog) };
 }

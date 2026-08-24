@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
+import CoverImage from "@/components/media/CoverImage";
 import Navbar from "@/components/layout/Navbar";
 import BlogContent from "@/components/blog/BlogContent";
 import BlogComments from "@/components/blog/BlogComments";
@@ -196,11 +196,6 @@ export default async function BlogPostPage({ params }: PageProps) {
     }),
   ];
 
-  const isRemoteCover =
-    !!post.coverImage &&
-    (post.coverImage.startsWith("http://") ||
-      post.coverImage.startsWith("https://"));
-
   return (
     <div className="bg-surface-dark min-h-screen">
       <JsonLd data={jsonLd} />
@@ -272,14 +267,12 @@ export default async function BlogPostPage({ params }: PageProps) {
 
             {post.coverImage ? (
               <div className="relative mx-auto mt-8 aspect-video max-w-2xl overflow-hidden rounded-2xl bg-slate-100">
-                <Image
+                <CoverImage
                   src={post.coverImage}
                   alt={post.title}
-                  fill
                   className="object-contain"
                   sizes="(max-width: 768px) 100vw, 672px"
                   priority
-                  unoptimized={!isRemoteCover && !post.coverImage.startsWith("/")}
                 />
               </div>
             ) : null}
