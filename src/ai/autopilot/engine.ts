@@ -34,9 +34,9 @@ async function alreadyRanToday(): Promise<boolean> {
 }
 
 /** Mark timed-out / crashed cron runs so they don't linger as RUNNING forever. */
-async function failStaleRunningJobs(maxAgeMinutes = 15) {
+export async function cleanupStuckAutopilotRuns(maxAgeMinutes = 10) {
   const cutoff = new Date(Date.now() - maxAgeMinutes * 60_000);
-  await prisma.aiAgentRun.updateMany({
+  const result = await prisma.aiAgentRun.updateMany({
     where: {
       workflowId: AUTOPILOT_WORKFLOW_ID,
       status: "RUNNING",
@@ -45,18 +45,38 @@ async function failStaleRunningJobs(maxAgeMinutes = 15) {
     data: {
       status: "FAILED",
       currentStep: "failed",
-      errorMessage: "Timed out or interrupted (stale RUNNING run)",
+      errorMessage:
+        "Timed out during research (Vercel killed the function). Cron now skips research and writes the draft first.",
       completedAt: new Date(),
     },
   });
+  return result.count;
 }
 
-async function createRun() {
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  return new Promise<T>((resolve, reject) => {
+    const timer = setTimeout(() => {
+      reject(new Error(`${label} timed out after ${Math.round(ms / 1000)}s`));
+    }, ms);
+    promise.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (err) => {
+        clearTimeout(timer);
+        reject(err);
+      },
+    );
+  });
+}
+
+async function createRun(initialStep = "research") {
   return prisma.aiAgentRun.create({
     data: {
       workflowId: AUTOPILOT_WORKFLOW_ID,
       status: "RUNNING",
-      currentStep: "research",
+      currentStep: initialStep,
       startedAt: new Date(),
     },
   });
@@ -82,6 +102,9 @@ async function completeRun(
 export async function runDailyAutopilot(
   options: DailyAutopilotOptions = {},
 ): Promise<DailyAutopilotReport> {
+  // Always clear stuck runs first (even when skipping / disabled).
+  await cleanupStuckAutopilotRuns();
+
   const oncePerDay = options.oncePerDay ?? autopilotOncePerDay();
   const refreshMarket = options.refreshMarket !== false;
   const applySeo = options.applySeo !== false;
@@ -107,8 +130,6 @@ export async function runDailyAutopilot(
     return report;
   }
 
-  await failStaleRunningJobs();
-
   if (options.dryRun) {
     const topic = await pickNextAutopilotTopic();
     report.skipped = true;
@@ -117,19 +138,23 @@ export async function runDailyAutopilot(
     return report;
   }
 
-  const run = await createRun();
+  const run = await createRun(refreshMarket ? "research" : "pickTopic");
   report.runId = run.id;
 
   try {
     if (refreshMarket) {
-      // Research can be slow / flaky (Reddit 403, RSS 404). Never block the draft.
+      // Cap research so Vercel never kills the whole cron before writing.
       report.steps.research = { ok: false };
       try {
-        const research = await runMarketResearch({
-          createRun: true,
-          runTitle: `Autopilot research ${new Date().toISOString().slice(0, 10)}`,
-          locale: "en-IN",
-        });
+        const research = await withTimeout(
+          runMarketResearch({
+            createRun: true,
+            runTitle: `Autopilot research ${new Date().toISOString().slice(0, 10)}`,
+            locale: "en-IN",
+          }),
+          45_000,
+          "Market research",
+        );
         report.steps.research = {
           ok: true,
           detail: `collected ${research.collected}, upserted ${research.upserted}`,
@@ -143,7 +168,11 @@ export async function runDailyAutopilot(
 
       report.steps.opportunities = { ok: false };
       try {
-        const opp = await runOpportunityEngine({ limit: 80 });
+        const opp = await withTimeout(
+          runOpportunityEngine({ limit: 40 }),
+          30_000,
+          "Opportunity engine",
+        );
         report.steps.opportunities = {
           ok: true,
           detail: `analyzed ${opp.analyzed}, upserted ${opp.upserted}`,
@@ -159,6 +188,11 @@ export async function runDailyAutopilot(
         where: { id: run.id },
         data: { currentStep: "pickTopic" },
       });
+    } else {
+      report.steps.research = {
+        ok: true,
+        detail: "skipped (cron write-first mode)",
+      };
     }
 
     report.steps.pickTopic = { ok: false };

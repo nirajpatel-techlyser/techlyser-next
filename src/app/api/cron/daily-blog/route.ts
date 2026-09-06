@@ -42,8 +42,12 @@ export async function GET(request: Request) {
   }
 
   try {
-    // Cron always respects once-per-day (env default true).
-    const report = await runDailyAutopilot({ oncePerDay: true });
+    // Cron: write-first. Skip slow market research so Vercel never times out
+    // before a DRAFT is saved. Admin button still refreshes market signals.
+    const report = await runDailyAutopilot({
+      oncePerDay: true,
+      refreshMarket: false,
+    });
     console.info("[cron.daily-blog] result", {
       skipped: report.skipped,
       skipReason: report.skipReason,

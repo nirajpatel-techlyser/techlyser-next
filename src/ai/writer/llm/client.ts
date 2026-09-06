@@ -219,42 +219,62 @@ async function callGemini(input: {
     generationConfig.thinkingConfig = { thinkingBudget: 0 };
   }
 
-  const response = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      systemInstruction: {
-        parts: [{ text: input.systemPrompt }],
-      },
-      contents: [
-        {
-          role: "user",
-          parts: [{ text: input.userPrompt }],
+  const maxAttempts = 3;
+  let lastError: Error | null = null;
+
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        systemInstruction: {
+          parts: [{ text: input.systemPrompt }],
         },
-      ],
-      generationConfig,
-    }),
-  });
+        contents: [
+          {
+            role: "user",
+            parts: [{ text: input.userPrompt }],
+          },
+        ],
+        generationConfig,
+      }),
+    });
 
-  const data = (await response.json()) as GeminiResponse;
-  if (!response.ok) {
-    throw new Error(
-      data.error?.message || `Gemini API error (${response.status})`,
-    );
+    const data = (await response.json()) as GeminiResponse;
+    if (!response.ok) {
+      const message =
+        data.error?.message || `Gemini API error (${response.status})`;
+      lastError = new Error(message);
+      const retryable =
+        response.status === 429 ||
+        response.status === 503 ||
+        /high demand|try again|unavailable|resource.?exhausted/i.test(message);
+      if (retryable && attempt < maxAttempts) {
+        const waitMs = attempt * 2500;
+        console.warn(
+          `[writer.llm] Gemini retry ${attempt}/${maxAttempts} in ${waitMs}ms: ${message}`,
+        );
+        await new Promise((resolve) => setTimeout(resolve, waitMs));
+        continue;
+      }
+      throw lastError;
+    }
+
+    const { content, finishReason } = collectGeminiText(data);
+    if (!content) {
+      throw new Error("Gemini returned an empty response");
+    }
+
+    if (finishReason === "MAX_TOKENS") {
+      throw new Error(
+        "Gemini response was truncated (MAX_TOKENS). Try a shorter article length.",
+      );
+    }
+
+    return { content, finishReason };
   }
 
-  const { content, finishReason } = collectGeminiText(data);
-  if (!content) {
-    throw new Error("Gemini returned an empty response");
-  }
-
-  if (finishReason === "MAX_TOKENS") {
-    throw new Error(
-      "Gemini response was truncated (MAX_TOKENS). Try a shorter article length.",
-    );
-  }
-
-  return { content, finishReason };
+  throw lastError || new Error("Gemini request failed");
 }
 
 function parseJsonResponse<T extends Record<string, unknown>>(

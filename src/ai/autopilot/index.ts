@@ -6,5 +6,5 @@
 
 export * from "./types";
 export * from "./config";
-export { runDailyAutopilot } from "./engine";
+export { runDailyAutopilot, cleanupStuckAutopilotRuns } from "./engine";
 export { pickNextAutopilotTopic } from "./pick-topic";

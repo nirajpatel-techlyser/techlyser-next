@@ -1,6 +1,10 @@
 import Link from "next/link";
 import RunAutopilotButton from "@/components/admin/ai/RunAutopilotButton";
-import { isAutopilotEnabled, autopilotPublishEnabled } from "@/ai/autopilot/config";
+import {
+  cleanupStuckAutopilotRuns,
+  isAutopilotEnabled,
+  autopilotPublishEnabled,
+} from "@/ai/autopilot";
 import { resolveLlmProvider, getWriterModel } from "@/ai/writer/config";
 import { prisma } from "@/lib/prisma";
 
@@ -17,6 +21,8 @@ function formatDate(value: Date) {
 }
 
 export default async function AdminAutopilotPage() {
+  await cleanupStuckAutopilotRuns(5);
+
   const runs = await prisma.aiAgentRun.findMany({
     where: { workflowId: "daily-autopilot" },
     orderBy: { createdAt: "desc" },
@@ -36,9 +42,11 @@ export default async function AdminAutopilotPage() {
         </p>
         <h1 className="mt-2 text-2xl font-bold text-slate-900">Daily Autopilot</h1>
         <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-          Har din automatically: market research → opportunities → article draft
-          (+ LinkedIn posts) → SEO + GEO. Featured images aap admin se upload
-          karo. Default: <strong>DRAFT only</strong> — review karke publish karo.
+          Daily cron writes one article DRAFT (+ LinkedIn posts) + SEO/GEO from
+          queued topics. Market research is skipped on cron (too slow for
+          Vercel) — use the admin button when you want a fresh research pass.
+          Featured images: upload in Blog edit. Default:{" "}
+          <strong>DRAFT only</strong>.
         </p>
         <div className="mt-4 flex flex-wrap gap-4 text-sm text-slate-600">
           <span>
@@ -63,18 +71,17 @@ export default async function AdminAutopilotPage() {
           </span>
           <span>
             Cron: <strong className="text-slate-900">03:30 UTC daily</strong>{" "}
-            (9:00 AM IST)
+            (9:00 AM IST) · write-first
           </span>
         </div>
         <div className="mt-5">
           <RunAutopilotButton />
         </div>
         <p className="mt-3 text-xs text-slate-500">
-          Admin button har click pe naya DRAFT banata hai. Daily cron (9:00 AM
-          IST) max 1 successful run/day. CLI:{" "}
-          <code className="text-xs">npm run ai:daily</code> · Prefer{" "}
-          <code className="text-xs">GEMINI_API_KEY</code> (free). Images: upload
-          in Blog edit.
+          Admin button har click pe naya DRAFT (+ research). Daily cron max 1
+          successful run/day without research. Prefer{" "}
+          <code className="text-xs">GEMINI_API_KEY</code>. Images: upload in Blog
+          edit.
         </p>
         <div className="mt-4">
           <Link href="/admin/ai" className="text-sm font-medium text-primary">
@@ -99,9 +106,15 @@ export default async function AdminAutopilotPage() {
               {runs.map((run) => (
                 <tr key={run.id} className="border-b border-slate-100">
                   <td className="px-2 py-3 text-slate-700">{run.status}</td>
-                  <td className="px-2 py-3 text-slate-600">{run.currentStep || "—"}</td>
-                  <td className="px-2 py-3 text-slate-600">{formatDate(run.createdAt)}</td>
-                  <td className="px-2 py-3 text-slate-600">{run.errorMessage || "—"}</td>
+                  <td className="px-2 py-3 text-slate-600">
+                    {run.currentStep || "—"}
+                  </td>
+                  <td className="px-2 py-3 text-slate-600">
+                    {formatDate(run.createdAt)}
+                  </td>
+                  <td className="px-2 py-3 text-slate-600">
+                    {run.errorMessage || "—"}
+                  </td>
                 </tr>
               ))}
               {runs.length === 0 ? (
