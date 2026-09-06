@@ -1,4 +1,5 @@
 import type { ContentPlanHorizon, Prisma } from "@prisma/client";
+import { isTechlyserNicheTopic } from "@/ai/brand/niche";
 import { prisma } from "@/lib/prisma";
 import { buildTopicClusters } from "./cluster";
 import {
@@ -43,15 +44,26 @@ export async function generateContentPlans(
   const locale = options.locale ?? "en-IN";
   const archivePreviousDrafts = options.archivePreviousDrafts !== false;
 
-  const opportunities = await prisma.opportunity.findMany({
+  const opportunitiesRaw = await prisma.opportunity.findMany({
     where: { status: { in: ["NEW", "REVIEWED", "QUEUED"] } },
     orderBy: [{ opportunityScore: "desc" }, { rank: "asc" }],
-    take: opportunityLimit,
+    take: opportunityLimit * 3,
   });
+
+  const opportunities = opportunitiesRaw
+    .filter((row) =>
+      isTechlyserNicheTopic(
+        row.title,
+        row.summary,
+        row.category,
+        ...(row.keywords || []),
+      ),
+    )
+    .slice(0, opportunityLimit);
 
   if (opportunities.length === 0) {
     throw new Error(
-      "No opportunities found. Run the Opportunity Engine first (npm run ai:opportunities).",
+      "No Shopify/ecommerce opportunities found. Run research focused on Shopify growth, or seed niche content ideas.",
     );
   }
 

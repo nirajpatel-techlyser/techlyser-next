@@ -1,4 +1,5 @@
 import type { OpportunityFactorId } from "./types";
+import { TECHLYSER_CONTENT_FOCUS } from "@/ai/brand/niche";
 
 /** Weights must sum to 1. Tunable without code changes to scorers. */
 export const OPPORTUNITY_WEIGHTS: Record<OpportunityFactorId, number> = {
@@ -55,25 +56,7 @@ export const TRANSACTIONAL_TERMS = [
   "contact",
 ] as const;
 
-export const TECHLYSER_FOCUS = [
-  "shopify",
-  "shopify plus",
-  "ecommerce",
-  "next.js",
-  "nextjs",
-  "headless",
-  "vercel",
-  "seo",
-  "core web vitals",
-  "conversion",
-  "d2c",
-  "india",
-  "wordpress",
-  "woocommerce",
-  "ai",
-  "automation",
-  "hydrogen",
-] as const;
+export const TECHLYSER_FOCUS = TECHLYSER_CONTENT_FOCUS;
 
 /** Higher = harder SERP / more saturated publisher (inverse applied in competition score). */
 export const SOURCE_COMPETITION_PRESSURE: Record<string, number> = {

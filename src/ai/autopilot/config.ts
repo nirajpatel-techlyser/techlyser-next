@@ -25,5 +25,4 @@ export function getImageModel(): string {
 
 export const AUTOPILOT_WORKFLOW_ID = "daily-autopilot";
 
-export const DEFAULT_AUDIENCE =
-  "ecommerce founders, D2C brands, and marketing leaders in India";
+export { DEFAULT_TECHLYSER_AUDIENCE as DEFAULT_AUDIENCE } from "@/ai/brand/niche";

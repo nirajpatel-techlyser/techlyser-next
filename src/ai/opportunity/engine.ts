@@ -1,3 +1,4 @@
+import { isTechlyserNicheTopic } from "@/ai/brand/niche";
 import { loadOpportunityCorpus, loadResearchItemsForOpportunity } from "./context";
 import { scoreResearchItem } from "./score";
 import {
@@ -27,7 +28,16 @@ export async function runOpportunityEngine(
     }),
   ]);
 
-  const scored = items.map((item) => scoreResearchItem(item, corpus));
+  const scored = items
+    .map((item) => scoreResearchItem(item, corpus))
+    .filter((item) =>
+      isTechlyserNicheTopic(
+        item.title,
+        item.summary,
+        item.category,
+        ...(item.keywords || []),
+      ),
+    );
   scored.sort((a, b) => b.opportunityScore - a.opportunityScore);
 
   const persisted = await upsertOpportunities(scored, options.dryRun);

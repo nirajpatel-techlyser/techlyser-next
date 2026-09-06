@@ -28,7 +28,7 @@ export const githubTrendingSource: ResearchSourceAdapter = {
       const q = encodeURIComponent(
         ctx.query?.trim()
           ? `${ctx.query} stars:>50`
-          : "shopify OR nextjs OR ecommerce stars:>100",
+          : "(shopify OR ecommerce OR \"shopify plus\" OR hydrogen) stars:>50",
       );
       const url = `https://api.github.com/search/repositories?q=${q}&sort=stars&order=desc&per_page=${ctx.limit || 12}`;
       const headers: Record<string, string> = {
@@ -103,11 +103,8 @@ export const hackerNewsSource: ResearchSourceAdapter = {
           const relevant =
             (query && hay.includes(query)) ||
             HN_TOPIC_HINTS.some((hint) => hay.includes(hint));
-          if (!relevant && !query) {
-            if ((item.score || 0) < 150) continue;
-          } else if (!relevant && query) {
-            continue;
-          }
+          // Only keep Shopify/ecommerce-relevant HN stories — never generic viral posts
+          if (!relevant) continue;
 
           hits.push({
             title: item.title,

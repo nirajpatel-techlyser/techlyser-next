@@ -1,6 +1,6 @@
-import { prisma } from "@/lib/prisma";
 import type { AutopilotTopic } from "./types";
-import { DEFAULT_AUDIENCE } from "./config";
+import { DEFAULT_TECHLYSER_AUDIENCE, isTechlyserNicheTopic } from "@/ai/brand/niche";
+import { prisma } from "@/lib/prisma";
 
 function mapIntent(
   label?: string | null,
@@ -20,21 +20,42 @@ function pickKeyword(keywords: string[], title: string) {
   );
 }
 
+function ideaMatchesNiche(idea: {
+  title: string;
+  angle: string | null;
+  keyword?: { term: string } | null;
+  cluster?: { name: string } | null;
+  metadata?: unknown;
+}): boolean {
+  const meta = idea.metadata as { keywords?: string[] } | null;
+  return isTechlyserNicheTopic(
+    idea.title,
+    idea.angle,
+    idea.keyword?.term,
+    idea.cluster?.name,
+    ...(meta?.keywords || []),
+  );
+}
+
 /**
  * Prefer planner ContentIdeas without a blog; fallback to top Opportunity.
+ * Hard-filters to Shopify / ecommerce growth niche (never GitHub product dumps).
  */
 export async function pickNextAutopilotTopic(): Promise<AutopilotTopic | null> {
-  const idea = await prisma.contentIdea.findFirst({
+  const ideas = await prisma.contentIdea.findMany({
     where: {
       blogId: null,
       status: { in: ["QUEUED", "APPROVED", "DRAFT"] },
     },
     orderBy: [{ priority: "desc" }, { createdAt: "asc" }],
+    take: 40,
     include: {
       cluster: { select: { name: true } },
       keyword: { select: { term: true, intent: true } },
     },
   });
+
+  const idea = ideas.find(ideaMatchesNiche);
 
   if (idea) {
     const keyword =
@@ -47,21 +68,31 @@ export async function pickNextAutopilotTopic(): Promise<AutopilotTopic | null> {
       contentIdeaId: idea.id,
       keyword,
       title: idea.title,
-      audience: DEFAULT_AUDIENCE,
+      audience: DEFAULT_TECHLYSER_AUDIENCE,
       searchIntent: mapIntent(idea.keyword?.intent || idea.angle),
-      category: idea.cluster?.name || "Shopify",
+      category: idea.cluster?.name || "Shopify Growth",
       tone: "premium",
       length: idea.targetWords && idea.targetWords > 2000 ? "long" : "medium",
     };
   }
 
-  const opportunity = await prisma.opportunity.findFirst({
+  const opportunities = await prisma.opportunity.findMany({
     where: {
       status: { in: ["NEW", "REVIEWED", "QUEUED"] },
       contentIdeaId: null,
     },
     orderBy: [{ opportunityScore: "desc" }, { rank: "asc" }],
+    take: 40,
   });
+
+  const opportunity = opportunities.find((row) =>
+    isTechlyserNicheTopic(
+      row.title,
+      row.summary,
+      row.category,
+      ...(row.keywords || []),
+    ),
+  );
 
   if (!opportunity) return null;
 
@@ -71,9 +102,9 @@ export async function pickNextAutopilotTopic(): Promise<AutopilotTopic | null> {
     id: opportunity.id,
     keyword,
     title: opportunity.title,
-    audience: DEFAULT_AUDIENCE,
+    audience: DEFAULT_TECHLYSER_AUDIENCE,
     searchIntent: mapIntent(opportunity.intentLabel),
-    category: opportunity.category || "Shopify",
+    category: opportunity.category || "Shopify Growth",
     tone: "premium",
     length: "medium",
   };

@@ -1,24 +1,9 @@
 import type { ResearchSourceId } from "./types";
 
+import { TECHLYSER_CONTENT_FOCUS } from "@/ai/brand/niche";
+
 /** Default Techlyser growth focus terms for relevance scoring. */
-export const DEFAULT_FOCUS_KEYWORDS = [
-  "shopify",
-  "shopify plus",
-  "ecommerce",
-  "next.js",
-  "nextjs",
-  "headless",
-  "vercel",
-  "seo",
-  "core web vitals",
-  "conversion",
-  "d2c",
-  "india",
-  "wordpress",
-  "woocommerce",
-  "ai",
-  "automation",
-] as const;
+export const DEFAULT_FOCUS_KEYWORDS = TECHLYSER_CONTENT_FOCUS;
 
 export const RESEARCH_USER_AGENT =
   process.env.RESEARCH_USER_AGENT ||
@@ -48,13 +33,13 @@ export const REDDIT_SUBREDDITS = [
 
 export const HN_TOPIC_HINTS = [
   "shopify",
-  "next.js",
-  "nextjs",
-  "vercel",
-  "seo",
   "ecommerce",
-  "headless",
-  "cloudflare",
+  "e-commerce",
+  "d2c",
+  "conversion",
+  "checkout",
+  "headless commerce",
+  "hydrogen",
 ] as const;
 
 /** Competitor RSS path guesses when Competitor.pageUrl is a homepage. */

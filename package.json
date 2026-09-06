@@ -17,6 +17,7 @@
     "ai:write": "tsx --env-file=.env.local scripts/run-ai-writer.ts",
     "ai:seo": "tsx --env-file=.env.local scripts/run-seo-geo.ts",
     "ai:daily": "tsx --env-file=.env.local scripts/run-daily-autopilot.ts",
+    "ai:seed-niche": "tsx --env-file=.env.local scripts/seed-shopify-niche-topics.ts",
     "postinstall": "prisma generate",
     "env:check": "node scripts/check-auth-url.mjs"
   },
