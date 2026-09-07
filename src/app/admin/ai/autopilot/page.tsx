@@ -43,11 +43,13 @@ export default async function AdminAutopilotPage() {
         </p>
         <h1 className="mt-2 text-2xl font-bold text-slate-900">Daily Autopilot</h1>
         <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-          Daily cron writes one article DRAFT (+ LinkedIn posts) + SEO/GEO from
-          queued topics. Market research is skipped on cron (too slow for
-          Vercel) — use the admin button when you want a fresh research pass.
-          Featured images: upload in Blog edit. Default:{" "}
-          <strong>DRAFT only</strong>.
+          Daily cron writes one article DRAFT (+ LinkedIn posts) + SEO/GEO.
+          Topic pick uses the <strong>Techlyser Growth Engine</strong>{" "}
+          (relevance → third-party filter → SEO opportunity → lead potential),
+          then a post-draft quality check before any auto-publish. Market
+          research is skipped on cron (too slow for Vercel) — use the admin
+          button when you want a fresh research pass. Featured images: upload
+          in Blog edit. Default: <strong>DRAFT only</strong>.
         </p>
         <div className="mt-4 flex flex-wrap gap-4 text-sm text-slate-600">
           <span>

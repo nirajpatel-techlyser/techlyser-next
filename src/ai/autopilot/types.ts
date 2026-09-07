@@ -1,3 +1,8 @@
+import type {
+  GrowthDecision,
+  GrowthQualityResult,
+} from "@/ai/growth-engine/types";
+
 export type AutopilotStep =
   | "research"
   | "opportunities"
@@ -5,6 +10,7 @@ export type AutopilotStep =
   | "write"
   | "image"
   | "seoGeo"
+  | "quality"
   | "done";
 
 export type AutopilotTopic = {
@@ -31,6 +37,10 @@ export type DailyAutopilotReport = {
   featuredImage?: string;
   seoScore?: number;
   geoScore?: number;
+  /** Growth Engine topic decision (scores + accept/reject). */
+  growthDecision?: GrowthDecision;
+  /** Post-draft quality gate. */
+  quality?: GrowthQualityResult;
   steps: Partial<Record<AutopilotStep, { ok: boolean; detail?: string }>>;
 };
 

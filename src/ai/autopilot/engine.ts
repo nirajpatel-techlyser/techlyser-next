@@ -4,6 +4,7 @@ import { runMarketResearch } from "@/ai/research";
 import { runOpportunityEngine } from "@/ai/opportunity";
 import { generateArticleDraft } from "@/ai/writer";
 import { optimizeSeoAndGeo } from "@/ai/seo";
+import { runGrowthQualityCheck } from "@/ai/growth-engine";
 import {
   AUTOPILOT_WORKFLOW_ID,
   autopilotGenerateImageEnabled,
@@ -12,7 +13,10 @@ import {
   isAutopilotEnabled,
 } from "./config";
 import { generateFeaturedImage } from "./image";
-import { markTopicUsed, pickNextAutopilotTopic } from "./pick-topic";
+import {
+  markTopicUsed,
+  pickNextAutopilotTopicWithDecision,
+} from "./pick-topic";
 import type { DailyAutopilotOptions, DailyAutopilotReport } from "./types";
 
 function startOfTodayUtc() {
@@ -131,10 +135,11 @@ export async function runDailyAutopilot(
   }
 
   if (options.dryRun) {
-    const topic = await pickNextAutopilotTopic();
+    const selected = await pickNextAutopilotTopicWithDecision();
     report.skipped = true;
     report.skipReason = "dryRun";
-    report.topic = topic || undefined;
+    report.topic = selected?.topic || undefined;
+    report.growthDecision = selected?.result.decision;
     return report;
   }
 
@@ -196,15 +201,20 @@ export async function runDailyAutopilot(
     }
 
     report.steps.pickTopic = { ok: false };
-    const topic = await pickNextAutopilotTopic();
-    if (!topic) {
+    const selected = await pickNextAutopilotTopicWithDecision();
+    if (!selected) {
       report.skipped = true;
-      report.skipReason = "No content idea or opportunity available";
+      report.skipReason = "No Growth Engine topic passed relevance / filters";
       await completeRun(run.id, report);
       return report;
     }
+    const topic = selected.topic;
     report.topic = topic;
-    report.steps.pickTopic = { ok: true, detail: `${topic.source}: ${topic.keyword}` };
+    report.growthDecision = selected.result.decision;
+    report.steps.pickTopic = {
+      ok: true,
+      detail: `${topic.source}: ${topic.keyword} (growth ${selected.result.decision.growthScore.toFixed(2)})`,
+    };
 
     await prisma.aiAgentRun.update({
       where: { id: run.id },
@@ -273,7 +283,33 @@ export async function runDailyAutopilot(
       };
     }
 
-    if (autopilotPublishEnabled()) {
+    await prisma.aiAgentRun.update({
+      where: { id: run.id },
+      data: { currentStep: "quality" },
+    });
+
+    report.steps.quality = { ok: false };
+    const quality = runGrowthQualityCheck({
+      title: draft.seoTitle || topic.title,
+      slug: draft.slug,
+      seoScore: report.seoScore,
+      geoScore: report.geoScore,
+      readingTimeMinutes: draft.readingTimeMinutes,
+      contentLength: draft.output.articleHtml?.length ?? 0,
+      ctaHref: draft.output.cta?.href ?? null,
+    });
+    report.quality = quality;
+    report.steps.quality = {
+      ok: quality.ok,
+      detail: quality.ok
+        ? `passed (${quality.score.toFixed(2)})`
+        : `failed: ${quality.checks
+            .filter((c) => !c.ok)
+            .map((c) => c.id)
+            .join(", ")}`,
+    };
+
+    if (autopilotPublishEnabled() && quality.ok) {
       await prisma.blog.update({
         where: { id: draft.blogId },
         data: {
@@ -282,6 +318,11 @@ export async function runDailyAutopilot(
         },
       });
       report.steps.done = { ok: true, detail: "published" };
+    } else if (autopilotPublishEnabled() && !quality.ok) {
+      report.steps.done = {
+        ok: true,
+        detail: "saved as DRAFT (quality gate blocked auto-publish)",
+      };
     } else {
       report.steps.done = { ok: true, detail: "saved as DRAFT" };
     }
