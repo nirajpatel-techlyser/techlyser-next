@@ -17,6 +17,7 @@ function formatDate(value: Date) {
     year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+    timeZone: "Asia/Kolkata",
   }).format(value);
 }
 
@@ -70,8 +71,8 @@ export default async function AdminAutopilotPage() {
             </strong>
           </span>
           <span>
-            Cron: <strong className="text-slate-900">03:30 UTC daily</strong>{" "}
-            (9:00 AM IST) · write-first
+            Cron: <strong className="text-slate-900">scheduled 9:00 AM IST</strong>{" "}
+            (Vercel Hobby may run ~9:00–10:00 AM) · write-first
           </span>
         </div>
         <div className="mt-5">

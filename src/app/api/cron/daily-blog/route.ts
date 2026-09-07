@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { runDailyAutopilot } from "@/ai/autopilot";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 export const maxDuration = 300;
 
 function isAuthorized(request: Request) {
