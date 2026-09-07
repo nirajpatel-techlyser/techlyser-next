@@ -1,7 +1,8 @@
 /**
  * Techlyser Growth Engine — content decision DTOs.
- * Scores live in memory / AiAgentRun.output (no new Prisma tables).
  */
+
+import type { TechlyserGrowthScoreBreakdown } from "./stages/growth-score";
 
 export type GrowthCandidateSource = "contentIdea" | "opportunity";
 
@@ -15,10 +16,8 @@ export type GrowthCandidate = {
   keywords: string[];
   category: string;
   intentLabel: string | null;
-  /** 0–100 style priority from ContentIdea, or opportunityScore*100 */
   priority: number;
   targetWords?: number | null;
-  /** Existing opportunity factor hints when available */
   opportunityScore?: number | null;
   techlyserRelevanceScore?: number | null;
   commercialIntentScore?: number | null;
@@ -33,6 +32,9 @@ export type GrowthStageScores = {
   seoOpportunity: number;
   leadPotential: number;
   priorityNorm: number;
+  /** Primary 0–100 brand-growth score */
+  techlyserGrowthScore?: number;
+  growthBreakdown?: TechlyserGrowthScoreBreakdown;
 };
 
 export type GrowthDecision = {
@@ -41,7 +43,10 @@ export type GrowthDecision = {
   title: string;
   keyword: string;
   scores: GrowthStageScores;
+  /** Normalized 0–1 (techlyserGrowthScore / 100) */
   growthScore: number;
+  /** Primary score 0–100 */
+  techlyserGrowthScore: number;
   accepted: boolean;
   rejectReason?: string;
   rankedAt: string;
@@ -49,7 +54,6 @@ export type GrowthDecision = {
 
 export type GrowthSelectResult = {
   decision: GrowthDecision;
-  /** Ranked accepted candidates (best first), for debugging / dry-run */
   ranked: GrowthDecision[];
   rejected: GrowthDecision[];
 };
@@ -57,11 +61,18 @@ export type GrowthSelectResult = {
 export type GrowthQualityInput = {
   title: string;
   slug: string;
+  excerpt?: string | null;
+  category?: string | null;
+  tags?: string[] | null;
+  seoTitle?: string | null;
+  seoDescription?: string | null;
   seoScore?: number | null;
   geoScore?: number | null;
   readingTimeMinutes?: number | null;
   contentLength?: number | null;
   ctaHref?: string | null;
+  techlyserGrowthScore?: number | null;
+  articleMarkdownOrHtml?: string | null;
 };
 
 export type GrowthQualityResult = {

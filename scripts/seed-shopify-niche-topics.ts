@@ -18,13 +18,54 @@ const SEED_IDEAS: Array<{
   targetWords: number;
 }> = [
   {
-    title: "Shopify CRO checklist for D2C founders who need more revenue, not more apps",
-    slug: "shopify-cro-checklist-d2c-founders",
+    title: "When should a business rebuild its website instead of patching it?",
+    slug: "when-rebuild-website-instead-of-patching",
     angle:
-      "Founder-first CRO prioritization for Shopify stores: what to fix first on PDP, cart, and checkout, with India-relevant examples.",
+      "Decision framework for founders: technical debt, UX, SEO, and ROI signals that mean a rebuild beats another plugin stack — Techlyser full-stack perspective.",
+    priority: 99,
+    targetWords: 1800,
+  },
+  {
+    title: "Why website performance is a business problem, not just a technical one",
+    slug: "website-performance-business-problem",
+    angle:
+      "Connect Core Web Vitals and slow pages to conversion, trust, and revenue for SME and ecommerce decision-makers.",
+    priority: 98,
+    targetWords: 1700,
+  },
+  {
+    title: "How AI search is changing what businesses should expect from their websites",
+    slug: "ai-search-changing-business-website-expectations",
+    angle:
+      "GEO/AEO/LLMO implications for content architecture, entities, and FAQs — practical steps without promoting any AI vendor.",
     priority: 98,
     targetWords: 1800,
   },
+  {
+    title: "UX mistakes that quietly kill conversion on modern business websites",
+    slug: "ux-mistakes-kill-website-conversion",
+    angle:
+      "Landing page, mobile, and navigation patterns that hurt leads — what to fix before buying more ads.",
+    priority: 97,
+    targetWords: 1600,
+  },
+  {
+    title: "When Shopify apps become technical debt for ecommerce brands",
+    slug: "when-shopify-apps-become-technical-debt",
+    angle:
+      "App sprawl vs custom functionality: performance, maintainability, and when to hire a development partner.",
+    priority: 97,
+    targetWords: 1700,
+  },
+  {
+    title: "What modern Next.js architecture means for scalable business applications",
+    slug: "nextjs-architecture-scalable-business-apps",
+    angle:
+      "Full-stack Next.js trade-offs for SMEs and SaaS: performance, maintainability, and when headless makes sense.",
+    priority: 96,
+    targetWords: 1800,
+  },
+
   {
     title: "How Shopify brands should run A/B tests without breaking conversion",
     slug: "shopify-ab-testing-without-breaking-conversion",

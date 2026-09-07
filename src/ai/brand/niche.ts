@@ -1,9 +1,19 @@
 /**
- * Techlyser content niche — Shopify store growth, not third-party SaaS promo.
- * Used by topic picking, planner, opportunity scoring, and research focus.
+ * Techlyser content niche — brand-growth topics across official pillars.
+ * Third-party products are research inputs, never the marketing hero.
  */
 
-/** Must match at least one commerce anchor to be eligible for autopilot. */
+import {
+  detectContentPillars,
+  SERVICE_RELEVANCE_TERMS,
+  TARGET_AUDIENCE_PROFILE,
+} from "./positioning";
+
+export {
+  TARGET_AUDIENCE_PROFILE as DEFAULT_TECHLYSER_AUDIENCE,
+} from "./positioning";
+
+/** Commerce / platform anchors (still valuable, not exclusive). */
 export const COMMERCE_ANCHORS = [
   "shopify",
   "shopify plus",
@@ -16,59 +26,54 @@ export const COMMERCE_ANCHORS = [
   "online store",
   "online retail",
   "storefront",
+  "woocommerce",
 ] as const;
 
-/** Growth / delivery themes we want to own for Techlyser authority. */
 export const GROWTH_PRACTICE_TERMS = [
+  ...SERVICE_RELEVANCE_TERMS,
   "cro",
   "conversion rate",
-  "conversion optimization",
   "a/b test",
   "a/b testing",
-  "ab test",
   "ab testing",
-  "split test",
   "geo",
   "aeo",
-  "generative engine optimization",
-  "answer engine",
-  "ai search",
+  "llmo",
   "core web vitals",
-  "page speed",
   "checkout",
   "cart abandonment",
-  "product page",
-  "pdp",
   "landing page",
-  "headless",
   "hydrogen",
   "liquid",
-  "theme customization",
-  "shopify app",
-  "shopify plus",
-  "migration",
   "founder",
-  "developers",
   "agency",
+  "redesign",
+  "modernis",
+  "moderniz",
 ] as const;
 
-/** Expanded focus list for research + opportunity scoring. */
 export const TECHLYSER_CONTENT_FOCUS = [
   ...COMMERCE_ANCHORS,
   ...GROWTH_PRACTICE_TERMS,
-  "next.js",
-  "nextjs",
-  "headless commerce",
   "india",
   "gst",
-  "woocommerce",
-  "wordpress",
-  "seo",
-  "aeo",
+  "react",
+  "node.js",
 ] as const;
 
-/** GitHub owner/repo style titles and pure product dumps we never want as blog heroes. */
 const REPO_TITLE_RE = /^[a-z0-9_.-]+\/[a-z0-9_.-]+$/i;
+
+/** Patterns that usually mean third-party promotion is the hero. */
+const THIRD_PARTY_PROMO_PATTERNS = [
+  /\bbest\s+\w+\s+apps?\b/i,
+  /\btop\s+\d+\s+(apps?|plugins?|tools?|saas)\b/i,
+  /\b\d+\s+best\s+(apps?|plugins?|tools?)\b/i,
+  /\bproduct\s+review\b/i,
+  /\baffiliate\b/i,
+  /\bhow\s+to\s+install\b/i,
+  /\bself[- ]host\b/i,
+  /\blaunched\b.*\bamazing\b/i,
+] as const;
 
 const BLOCKED_PRODUCT_MARKERS = [
   "cal.com",
@@ -81,6 +86,7 @@ const BLOCKED_PRODUCT_MARKERS = [
   "payloadcms/",
   "langgenius/",
   "prompts.chat",
+  "chatgpt prompts",
 ] as const;
 
 export function haystackOf(...parts: Array<string | null | undefined>): string {
@@ -98,7 +104,11 @@ export function isOffBrandProductTopic(
   const title = (parts[0] || "").trim();
   if (REPO_TITLE_RE.test(title)) return true;
   const hay = haystackOf(...parts);
-  return BLOCKED_PRODUCT_MARKERS.some((marker) => hay.includes(marker));
+  if (BLOCKED_PRODUCT_MARKERS.some((marker) => hay.includes(marker))) {
+    return true;
+  }
+  const joined = parts.filter(Boolean).join(" ");
+  return THIRD_PARTY_PROMO_PATTERNS.some((re) => re.test(joined));
 }
 
 export function hasCommerceAnchor(
@@ -109,15 +119,17 @@ export function hasCommerceAnchor(
 }
 
 /**
- * Eligible for Techlyser autopilot / planner: commerce-anchored topics only.
- * Growth practices alone (e.g. generic "A/B testing") are not enough without Shopify/ecommerce context.
+ * Eligible when tied to a Techlyser content pillar and not a third-party promo dump.
  */
 export function isTechlyserNicheTopic(
   ...parts: Array<string | null | undefined>
 ): boolean {
   if (isOffBrandProductTopic(...parts)) return false;
-  return hasCommerceAnchor(...parts);
+  const pillars = detectContentPillars(...parts);
+  if (pillars.length > 0) return true;
+  // Fallback: service-relevance terms without a named pillar match
+  const hay = haystackOf(...parts);
+  return SERVICE_RELEVANCE_TERMS.some((t) => hay.includes(t));
 }
 
-export const DEFAULT_TECHLYSER_AUDIENCE =
-  "Shopify founders, D2C brand operators, ecommerce marketers, and Shopify developers focused on CRO, GEO/AEO, A/B testing, and store growth";
+export { TARGET_AUDIENCE_PROFILE };

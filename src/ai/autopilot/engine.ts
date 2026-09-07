@@ -213,7 +213,7 @@ export async function runDailyAutopilot(
     report.growthDecision = selected.result.decision;
     report.steps.pickTopic = {
       ok: true,
-      detail: `${topic.source}: ${topic.keyword} (growth ${selected.result.decision.growthScore.toFixed(2)})`,
+      detail: `${topic.source}: ${topic.keyword} (techlyserGrowthScore ${selected.result.decision.techlyserGrowthScore})`,
     };
 
     await prisma.aiAgentRun.update({
@@ -292,18 +292,25 @@ export async function runDailyAutopilot(
     const quality = runGrowthQualityCheck({
       title: draft.seoTitle || topic.title,
       slug: draft.slug,
+      excerpt: draft.output.excerpt,
+      category: topic.category,
+      tags: draft.output.tags,
+      seoTitle: draft.output.seoTitle || draft.seoTitle,
+      seoDescription: draft.output.metaDescription,
       seoScore: report.seoScore,
       geoScore: report.geoScore,
       readingTimeMinutes: draft.readingTimeMinutes,
       contentLength: draft.output.articleHtml?.length ?? 0,
       ctaHref: draft.output.cta?.href ?? null,
+      techlyserGrowthScore: report.growthDecision?.techlyserGrowthScore,
+      articleMarkdownOrHtml: draft.output.articleHtml,
     });
     report.quality = quality;
     report.steps.quality = {
       ok: quality.ok,
       detail: quality.ok
-        ? `passed (${quality.score.toFixed(2)})`
-        : `failed: ${quality.checks
+        ? `validateContent passed (${quality.score.toFixed(2)}; growth ${report.growthDecision?.techlyserGrowthScore ?? "?"})`
+        : `validateContent failed: ${quality.checks
             .filter((c) => !c.ok)
             .map((c) => c.id)
             .join(", ")}`,

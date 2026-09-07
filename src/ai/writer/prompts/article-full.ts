@@ -1,36 +1,36 @@
-export const WRITER_ARTICLE_FULL_TEMPLATE = `Write a complete SEO article draft for Techlyser that helps Shopify stores grow and positions Techlyser as the expert partner.
+import { formatInternalUrlsForPrompt } from "@/ai/brand/positioning";
+
+export const WRITER_ARTICLE_FULL_TEMPLATE = `Write THREE distinct Techlyser content assets as one JSON object: (1) website SEO article, (2) personal LinkedIn thought leadership, (3) Techlyser company page post.
+
+Every asset must answer: how does this help Techlyser grow (authority, search, leads)? Third-party platforms are research context — not the promotional subject.
 
 Inputs:
 - Primary keyword: {{keyword}}
 - Target audience: {{audience}}
 - Search intent: {{searchIntent}}
-- Category: {{category}}
+- Category / pillar: {{category}}
 - Tone: {{tone}}
-- Target word count: ~{{targetWords}} words (articleMarkdown body only)
+- Target word count: ~{{targetWords}} words (articleMarkdown body only; prefer 1200–2000 when the topic supports it)
 
-Content strategy (mandatory):
-- Center the article on Shopify / D2C store growth outcomes (revenue, conversion, speed, discoverability)
-- Include at least one section useful to founders (decisions, ROI, prioritization, briefing vendors)
-- Include at least one section useful to developers or implementers (how to execute, measure, or ship safely)
-- Cover practical CRO, GEO/AEO, A/B testing, UX, or technical delivery details when the keyword allows
-- Soft-sell Techlyser as the agency that audits, builds, and optimizes Shopify stores — never hard-sell unrelated products
-- If the keyword looks like a third-party product or GitHub repo, REFRAME it into a Shopify growth / implementation problem Techlyser solves (do not write a product marketing piece for that vendor)
+Website article (Asset 3) requirements:
+1. seoTitle — ≤60 chars when possible; includes primary keyword; no clickbait; Techlyser/business-problem framing
+2. metaDescription — 140–160 chars; keyword + soft value; no hard sell
+3. slug — lowercase kebab-case
+4. outline — markdown H2/H3 bullets only
+5. excerpt — 1–2 sentences for blog cards
+6. articleMarkdown — original long-form markdown. Use ## / ### (no H1 in body). Include intro, practical examples, actionable recommendations, business implications, technical insight where relevant, conclusion. Soft Techlyser CTA in prose (1–3 mentions max). Never copy/paraphrase a news release. Never giant code fences wrapping the article.
+7. faqs — 4–6 { question, answer } when useful; else still provide solid FAQs for AI/search discoverability
+8. howTo — { name, description, steps } when how-to intent fits; else null
+9. comparisonTable — only when it improves understanding; else null
+10. cta — { headline, body, buttonText, href }. Soft, topic-matched. href MUST be one of: ${formatInternalUrlsForPrompt()}
+11. featuredImagePrompt — professional hero image concept; no text in image; business/web context
+12. tags — 3–6 lowercase tags
+13. linkedinPersonalPost — Asset 1: founder/expert 1st-person voice (~150–250 words). Strong hook, insight, business impact, light technical note, discussion prompt. 0–1 Techlyser mention. No corporate tone, no emoji spam, no hard sell. Different from company post.
+14. linkedinPagePost — Asset 2: Techlyser company voice (~120–200 words). Business impact + expertise + useful takeaway + engagement question or soft CTA. 1–2 Techlyser mentions. Do NOT copy the personal post.
 
-Requirements:
-1. seoTitle — compelling, ≤60 chars when possible, includes keyword naturally; prefer Shopify/growth framing
-2. metaDescription — 140–160 chars, includes keyword + CTA hint toward Techlyser help
-3. slug — lowercase kebab-case, no leading/trailing hyphens, no year unless essential
-4. outline — markdown bullet outline (H2/H3 headings only)
-5. excerpt — 1–2 sentence summary for blog cards
-6. articleMarkdown — full article body in markdown (H2/H3, lists, bold). No H1. No FAQ/HowTo/CTA sections here — those are separate fields
-7. faqs — array of 4–6 objects { question, answer } aligned to People Also Ask
-8. howTo — optional object { name, description, steps: [{ name, text }] } when intent is informational/how-to; null otherwise
-9. comparisonTable — optional { headers: string[], rows: string[][] } when commercial/comparison intent fits; null otherwise
-10. cta — { headline, body, buttonText, href } — href must be one of /free-shopify-audit, /services/shopify, /shopify-developers-india, /contact (internal only)
-11. featuredImagePrompt — one detailed prompt for a professional blog hero image (no text in image); ecommerce/Shopify context
-12. tags — 3–6 lowercase slug-friendly tags; include shopify when relevant
-13. linkedinPersonalPost — markdown post for a personal LinkedIn profile (1st-person founder/expert voice, ~150–250 words, line breaks, 3–6 hashtags, soft CTA + mention the article topic; no HTML)
-14. linkedinPagePost — markdown post for Techlyser company LinkedIn page (brand voice, ~120–200 words, line breaks, 3–6 hashtags, CTA to contact/consult; no HTML). Different angle from the personal post — more brand/agency oriented
+Also identify implicitly: primaryKeyword={{keyword}}, searchIntent, targetAudience, contentAngle that connects problem → Techlyser expertise.
+
+If the keyword looks like third-party news or a tool/repo name, REFRAME into what businesses should do / architecture / UX / SEO / ecommerce / AI-ready web implications — never promote that vendor.
 
 Return JSON:
 {

@@ -1,4 +1,5 @@
-import { GROWTH_SCORE_WEIGHTS, GROWTH_THRESHOLDS } from "./config";
+import { GROWTH_THRESHOLDS } from "./config";
+import { computeTechlyserGrowthScore } from "./stages/growth-score";
 import { scoreLeadPotential } from "./stages/lead-potential";
 import { scoreTechlyserRelevance } from "./stages/relevance";
 import { scoreSeoOpportunity } from "./stages/seo-opportunity";
@@ -10,26 +11,17 @@ function clamp01(n: number) {
 }
 
 export function normalizePriority(priority: number): number {
-  // ContentIdea priorities are often 0–100; opportunityScore*100 similarly.
   return clamp01(priority / 100);
 }
 
-export function computeGrowthScore(scores: GrowthStageScores): number {
-  const w = GROWTH_SCORE_WEIGHTS;
-  return clamp01(
-    scores.relevance * w.relevance +
-      scores.seoOpportunity * w.seoOpportunity +
-      scores.leadPotential * w.leadPotential +
-      scores.priorityNorm * w.priorityNorm,
-  );
-}
-
 /**
- * Score one candidate through:
- * Techlyser Relevance → Third-Party Filter → SEO Opportunity → Lead Potential
+ * Score one candidate:
+ * Third-Party Filter → techlyserGrowthScore (0–100) + stage diagnostics.
+ * Accept only when third-party passes AND techlyserGrowthScore >= 70.
  */
 export function scoreGrowthCandidate(candidate: GrowthCandidate): GrowthDecision {
   const thirdParty = filterThirdParty(candidate);
+  const breakdown = computeTechlyserGrowthScore(candidate);
   const relevance = scoreTechlyserRelevance(candidate);
   const seoOpportunity = scoreSeoOpportunity(candidate);
   const leadPotential = scoreLeadPotential(candidate);
@@ -42,21 +34,26 @@ export function scoreGrowthCandidate(candidate: GrowthCandidate): GrowthDecision
     seoOpportunity,
     leadPotential,
     priorityNorm,
+    techlyserGrowthScore: breakdown.total,
+    growthBreakdown: breakdown,
   };
 
-  const growthScore = computeGrowthScore(scores);
+  /** Normalized 0–1 for backward-compatible report fields. */
+  const growthScore = clamp01(breakdown.total / 100);
+
   let accepted = true;
   let rejectReason: string | undefined;
 
   if (!thirdParty.pass) {
     accepted = false;
     rejectReason = thirdParty.note;
-  } else if (relevance < GROWTH_THRESHOLDS.minRelevance) {
+  } else if (breakdown.total < GROWTH_THRESHOLDS.minTechlyserGrowthScore) {
     accepted = false;
-    rejectReason = `Relevance ${relevance.toFixed(2)} below min ${GROWTH_THRESHOLDS.minRelevance}`;
-  } else if (growthScore < GROWTH_THRESHOLDS.minGrowthScore) {
-    accepted = false;
-    rejectReason = `Growth score ${growthScore.toFixed(2)} below min ${GROWTH_THRESHOLDS.minGrowthScore}`;
+    rejectReason = `techlyserGrowthScore ${breakdown.total} below min ${GROWTH_THRESHOLDS.minTechlyserGrowthScore}${
+      breakdown.penaltyNotes.length
+        ? ` (${breakdown.penaltyNotes.join("; ")})`
+        : ""
+    }`;
   }
 
   return {
@@ -66,8 +63,17 @@ export function scoreGrowthCandidate(candidate: GrowthCandidate): GrowthDecision
     keyword: candidate.keyword,
     scores,
     growthScore,
+    techlyserGrowthScore: breakdown.total,
     accepted,
     rejectReason,
     rankedAt: new Date().toISOString(),
   };
+}
+
+/** @deprecated use techlyserGrowthScore / 100 */
+export function computeGrowthScore(scores: GrowthStageScores): number {
+  if (typeof scores.techlyserGrowthScore === "number") {
+    return clamp01(scores.techlyserGrowthScore / 100);
+  }
+  return 0;
 }
