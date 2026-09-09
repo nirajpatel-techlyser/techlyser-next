@@ -15,9 +15,9 @@ export type PublicSiteSettings = {
 
 const DEFAULTS: PublicSiteSettings = {
   theme: DEFAULT_SITE_THEME,
-  whatsappUrl: "",
+  whatsappUrl: "https://wa.me/919753808608",
   facebookUrl: "",
-  googleUrl: "",
+  googleUrl: "https://g.page/r/CWYl15UAeeS3EAE/review",
   instagramUrl: "",
   linkedinUrl: "",
 };
@@ -44,9 +44,10 @@ export async function getSiteSettings(): Promise<PublicSiteSettings> {
 
     return {
       theme: settings.theme as SiteThemeMode,
-      whatsappUrl: normalizeUrl(settings.whatsappUrl),
+      whatsappUrl:
+        normalizeUrl(settings.whatsappUrl) || DEFAULTS.whatsappUrl,
       facebookUrl: normalizeUrl(settings.facebookUrl),
-      googleUrl: normalizeUrl(settings.googleUrl),
+      googleUrl: normalizeUrl(settings.googleUrl) || DEFAULTS.googleUrl,
       instagramUrl: normalizeUrl(settings.instagramUrl),
       linkedinUrl: normalizeUrl(settings.linkedinUrl),
     };

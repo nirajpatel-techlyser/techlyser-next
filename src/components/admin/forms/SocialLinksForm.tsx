@@ -16,7 +16,7 @@ const fields: Array<{
   {
     key: "whatsappUrl",
     label: "WhatsApp",
-    placeholder: "https://wa.me/918819886862",
+    placeholder: "https://wa.me/919753808608",
   },
   {
     key: "facebookUrl",
@@ -26,7 +26,7 @@ const fields: Array<{
   {
     key: "googleUrl",
     label: "Google",
-    placeholder: "https://g.page/your-business",
+    placeholder: "https://g.page/r/CWYl15UAeeS3EAE/review",
   },
   {
     key: "instagramUrl",

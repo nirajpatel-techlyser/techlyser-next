@@ -14,9 +14,9 @@ export const contactHero = {
 export const contactInfo = {
   email: "info@techlyser.com",
 
-  phone: "+918819886862",
+  phone: "+919753808608",
 
-  whatsapp: "https://wa.me/918819886862",
+  whatsapp: "https://wa.me/919753808608",
 
   location: "India",
 
