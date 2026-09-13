@@ -79,7 +79,10 @@ export async function generateMetadata({
   const { slug } = await params;
 
   if (RESERVED_PATHS.has(slug)) {
-    return {};
+    return {
+      title: { absolute: "Not Found" },
+      robots: { index: false, follow: false },
+    };
   }
 
   try {
@@ -102,7 +105,10 @@ export async function generateMetadata({
       authors: [post.author],
     });
   } catch {
-    return {};
+    return {
+      title: { absolute: "Not Found" },
+      robots: { index: false, follow: false },
+    };
   }
 }
 

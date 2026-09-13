@@ -20,18 +20,18 @@ import {
 } from "@/lib/seo";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "Shopify & Ecommerce Agency India",
+  title: "Shopify Web Design & Development Agency in Indore | Techlyser",
   description:
-    "Techlyser builds high-performance Shopify stores and Next.js apps for ambitious brands. Best Shopify agency in India — Indore, Mumbai, Ahmedabad, Bangalore, Pune, Delhi, Hyderabad, Chennai, Gujarat, and worldwide.",
+    "Techlyser Web Solutions is an Indore-based Shopify web design and development agency helping DTC and e-commerce brands build fast, responsive and conversion-focused online stores.",
   path: "/",
 });
 
 export default function Home() {
   const jsonLd = [
     webPageJsonLd({
-      name: "Shopify & Ecommerce Agency India | Techlyser",
+      name: "Shopify Web Design & Development Agency in Indore | Techlyser",
       description:
-        "Premium Shopify, Shopify Plus, Next.js, and AI automation agency in India.",
+        "Indore-based Shopify web design and development agency helping DTC and ecommerce brands build fast, conversion-focused online stores.",
       path: "/",
     }),
     faqPageJsonLd(
@@ -43,7 +43,7 @@ export default function Home() {
     howToJsonLd({
       name: "How to start a Shopify project with Techlyser",
       description:
-        "A simple path from free audit to launch for Indian ecommerce brands.",
+        "A simple path from free audit to launch for ecommerce brands working with Techlyser in Indore.",
       steps: [
         {
           name: "Book a Free Shopify Growth Audit",

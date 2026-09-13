@@ -26,7 +26,8 @@ export async function generateMetadata({
 
   if (!service) {
     return {
-      title: "Service not found",
+      title: { absolute: "Service not found" },
+      robots: { index: false, follow: false },
     };
   }
 

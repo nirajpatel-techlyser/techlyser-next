@@ -13,50 +13,29 @@ export const siteConfig = {
   country: "India",
   foundingYear: 2018,
   address: {
-    streetAddress: "Indore",
-    addressLocality: "Indore",
+    streetAddress: "A-86, Sanskruti Royal City",
+    addressLocality: "Rau",
     addressRegion: "Madhya Pradesh",
-    postalCode: "452001",
+    postalCode: "453331",
     addressCountry: "IN",
   },
   geo: {
-    latitude: 22.7196,
-    longitude: 75.8577,
+    // Approximate coordinates for Rau, Indore (business location)
+    latitude: 22.6369,
+    longitude: 75.8097,
   },
   defaultTitle:
-    "Shopify Developers India | Best Shopify Agency | Techlyser",
+    "Shopify Web Design & Development Agency in Indore | Techlyser",
   defaultDescription:
-    "Hire expert Shopify developers in India. Techlyser is a premium Shopify, Shopify Plus, Next.js, Headless Commerce, WordPress, and AI automation agency — serving Indore, Mumbai, Ahmedabad, Bangalore, Pune, Delhi, Hyderabad, Chennai, Gujarat, and clients worldwide.",
+    "Techlyser Web Solutions is an Indore-based Shopify web design and development agency helping DTC and e-commerce brands build fast, responsive and conversion-focused online stores.",
   defaultOgImage: "/images/tech-hero.png",
-  keywords: [
-    "Shopify developers India",
-    "best Shopify agency",
-    "Shopify agency India",
-    "Shopify experts India",
-    "Shopify Plus developers India",
-    "Shopify developers Indore",
-    "Shopify developers Mumbai",
-    "Shopify developers Ahmedabad",
-    "Shopify developers Bangalore",
-    "Shopify developers Pune",
-    "Shopify developers Delhi",
-    "Shopify developers Hyderabad",
-    "Shopify developers Chennai",
-    "Shopify developers Gujarat",
-    "Next.js development company India",
-    "Headless commerce India",
-    "WordPress development India",
-    "WooCommerce development India",
-    "AI automation agency India",
-    "custom Shopify theme development",
-    "ecommerce developers India",
-  ],
 } as const;
 
 type PageSeoInput = {
   title: string;
   description: string;
   path: string;
+  /** Optional; omitted from metadata when empty (meta keywords are obsolete for Google). */
   keywords?: string[];
   ogImage?: string;
   noIndex?: boolean;
@@ -65,6 +44,23 @@ type PageSeoInput = {
   modifiedTime?: string;
   authors?: string[];
 };
+
+/** True when the title already carries Techlyser branding (avoid template double-suffix). */
+export function titleIncludesBrand(title: string): boolean {
+  return /\btechlyser\b/i.test(title.trim());
+}
+
+/**
+ * Use absolute title when brand is already present; otherwise let the root
+ * template append `| Techlyser Web Solutions`.
+ */
+export function resolveMetadataTitle(title: string): Metadata["title"] {
+  const normalized = title.trim();
+  if (titleIncludesBrand(normalized)) {
+    return { absolute: normalized };
+  }
+  return normalized;
+}
 
 export function absoluteUrl(path: string) {
   if (path.startsWith("http")) return path;
@@ -76,7 +72,7 @@ export function buildPageMetadata({
   title,
   description,
   path,
-  keywords = [...siteConfig.keywords],
+  keywords,
   ogImage = siteConfig.defaultOgImage,
   noIndex = false,
   type = "website",
@@ -89,11 +85,13 @@ export function buildPageMetadata({
     ? new URL(canonical).pathname
     : canonical;
   const imageUrl = absoluteUrl(ogImage);
+  const resolvedTitle = resolveMetadataTitle(title);
+  const ogTitle = title.trim();
 
   return {
-    title,
+    title: resolvedTitle,
     description,
-    keywords,
+    ...(keywords && keywords.length > 0 ? { keywords } : {}),
     authors: authors?.map((name) => ({ name })),
     creator: siteConfig.name,
     publisher: siteConfig.name,
@@ -128,14 +126,14 @@ export function buildPageMetadata({
       locale: siteConfig.locale,
       url: absoluteUrl(canonicalPath),
       siteName: siteConfig.name,
-      title,
+      title: ogTitle,
       description,
       images: [
         {
           url: imageUrl,
           width: 1200,
           height: 630,
-          alt: title,
+          alt: ogTitle,
         },
       ],
       ...(publishedTime ? { publishedTime } : {}),
@@ -144,7 +142,7 @@ export function buildPageMetadata({
     },
     twitter: {
       card: "summary_large_image",
-      title,
+      title: ogTitle,
       description,
       images: [imageUrl],
     },
@@ -190,17 +188,10 @@ export function organizationJsonLd(sameAs: string[] = []) {
         availableLanguage: ["English", "Hindi"],
       },
     ],
+    // Service area (not additional offices). Business location remains Rau, Indore.
     areaServed: [
       { "@type": "Country", name: "India" },
       { "@type": "City", name: "Indore" },
-      { "@type": "City", name: "Mumbai" },
-      { "@type": "City", name: "Ahmedabad" },
-      { "@type": "City", name: "Bangalore" },
-      { "@type": "City", name: "Pune" },
-      { "@type": "City", name: "Delhi" },
-      { "@type": "City", name: "Hyderabad" },
-      { "@type": "City", name: "Chennai" },
-      { "@type": "AdministrativeArea", name: "Gujarat" },
     ],
     knowsAbout: [
       "Shopify development",
@@ -432,6 +423,38 @@ export function collectionPageJsonLd(input: {
     description: input.description,
     url: absoluteUrl(input.path),
     isPartOf: { "@id": `${siteConfig.url}/#website` },
+    about: { "@id": `${siteConfig.url}/#organization` },
+  };
+}
+
+/** Service catalog for /services — ItemList of Service entities (no fake ratings). */
+export function serviceCatalogJsonLd(
+  items: Array<{ name: string; description: string; url: string }>,
+) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "@id": absoluteUrl("/services"),
+    url: absoluteUrl("/services"),
+    name: "Web & Shopify Services",
+    description:
+      "Shopify development, Next.js, WordPress, UI/UX, performance, and SEO services from Techlyser Web Solutions in Indore.",
+    isPartOf: { "@id": `${siteConfig.url}/#website` },
+    about: { "@id": `${siteConfig.url}/#organization` },
+    mainEntity: {
+      "@type": "ItemList",
+      itemListElement: items.map((item, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        item: {
+          "@type": "Service",
+          name: item.name,
+          description: item.description,
+          url: absoluteUrl(item.url),
+          provider: { "@id": `${siteConfig.url}/#organization` },
+        },
+      })),
+    },
   };
 }
 

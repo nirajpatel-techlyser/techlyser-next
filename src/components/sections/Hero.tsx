@@ -122,9 +122,9 @@ export default function Hero() {
             </h1>
 
             <p className="mt-2 hidden max-w-xl text-sm font-normal leading-6 text-hero-fg-muted sm:mt-4 sm:block sm:text-base sm:leading-7">
-              We design, develop, optimise and maintain Shopify stores that
-              deliver exceptional user experiences and measurable business
-              growth.
+              Indore-based Shopify web design and development agency. We design,
+              develop, optimise and maintain Shopify stores that deliver
+              exceptional user experiences and measurable business growth.
             </p>
 
             <div className="mt-3 flex flex-col gap-2 sm:mt-6 sm:flex-row sm:gap-3">

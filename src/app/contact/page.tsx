@@ -11,7 +11,7 @@ import JsonLd from "@/components/seo/JsonLd";
 export const metadata: Metadata = buildPageMetadata({
   title: "Contact Shopify Developers",
   description:
-    "Contact Techlyser for Shopify development in India — free consultation, 24hr response. Indore, Mumbai, Ahmedabad, Bangalore, Pune, Delhi, Hyderabad, Chennai, Gujarat, and worldwide.",
+    "Contact Techlyser Web Solutions, an Indore-based Shopify web design and development agency. Free consultation and typically a response within 24 hours.",
   path: "/contact",
 });
 

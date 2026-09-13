@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { portfolio } from "@/data/portfolio";
 
 import PortfolioCard from "@/components/cards/PortfolioCard";
@@ -11,9 +10,11 @@ import { FaWhatsapp } from "react-icons/fa";
 
 interface PortfolioProps {
   limit?: number;
+  /** Use h1 on the dedicated /portfolio page; keep h2 when embedded on the homepage. */
+  headingAs?: "h1" | "h2";
 }
 
-export default function Portfolio({ limit }: PortfolioProps) {
+export default function Portfolio({ limit, headingAs = "h2" }: PortfolioProps) {
   const displayedProjects = limit ? portfolio.slice(0, limit) : portfolio;
 
   const leftProjects = displayedProjects.filter((_, index) => index % 2 === 0);
@@ -28,6 +29,7 @@ export default function Portfolio({ limit }: PortfolioProps) {
           <div className="max-w-3xl">
             <SectionHeading
               caption="PORTFOLIO"
+              as={headingAs}
               title="Featured work"
               description="We help businesses grow with high-performance Shopify stores, modern Next.js applications, WordPress websites, and conversion-focused digital experiences. Explore some of the projects we've delivered for brands across ecommerce and technology."
               align="left"

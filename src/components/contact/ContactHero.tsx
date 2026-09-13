@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { contactHero } from "@/data/contact";
 
 import { Badge, Container, Section, SectionHeading } from "@/components/ui";
@@ -13,6 +12,7 @@ export default function ContactHero() {
 
         <SectionHeading
           caption=""
+          as="h1"
           title={
             <>
               {contactHero.title}{" "}

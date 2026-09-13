@@ -33,7 +33,7 @@ export default function PortfolioPage() {
       />
       <div className="bg-surface-dark">
         <Navbar />
-        <Portfolio />
+        <Portfolio headingAs="h1" />
         <WhyChoose />
         <FAQ />
         <CTA />

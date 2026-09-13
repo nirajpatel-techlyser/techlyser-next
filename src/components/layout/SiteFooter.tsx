@@ -59,7 +59,8 @@ export default async function SiteFooter() {
               </a>
             </p>
             <p className="mt-1 text-sm text-slate-400">
-              {siteConfig.address.addressLocality}, {siteConfig.country}
+              {siteConfig.address.addressLocality}, Indore,{" "}
+              {siteConfig.country}
             </p>
           </div>
 

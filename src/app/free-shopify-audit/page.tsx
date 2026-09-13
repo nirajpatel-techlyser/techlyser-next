@@ -5,20 +5,14 @@ import Navbar from "@/components/layout/Navbar";
 import ContactForm from "@/components/contact/ContactForm";
 import CTA from "@/components/sections/CTA";
 import { Container, Section } from "@/components/ui";
-import { buildPageMetadata } from "@/lib/seo";
+import { buildPageMetadata, webPageJsonLd } from "@/lib/seo";
+import JsonLd from "@/components/seo/JsonLd";
 
 export const metadata: Metadata = buildPageMetadata({
   title: "Free Shopify Growth Audit",
   description:
-    "Claim a free Shopify growth audit from Techlyser. We identify high-impact issues in performance, UX, conversion, accessibility, and SEO, and fix the first two where feasible.",
+    "Claim a free Shopify growth audit from Techlyser Web Solutions in Indore. We identify high-impact issues in performance, UX, conversion, accessibility, and SEO.",
   path: "/free-shopify-audit",
-  keywords: [
-    "free Shopify audit",
-    "Shopify growth audit",
-    "Shopify speed check",
-    "Shopify UX audit",
-    "Shopify SEO health check",
-  ],
 });
 
 const points = [
@@ -40,6 +34,14 @@ const brands = ["Innosupps", "Liv Body", "Mate Tea", "Motherly", "Actizio"];
 export default function FreeShopifyAuditPage() {
   return (
     <div className="min-h-screen bg-surface-dark">
+      <JsonLd
+        data={webPageJsonLd({
+          name: "Free Shopify Growth Audit",
+          description:
+            "Free Shopify growth audit covering performance, UX, conversion, accessibility, and SEO from Techlyser Web Solutions in Indore.",
+          path: "/free-shopify-audit",
+        })}
+      />
       <Navbar />
       <main>
         <Section className="bg-surface-dark text-hero-fg">

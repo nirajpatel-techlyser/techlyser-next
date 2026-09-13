@@ -9,23 +9,28 @@ import AboutTechnologies from "@/components/about/AboutTechnologies";
 import AboutProcess from "@/components/about/AboutProcess";
 import CTA from "@/components/sections/CTA";
 
-import { buildPageMetadata } from "@/lib/seo";
+import { buildPageMetadata, webPageJsonLd } from "@/lib/seo";
+import JsonLd from "@/components/seo/JsonLd";
 
 export const metadata: Metadata = buildPageMetadata({
-  title: "About Techlyser — Shopify Agency India",
+  title: "About Techlyser — Indore Shopify Agency",
   description:
-    "Meet Techlyser — a premium Shopify, Shopify Plus, Next.js, and AI automation agency in India helping brands launch, optimize, and scale high-performance digital experiences.",
+    "Meet Techlyser Web Solutions — an Indore-based Shopify web design and development agency helping brands launch, optimize, and scale high-performance digital experiences.",
   path: "/about",
-  keywords: [
-    "About Techlyser",
-    "Shopify agency India team",
-    "Shopify experts Indore",
-  ],
 });
 
 export default function AboutPage() {
   return (
     <div className="min-h-screen bg-white">
+      <JsonLd
+        data={webPageJsonLd({
+          name: "About Techlyser Web Solutions",
+          description:
+            "Indore-based Shopify web design and development agency helping brands build conversion-focused digital experiences.",
+          path: "/about",
+          type: "AboutPage",
+        })}
+      />
       <Navbar />
       <main>
         <AboutHero />
