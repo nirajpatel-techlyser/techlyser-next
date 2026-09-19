@@ -46,7 +46,7 @@ export const portfolio: Portfolio[] = [
     description:
       "High-performance ecommerce store for a premium nutrition brand offering supplements and wellness products to support active lifestyles and everyday health. Designed with a clean shopping experience focused on trust, usability, and conversions.",
     image: "/images/portfolio/ORPHIC.jpg",
-    href: "/portfolio/orphic",
+    href: "/portfolio",
     technologies: ["Shopify", "Nutrition", "Supplements", "CRO"],
   },
 ];

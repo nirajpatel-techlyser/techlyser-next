@@ -131,6 +131,42 @@ const nextConfig: NextConfig = {
         destination: "/resources",
         permanent: true,
       },
+      // Legacy WordPress / migration redirects
+      {
+        source: "/blogs",
+        destination: "/blog",
+        permanent: true,
+      },
+      {
+        source: "/:path*/feed",
+        destination: "/rss.xml",
+        permanent: true,
+      },
+      {
+        source: "/category/shopify-2",
+        destination: "/category/shopify",
+        permanent: true,
+      },
+      {
+        source: "/category/social-media-marketing",
+        destination: "/blog",
+        permanent: true,
+      },
+      {
+        source: "/category/ppc-pay-per-click",
+        destination: "/blog",
+        permanent: true,
+      },
+      {
+        source: "/category/:slug/page/:page",
+        destination: "/category/:slug",
+        permanent: true,
+      },
+      {
+        source: "/portfolio/:path+",
+        destination: "/portfolio",
+        permanent: true,
+      },
     ];
   },
 };
