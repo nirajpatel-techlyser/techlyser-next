@@ -78,7 +78,8 @@ export async function POST(request: Request) {
           typeof body.referrer === "string"
             ? body.referrer.slice(0, 500)
             : headers.get("referer")?.slice(0, 500) || null,
-        userAgent: headers.get("user-agent")?.slice(0, 500) || null,
+        // Omit UA to reduce PageView disk growth on Free plan (geo/path still kept).
+        userAgent: null,
         ipHash: hashIp(ip),
       },
     });

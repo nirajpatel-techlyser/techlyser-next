@@ -1,7 +1,32 @@
-import { BlogStatus, type Blog } from "@prisma/client";
+import { BlogStatus, type Blog, Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { slugifyTaxonomy } from "@/lib/blog-html";
 import type { BlogPost } from "@/types/blog";
+
+/** Fields needed for cards / archives — excludes HTML body + LinkedIn drafts (egress). */
+const blogListSelect = {
+  id: true,
+  title: true,
+  slug: true,
+  excerpt: true,
+  seoDescription: true,
+  publishedAt: true,
+  createdAt: true,
+  updatedAt: true,
+  author: true,
+  category: true,
+  tags: true,
+  featuredImage: true,
+  featured: true,
+  commentsEnabled: true,
+  readingTime: true,
+  seoTitle: true,
+  metaKeywords: true,
+  views: true,
+  status: true,
+} satisfies Prisma.BlogSelect;
+
+type BlogListRow = Prisma.BlogGetPayload<{ select: typeof blogListSelect }>;
 
 function mapBlog(blog: Blog): BlogPost {
   return {
@@ -29,13 +54,40 @@ function mapBlog(blog: Blog): BlogPost {
   };
 }
 
+function mapBlogList(blog: BlogListRow): BlogPost {
+  return {
+    id: blog.id,
+    title: blog.title,
+    slug: blog.slug,
+    description: blog.seoDescription || blog.excerpt || "",
+    excerpt: blog.excerpt || "",
+    date: (blog.publishedAt || blog.createdAt).toISOString(),
+    updatedAt: blog.updatedAt.toISOString(),
+    author: blog.author,
+    categories: blog.category ? [blog.category] : [],
+    tags: blog.tags,
+    coverImage: blog.featuredImage || "",
+    featured: blog.featured,
+    commentsEnabled: blog.commentsEnabled,
+    content: "",
+    readingTime: blog.readingTime ? `${blog.readingTime} min read` : undefined,
+    readingTimeMinutes: blog.readingTime || undefined,
+    seoTitle: blog.seoTitle || undefined,
+    seoDescription: blog.seoDescription || undefined,
+    metaKeywords: blog.metaKeywords || undefined,
+    views: blog.views,
+    status: blog.status,
+  };
+}
+
 export async function getAllPosts(): Promise<BlogPost[]> {
   const posts = await prisma.blog.findMany({
     where: { status: BlogStatus.PUBLISHED },
     orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
+    select: blogListSelect,
   });
 
-  return posts.map(mapBlog);
+  return posts.map(mapBlogList);
 }
 
 export async function getPostBySlug(slug: string): Promise<BlogPost> {
@@ -66,10 +118,11 @@ export async function getRelatedPosts(
     },
     orderBy: { publishedAt: "desc" },
     take: limit,
+    select: blogListSelect,
   });
 
   if (posts.length >= limit || !category) {
-    return posts.map(mapBlog);
+    return posts.map(mapBlogList);
   }
 
   const filler = await prisma.blog.findMany({
@@ -79,9 +132,10 @@ export async function getRelatedPosts(
     },
     orderBy: { publishedAt: "desc" },
     take: limit - posts.length,
+    select: blogListSelect,
   });
 
-  return [...posts, ...filler].map(mapBlog);
+  return [...posts, ...filler].map(mapBlogList);
 }
 
 export async function getAdjacentPosts(slug: string) {
@@ -137,9 +191,10 @@ export async function getPostsByCategory(
   const posts = await prisma.blog.findMany({
     where: { status: BlogStatus.PUBLISHED, category: match.name },
     orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
+    select: blogListSelect,
   });
 
-  return { category: match.name, posts: posts.map(mapBlog) };
+  return { category: match.name, posts: posts.map(mapBlogList) };
 }
 
 export async function getSitemapEntries(): Promise<
@@ -223,11 +278,12 @@ export async function getPostsByTag(
       status: BlogStatus.PUBLISHED,
     },
     orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
+    select: blogListSelect,
   });
 
   const filtered = posts.filter((post) =>
     post.tags.some((tag) => slugifyTaxonomy(tag) === tagSlug),
   );
 
-  return { tag: match.name, posts: filtered.map(mapBlog) };
+  return { tag: match.name, posts: filtered.map(mapBlogList) };
 }

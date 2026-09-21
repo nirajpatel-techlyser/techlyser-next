@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { runDailyAutopilot } from "@/ai/autopilot";
+import { runDbRetention } from "@/lib/db-retention";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -56,7 +57,20 @@ export async function GET(request: Request) {
       blogId: report.blogId,
       status: report.steps.done?.detail,
     });
-    return NextResponse.json({ success: true, report });
+
+    // Keep Free-plan DB lean (never deletes Blog posts).
+    let retention: Awaited<ReturnType<typeof runDbRetention>> | null = null;
+    try {
+      retention = await runDbRetention({ dryRun: false });
+      console.info("[cron.daily-blog] retention", {
+        deleted: retention.deleted,
+        nulled: retention.nulled,
+      });
+    } catch (retentionError) {
+      console.error("[cron.daily-blog] retention failed:", retentionError);
+    }
+
+    return NextResponse.json({ success: true, report, retention });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Autopilot failed";
     console.error("[cron.daily-blog]", err);
