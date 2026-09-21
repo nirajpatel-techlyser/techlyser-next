@@ -116,7 +116,17 @@ export async function listSeoGeoRuns(limit = 30) {
   return prisma.aiSeoGeoRun.findMany({
     orderBy: { createdAt: "desc" },
     take: limit,
-    include: {
+    select: {
+      id: true,
+      status: true,
+      applied: true,
+      seoScore: true,
+      geoScore: true,
+      errorMessage: true,
+      startedAt: true,
+      completedAt: true,
+      createdAt: true,
+      blogId: true,
       blog: { select: { id: true, slug: true, title: true, status: true } },
     },
   });
@@ -125,7 +135,19 @@ export async function listSeoGeoRuns(limit = 30) {
 export async function getSeoGeoRun(id: string) {
   return prisma.aiSeoGeoRun.findUnique({
     where: { id },
-    include: {
+    select: {
+      id: true,
+      status: true,
+      applied: true,
+      seoScore: true,
+      geoScore: true,
+      seoOutput: true,
+      geoOutput: true,
+      errorMessage: true,
+      startedAt: true,
+      completedAt: true,
+      createdAt: true,
+      blogId: true,
       blog: { select: { id: true, slug: true, title: true, status: true } },
     },
   });

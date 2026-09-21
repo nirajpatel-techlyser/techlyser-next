@@ -28,6 +28,15 @@ export default async function AdminAutopilotPage() {
     where: { workflowId: "daily-autopilot" },
     orderBy: { createdAt: "desc" },
     take: 15,
+    select: {
+      id: true,
+      status: true,
+      currentStep: true,
+      errorMessage: true,
+      startedAt: true,
+      completedAt: true,
+      createdAt: true,
+    },
   });
 
   const enabled = isAutopilotEnabled();

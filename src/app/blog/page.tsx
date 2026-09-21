@@ -3,7 +3,13 @@ import Link from "next/link";
 import Navbar from "@/components/layout/Navbar";
 import BlogCard from "@/components/blog/BlogCard";
 import JsonLd from "@/components/seo/JsonLd";
-import { getAllCategories, getAllPosts, getAllTags } from "@/lib/blog";
+import {
+  countPublishedPosts,
+  getAllCategories,
+  getAllPosts,
+  getAllTags,
+  searchPublishedPosts,
+} from "@/lib/blog";
 import { Container } from "@/components/ui";
 import {
   buildPageMetadata,
@@ -39,21 +45,37 @@ function formatDate(value: string) {
 }
 
 type BlogIndexProps = {
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<{ q?: string; page?: string }>;
 };
 
+const PAGE_SIZE = 24;
+
 export default async function BlogIndexPage({ searchParams }: BlogIndexProps) {
-  const { q } = await searchParams;
-  const query = (q || "").trim().toLowerCase();
+  const { q, page: pageRaw } = await searchParams;
+  const query = (q || "").trim();
+  const page = Math.max(1, Number.parseInt(pageRaw || "1", 10) || 1);
+  const skip = (page - 1) * PAGE_SIZE;
 
   let posts: Awaited<ReturnType<typeof getAllPosts>> = [];
+  let total = 0;
   let categories: Awaited<ReturnType<typeof getAllCategories>> = [];
   let tags: Awaited<ReturnType<typeof getAllTags>> = [];
 
   try {
-    posts = await getAllPosts();
+    if (query) {
+      const result = await searchPublishedPosts(query, {
+        take: PAGE_SIZE,
+        skip,
+      });
+      posts = result.posts;
+      total = result.total;
+    } else {
+      total = await countPublishedPosts();
+      posts = await getAllPosts({ take: PAGE_SIZE, skip });
+    }
   } catch {
     posts = [];
+    total = 0;
   }
 
   try {
@@ -68,19 +90,14 @@ export default async function BlogIndexPage({ searchParams }: BlogIndexProps) {
     tags = [];
   }
 
-  const filtered = query
-    ? posts.filter((post) => {
-        const haystack = [
-          post.title,
-          post.excerpt,
-          post.categories.join(" "),
-          post.tags.join(" "),
-        ]
-          .join(" ")
-          .toLowerCase();
-        return haystack.includes(query);
-      })
-    : posts;
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const qs = (p: number) => {
+    const params = new URLSearchParams();
+    if (query) params.set("q", query);
+    if (p > 1) params.set("page", String(p));
+    const s = params.toString();
+    return s ? `/blog?${s}` : "/blog";
+  };
 
   return (
     <div className="bg-surface-dark min-h-screen">
@@ -128,8 +145,8 @@ export default async function BlogIndexPage({ searchParams }: BlogIndexProps) {
             </form>
             {query ? (
               <p className="mt-3 text-sm text-slate-500">
-                Showing {filtered.length} result
-                {filtered.length === 1 ? "" : "s"} for “{q}”.{" "}
+                Showing {posts.length} of {total} result
+                {total === 1 ? "" : "s"} for “{q}”.{" "}
                 <Link href="/blog" className="text-primary hover:underline">
                   Clear
                 </Link>
@@ -155,7 +172,7 @@ export default async function BlogIndexPage({ searchParams }: BlogIndexProps) {
           ) : null}
 
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-            {filtered.map((post) => (
+            {posts.map((post) => (
               <BlogCard
                 key={post.slug}
                 post={post}
@@ -163,6 +180,37 @@ export default async function BlogIndexPage({ searchParams }: BlogIndexProps) {
               />
             ))}
           </div>
+
+          {totalPages > 1 ? (
+            <nav
+              aria-label="Blog pagination"
+              className="mt-10 flex items-center justify-center gap-4 text-sm"
+            >
+              {page > 1 ? (
+                <Link
+                  href={qs(page - 1)}
+                  className="font-medium text-primary hover:underline"
+                >
+                  ← Previous
+                </Link>
+              ) : (
+                <span className="text-slate-300">← Previous</span>
+              )}
+              <span className="text-slate-600">
+                Page {page} of {totalPages}
+              </span>
+              {page < totalPages ? (
+                <Link
+                  href={qs(page + 1)}
+                  className="font-medium text-primary hover:underline"
+                >
+                  Next →
+                </Link>
+              ) : (
+                <span className="text-slate-300">Next →</span>
+              )}
+            </nav>
+          ) : null}
 
           {tags.length > 0 ? (
             <section className="mt-14 border-t border-slate-200 pt-8">

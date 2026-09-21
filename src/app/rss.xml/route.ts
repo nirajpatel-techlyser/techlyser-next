@@ -1,17 +1,24 @@
-import { getAllPosts } from "@/lib/blog";
+import { getRssPosts } from "@/lib/blog";
+import { unstable_cache } from "next/cache";
 import { connection } from "next/server";
 
-// Must stay fully dynamic — `revalidate` would force prerender and break Vercel builds
-// whenever DATABASE_URL auth fails during `next build`.
+// Must stay fully dynamic for build safety when DATABASE_URL is unavailable,
+// but cache the DB read so origin hits do not smash Supabase on every poll.
 export const dynamic = "force-dynamic";
+
+const getCachedRssPosts = unstable_cache(
+  async () => getRssPosts(),
+  ["rss-posts-v1"],
+  { revalidate: 300 },
+);
 
 export async function GET() {
   await connection();
 
   const baseUrl = "https://techlyser.com";
-  let posts: Awaited<ReturnType<typeof getAllPosts>> = [];
+  let posts: Awaited<ReturnType<typeof getRssPosts>> = [];
   try {
-    posts = await getAllPosts();
+    posts = await getCachedRssPosts();
   } catch (error) {
     console.error("RSS feed failed to load posts:", error);
   }

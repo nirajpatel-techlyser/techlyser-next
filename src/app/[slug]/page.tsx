@@ -13,9 +13,10 @@ import { Container } from "@/components/ui";
 import { prisma } from "@/lib/prisma";
 import {
   getAdjacentPosts,
-  getAllPosts,
   getPostBySlug,
+  getPostMetaBySlug,
   getRelatedPosts,
+  getSitemapEntries,
 } from "@/lib/blog";
 import { prepareBlogHtml } from "@/lib/prepare-blog-html";
 import { slugifyTaxonomy } from "@/lib/blog-html";
@@ -66,7 +67,7 @@ function formatDate(value: string) {
 
 export async function generateStaticParams() {
   try {
-    const posts = await getAllPosts();
+    const posts = await getSitemapEntries();
     return posts.map((post) => ({ slug: post.slug }));
   } catch {
     return [];
@@ -86,7 +87,7 @@ export async function generateMetadata({
   }
 
   try {
-    const post = await getPostBySlug(slug);
+    const post = await getPostMetaBySlug(slug);
     const title = post.seoTitle || post.title;
     const description =
       post.seoDescription || post.description || post.excerpt || "";

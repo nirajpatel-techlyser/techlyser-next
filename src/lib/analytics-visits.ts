@@ -43,6 +43,18 @@ export function buildDailyVisitSeries(
     counts.set(key, (counts.get(key) || 0) + 1);
   }
 
+  return buildDailyVisitSeriesFromCounts(counts, days, timeZone);
+}
+
+/** Prefer this over loading every PageView timestamp (egress). */
+export function buildDailyVisitSeriesFromCounts(
+  counts: Map<string, number> | Record<string, number>,
+  days = 30,
+  timeZone = "Asia/Kolkata",
+): DailyVisitPoint[] {
+  const map =
+    counts instanceof Map ? counts : new Map(Object.entries(counts));
+
   const series: DailyVisitPoint[] = [];
   for (let i = days - 1; i >= 0; i -= 1) {
     const key = toDateKey(
@@ -52,7 +64,7 @@ export function buildDailyVisitSeries(
     series.push({
       date: key,
       label: labelForKey(key),
-      views: counts.get(key) || 0,
+      views: map.get(key) || 0,
     });
   }
   return series;

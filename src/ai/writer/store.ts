@@ -138,7 +138,17 @@ export async function listWriterRuns(limit = 30) {
   return prisma.aiWriterRun.findMany({
     orderBy: { createdAt: "desc" },
     take: limit,
-    include: {
+    select: {
+      id: true,
+      status: true,
+      keyword: true,
+      model: true,
+      errorMessage: true,
+      startedAt: true,
+      completedAt: true,
+      createdAt: true,
+      blogId: true,
+      contentIdeaId: true,
       blog: { select: { id: true, slug: true, title: true, status: true } },
       contentIdea: { select: { id: true, title: true } },
     },
@@ -148,7 +158,19 @@ export async function listWriterRuns(limit = 30) {
 export async function getWriterRun(id: string) {
   return prisma.aiWriterRun.findUnique({
     where: { id },
-    include: {
+    select: {
+      id: true,
+      status: true,
+      keyword: true,
+      model: true,
+      promptVersion: true,
+      errorMessage: true,
+      startedAt: true,
+      completedAt: true,
+      createdAt: true,
+      // Detail page may need payloads
+      input: true,
+      output: true,
       blog: { select: { id: true, slug: true, title: true, status: true } },
       contentIdea: { select: { id: true, title: true } },
     },

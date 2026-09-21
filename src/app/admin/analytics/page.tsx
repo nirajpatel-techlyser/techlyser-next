@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ArrowLeft, CalendarDays, Eye, Globe2, Search } from "lucide-react";
 import VisitsTrendChart from "@/components/admin/analytics/VisitsTrendChart";
 import {
-  buildDailyVisitSeries,
+  buildDailyVisitSeriesFromCounts,
   getTodayYesterdayKeys,
   startOfDayInZone,
 } from "@/lib/analytics-visits";
@@ -91,14 +91,25 @@ export default async function SiteAnalyticsPage() {
     0,
   );
   const recentTimestamps = await safe(
-    "recentTimestamps",
-    () =>
-      prisma.pageView.findMany({
-        where: { createdAt: { gte: rangeStart } },
-        select: { createdAt: true },
-        orderBy: { createdAt: "asc" },
-      }),
-    [],
+    "dailyCounts",
+    async () => {
+      const rows = await prisma.$queryRaw<
+        { day: string; views: number }[]
+      >`
+        SELECT
+          to_char(
+            (("createdAt" AT TIME ZONE 'UTC') AT TIME ZONE 'Asia/Kolkata'),
+            'YYYY-MM-DD'
+          ) AS day,
+          COUNT(*)::int AS views
+        FROM "PageView"
+        WHERE "createdAt" >= ${rangeStart}
+        GROUP BY 1
+        ORDER BY 1
+      `;
+      return rows;
+    },
+    [] as { day: string; views: number }[],
   );
   const byCountry = await safe(
     "byCountry",
@@ -189,8 +200,8 @@ export default async function SiteAnalyticsPage() {
     .sort((a, b) => b.count - a.count)
     .slice(0, 30);
 
-  const dailySeries = buildDailyVisitSeries(
-    recentTimestamps.map((row) => row.createdAt),
+  const dailySeries = buildDailyVisitSeriesFromCounts(
+    Object.fromEntries(recentTimestamps.map((row) => [row.day, Number(row.views)])),
     30,
   );
 

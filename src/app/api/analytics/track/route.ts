@@ -4,8 +4,14 @@ import {
   getClientIp,
   getGeoFromHeaders,
   hashIp,
-  lookupGeoByIp,
 } from "@/lib/analytics";
+
+function isBot(userAgent: string | null) {
+  if (!userAgent) return false;
+  return /bot|crawl|spider|slurp|facebookexternalhit|preview|wget|curl|python-requests|headless/i.test(
+    userAgent,
+  );
+}
 
 export async function POST(request: Request) {
   try {
@@ -19,7 +25,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid path" }, { status: 400 });
     }
 
-    // Skip admin/api noise
     if (
       path.startsWith("/admin") ||
       path.startsWith("/api") ||
@@ -29,12 +34,12 @@ export async function POST(request: Request) {
     }
 
     const headers = request.headers;
-    const ip = getClientIp(headers);
-    let geo = getGeoFromHeaders(headers);
-
-    if (!geo.country && !geo.city) {
-      geo = await lookupGeoByIp(ip);
+    if (isBot(headers.get("user-agent"))) {
+      return NextResponse.json({ ok: true, skipped: true, reason: "bot" });
     }
+
+    const ip = getClientIp(headers);
+    const geo = getGeoFromHeaders(headers);
 
     const slugMatch = path.match(/^\/(?!blog\/?$)([a-z0-9-]+)\/?$/i);
     const slug = slugMatch?.[1] || null;
@@ -49,42 +54,46 @@ export async function POST(request: Request) {
       "rss.xml",
       "sitemap.xml",
       "robots.txt",
+      "category",
+      "tag",
+      "resources",
+      "free-shopify-audit",
+      "shopify-developers-india",
+      "shopify-developers",
     ]);
 
     let blogId: string | null = null;
     if (slug && !reserved.has(slug.toLowerCase())) {
-      const blog = await prisma.blog.findFirst({
-        where: { slug, status: "PUBLISHED" },
-        select: { id: true },
-      });
-      blogId = blog?.id || null;
-
-      if (blogId) {
-        await prisma.blog.update({
-          where: { id: blogId },
-          data: { views: { increment: 1 } },
-        });
-      }
+      const rows = await prisma.$queryRaw<{ id: string }[]>`
+        UPDATE "Blog"
+        SET views = views + 1
+        WHERE slug = ${slug} AND status = 'PUBLISHED'
+        RETURNING id
+      `;
+      blogId = rows[0]?.id ?? null;
     }
 
-    await prisma.pageView.create({
-      data: {
-        path,
-        blogId,
-        country: geo.country,
-        city: geo.city,
-        region: geo.region,
-        referrer:
-          typeof body.referrer === "string"
-            ? body.referrer.slice(0, 500)
-            : headers.get("referer")?.slice(0, 500) || null,
-        // Omit UA to reduce PageView disk growth on Free plan (geo/path still kept).
-        userAgent: null,
-        ipHash: hashIp(ip),
-      },
-    });
+    // Sample detailed PageView rows; Blog.views stays accurate above.
+    const samplePageView = Math.random() < 0.4;
+    if (samplePageView) {
+      await prisma.pageView.create({
+        data: {
+          path,
+          blogId,
+          country: geo.country,
+          city: geo.city,
+          region: geo.region,
+          referrer:
+            typeof body.referrer === "string"
+              ? body.referrer.slice(0, 500)
+              : headers.get("referer")?.slice(0, 500) || null,
+          userAgent: null,
+          ipHash: hashIp(ip),
+        },
+      });
+    }
 
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ ok: true, sampled: samplePageView });
   } catch (error) {
     console.error("Analytics track failed:", error);
     return NextResponse.json({ ok: false }, { status: 500 });
