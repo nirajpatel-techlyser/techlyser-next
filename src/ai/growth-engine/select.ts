@@ -22,6 +22,11 @@ function mapIntent(
   return "informational";
 }
 
+function shopifyPriority(decision: GrowthDecision): number {
+  const hay = `${decision.title} ${decision.keyword}`.toLowerCase();
+  return hay.includes("shopify") ? 1 : 0;
+}
+
 function tokenOverlap(a: string, b: string): number {
   const ta = new Set(
     a
@@ -96,7 +101,12 @@ async function rankPool(
 
   const accepted = decisions
     .filter((d) => d.accepted)
-    .sort((a, b) => b.techlyserGrowthScore - a.techlyserGrowthScore);
+    .sort((a, b) => {
+      // Shopify stays first whenever both topics pass the score gate.
+      const shopifyDelta = shopifyPriority(b) - shopifyPriority(a);
+      if (shopifyDelta !== 0) return shopifyDelta;
+      return b.techlyserGrowthScore - a.techlyserGrowthScore;
+    });
   const rejected = decisions.filter((d) => !d.accepted);
   return { accepted, rejected };
 }

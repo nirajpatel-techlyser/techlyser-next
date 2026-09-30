@@ -16,6 +16,8 @@ const SEED_IDEAS: Array<{
   angle: string;
   priority: number;
   targetWords: number;
+  keywords?: string[];
+  pillars?: string[];
 }> = [
   {
     title: "When should a business rebuild its website instead of patching it?",
@@ -185,6 +187,78 @@ const SEED_IDEAS: Array<{
       "A 90-day growth roadmap covering CRO, GEO, retention, and technical debt prioritization for Shopify brands.",
     priority: 90,
     targetWords: 1600,
+    keywords: ["shopify", "d2c", "cro", "growth"],
+    pillars: ["ecommerce", "seo-organic"],
+  },
+  {
+    title: "When should an Indian D2C brand rebuild a slow Shopify store instead of adding more apps?",
+    slug: "rebuild-slow-shopify-store-instead-of-more-apps",
+    angle:
+      "Founder decision guide: Shopify performance, SEO, conversion, and technical debt signals that mean a custom rebuild beats another app. Techlyser Shopify agency perspective for ecommerce brands.",
+    priority: 110,
+    targetWords: 1800,
+    keywords: ["shopify", "performance", "seo", "cro", "rebuild", "ecommerce"],
+    pillars: ["ecommerce", "seo-organic"],
+  },
+  {
+    title: "Shopify SEO checklist for founders before spending more on ads",
+    slug: "shopify-seo-checklist-before-more-ads",
+    angle:
+      "A practical Shopify SEO and Core Web Vitals checklist: crawlability, product pages, schema, and page speed that protect conversion before paid traffic.",
+    priority: 108,
+    targetWords: 1700,
+    keywords: ["shopify", "seo", "core web vitals", "conversion", "ecommerce"],
+    pillars: ["ecommerce", "seo-organic"],
+  },
+  {
+    title: "How founders should hire a Shopify agency for performance and CRO",
+    slug: "hire-shopify-agency-performance-cro",
+    angle:
+      "What to ask a Shopify development partner about theme speed, checkout conversion, migration risk, and measurement before signing a rebuild.",
+    priority: 106,
+    targetWords: 1600,
+    keywords: ["shopify", "agency", "cro", "performance", "hire"],
+    pillars: ["ecommerce"],
+  },
+  {
+    title: "When should a business choose Next.js instead of WordPress for a custom website?",
+    slug: "nextjs-instead-of-wordpress-custom-website",
+    angle:
+      "Decision framework for founders: Next.js vs WordPress for performance, SEO, maintainability, and custom web applications. Node.js APIs when the site needs more than a CMS.",
+    priority: 84,
+    targetWords: 1800,
+    keywords: ["next.js", "wordpress", "web development", "seo", "performance", "node.js"],
+    pillars: ["web-development"],
+  },
+  {
+    title: "WordPress and PHP: when a slow business website needs a rebuild, not another plugin",
+    slug: "wordpress-php-rebuild-instead-of-plugins",
+    angle:
+      "WordPress development guide for SMEs: PHP theme debt, security, Core Web Vitals, and SEO problems that mean a redesign or migration beats another plugin.",
+    priority: 82,
+    targetWords: 1700,
+    keywords: ["wordpress", "web development", "performance", "seo", "rebuild"],
+    pillars: ["web-development", "seo-organic"],
+  },
+  {
+    title: "Node.js APIs for business websites: when custom integration beats a plugin stack",
+    slug: "nodejs-apis-custom-integration-vs-plugins",
+    angle:
+      "When founders should commission a Node.js API behind Next.js or WordPress: scalability, maintainability, and integration problems that hurt conversion.",
+    priority: 80,
+    targetWords: 1600,
+    keywords: ["node.js", "next.js", "api", "web development", "integration", "wordpress"],
+    pillars: ["web-development"],
+  },
+  {
+    title: "Web development checklist for founders: performance, SEO, and conversion before a redesign",
+    slug: "web-development-checklist-performance-seo-conversion",
+    angle:
+      "A founder checklist for custom web development: mobile UX, page speed, technical SEO, and lead conversion signals before hiring an agency to rebuild the site.",
+    priority: 78,
+    targetWords: 1600,
+    keywords: ["web development", "seo", "performance", "conversion", "redesign"],
+    pillars: ["web-development", "seo-organic"],
   },
 ];
 
@@ -287,7 +361,8 @@ async function seedIdeas() {
           targetWords: idea.targetWords,
           metadata: {
             source: "techlyser-niche-seed",
-            pillars: ["shopify-growth", "cro", "geo", "ab-testing"],
+            pillars: idea.pillars ?? ["ecommerce", "shopify-growth"],
+            keywords: idea.keywords ?? ["shopify", "ecommerce", "cro"],
           },
         },
       });
@@ -305,7 +380,8 @@ async function seedIdeas() {
         targetWords: idea.targetWords,
         metadata: {
           source: "techlyser-niche-seed",
-          pillars: ["shopify-growth", "cro", "geo", "ab-testing"],
+          pillars: idea.pillars ?? ["ecommerce", "shopify-growth"],
+          keywords: idea.keywords ?? ["shopify", "ecommerce", "cro"],
         },
       },
     });
