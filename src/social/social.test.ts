@@ -26,12 +26,24 @@ const post: WebsitePostSource = {
   websiteStatus: "PUBLISHED",
 };
 
-test("captions stay shorter than the article and keep the site URL", () => {
-  const linkedin = buildSocialCaption(post, "LINKEDIN");
+test("captions keep paragraphs, decode entities, and end with the article line", () => {
+  const linkedin = buildSocialCaption(
+    {
+      ...post,
+      linkedinPagePost:
+        "<p>Founders should fix theme speed before buying another app.</p><p>It&#39;s a rebuild decision.</p>",
+    },
+    "LINKEDIN",
+  );
   const instagram = buildSocialCaption(post, "INSTAGRAM");
   assert.match(linkedin.caption, /theme speed/);
-  assert.match(linkedin.caption, /https:\/\/techlyser.com\/shopify-speed/);
-  assert.ok(linkedin.caption.length < post.content.length + 500);
+  assert.match(linkedin.caption, /It's a rebuild decision/);
+  assert.match(linkedin.caption, /\n\n/);
+  assert.match(
+    linkedin.caption,
+    /View full article here - https:\/\/techlyser.com\/shopify-speed$/,
+  );
+  assert.doesNotMatch(linkedin.caption, /&#39;/);
   assert.ok(instagram.hashtags.includes("#shopify"));
   assert.equal(instagram.imageUrl, post.featuredImage);
 });

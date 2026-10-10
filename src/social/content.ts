@@ -9,17 +9,30 @@ const LIMITS: Record<SocialPlatform, number> = {
   GOOGLE_BUSINESS: 1400,
 };
 
-export function htmlToText(value: string) {
+function decodeHtmlEntities(value: string) {
+  const fromCode = (code: number, original: string) =>
+    code > 0 && code <= 0x10ffff ? String.fromCodePoint(code) : original;
   return value
+    .replace(/&#(\d+);/g, (original, digits) => fromCode(Number(digits), original))
+    .replace(/&#x([0-9a-f]+);/gi, (original, hex) => fromCode(parseInt(hex, 16), original))
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&quot;/gi, '"')
+    .replace(/&apos;/gi, "'")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&amp;/gi, "&");
+}
+
+export function htmlToText(value: string) {
+  const withBreaks = value
     .replace(/<br\s*\/?>/gi, "\n")
-    .replace(/<\/p>/gi, "\n\n")
-    .replace(/<[^>]+>/g, "")
-    .replace(/&nbsp;/g, " ")
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
+    .replace(/<\/(p|div|h[1-6]|li|tr|blockquote)>/gi, "\n\n")
+    .replace(/<li[^>]*>/gi, "• ")
+    .replace(/<[^>]+>/g, "");
+  return decodeHtmlEntities(withBreaks)
+    .replace(/[ \t]+\n/g, "\n")
     .replace(/\n{3,}/g, "\n\n")
+    .replace(/[ \t]{2,}/g, " ")
     .trim();
 }
 
@@ -34,9 +47,20 @@ export function isPublicHttpsUrl(value: string | null | undefined) {
 }
 
 function clip(value: string, max: number) {
-  const clean = value.replace(/\s+/g, " ").trim();
+  const clean = value.replace(/[ \t]+\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
   if (clean.length <= max) return clean;
   return `${clean.slice(0, max - 1).trimEnd()}…`;
+}
+
+function articleLine(linkUrl: string) {
+  return `View full article here - ${linkUrl}`;
+}
+
+function withArticleLine(body: string, linkUrl: string, max: number) {
+  const line = articleLine(linkUrl);
+  const withoutUrl = body.replaceAll(linkUrl, "").replace(/\n{3,}/g, "\n\n").trim();
+  const clipped = clip(withoutUrl, Math.max(0, max - line.length - 2));
+  return clipped ? `${clipped}\n\n${line}` : line;
 }
 
 function hashtagsFromTags(tags: string[]) {
@@ -102,21 +126,20 @@ function linkedinCaption(post: WebsitePostSource, linkUrl: string) {
   const personal = htmlToText(post.linkedinPersonalPost);
   const page = htmlToText(post.linkedinPagePost);
   const body = personal || page || `${post.title}\n\n${leadText(post)}`;
-  const withLink = body.includes(linkUrl) ? body : `${body}\n\n${linkUrl}`;
-  return clip(withLink, LIMITS.LINKEDIN);
+  return withArticleLine(body, linkUrl, LIMITS.LINKEDIN);
 }
 
 function captionFor(platform: SocialPlatform, post: WebsitePostSource, linkUrl: string, hashtags: string[]) {
   if (platform === "LINKEDIN") return linkedinCaption(post, linkUrl);
   if (platform === "INSTAGRAM") {
     const tags = hashtags.length ? `\n\n${hashtags.join(" ")}` : "";
-    const body = `${post.title}\n\n${leadText(post)}\n\n${linkUrl}${tags}`;
-    return clip(body, LIMITS.INSTAGRAM);
+    const body = `${post.title}\n\n${leadText(post)}${tags}`;
+    return withArticleLine(body, linkUrl, LIMITS.INSTAGRAM);
   }
   if (platform === "FACEBOOK") {
-    return clip(`${post.title}\n\n${leadText(post)}\n\n${linkUrl}`, LIMITS.FACEBOOK);
+    return withArticleLine(`${post.title}\n\n${leadText(post)}`, linkUrl, LIMITS.FACEBOOK);
   }
-  return clip(`${post.title}. ${leadText(post)}`, LIMITS.GOOGLE_BUSINESS);
+  return withArticleLine(`${post.title}\n\n${leadText(post)}`, linkUrl, LIMITS.GOOGLE_BUSINESS);
 }
 
 export function buildSocialCaption(
