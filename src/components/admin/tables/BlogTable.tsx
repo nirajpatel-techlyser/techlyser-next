@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { BlogStatus } from "@prisma/client";
 import { deleteBlog, duplicateBlog } from "@/actions/blogs";
+import { LIFECYCLE_LABEL } from "@/social/labels";
 
 export type BlogListItem = {
   id: string;
@@ -16,6 +17,7 @@ export type BlogListItem = {
   publishedAt: string | null;
   createdAt: string;
   updatedAt: string;
+  socialStatus: string | null;
 };
 
 function formatDate(value: string | null) {
@@ -39,6 +41,7 @@ export default function BlogTable({ posts }: { posts: BlogListItem[] }) {
             <th className="px-5 py-3 font-medium">Title</th>
             <th className="px-5 py-3 font-medium">Category</th>
             <th className="px-5 py-3 font-medium">Status</th>
+            <th className="px-5 py-3 font-medium">Social</th>
             <th className="px-5 py-3 font-medium">Views</th>
             <th className="px-5 py-3 font-medium">Created</th>
             <th className="px-5 py-3 font-medium">Published</th>
@@ -48,7 +51,7 @@ export default function BlogTable({ posts }: { posts: BlogListItem[] }) {
         <tbody>
           {posts.length === 0 ? (
             <tr>
-              <td colSpan={7} className="px-5 py-12 text-center text-slate-500">
+              <td colSpan={8} className="px-5 py-12 text-center text-slate-500">
                 No blogs found.
               </td>
             </tr>
@@ -72,6 +75,9 @@ export default function BlogTable({ posts }: { posts: BlogListItem[] }) {
                   >
                     {post.status}
                   </span>
+                </td>
+                <td className="px-5 py-3 text-xs font-semibold text-slate-600">
+                  {post.socialStatus ? LIFECYCLE_LABEL[post.socialStatus] || post.socialStatus : "—"}
                 </td>
                 <td className="px-5 py-3">
                   <Link

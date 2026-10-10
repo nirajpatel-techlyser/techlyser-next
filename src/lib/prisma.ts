@@ -25,13 +25,15 @@ function hasAiModels(client: PrismaClient) {
     aiWriterRun?: unknown;
     aiSeoGeoRun?: unknown;
     researchItem?: unknown;
+    socialAccount?: unknown;
   };
   return Boolean(
     c.opportunity &&
       c.contentPlan &&
       c.aiWriterRun &&
       c.aiSeoGeoRun &&
-      c.researchItem,
+      c.researchItem &&
+      c.socialAccount,
   );
 }
 

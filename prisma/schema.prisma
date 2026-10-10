@@ -104,6 +104,8 @@ model Blog {
   publishJobs      PublishingQueue[]
   writerRuns       AiWriterRun[]
   seoGeoRuns       AiSeoGeoRun[]
+  socialDistribution SocialDistribution?
+  socialPublishJobs  SocialPublishJob[]
 
   @@index([status, publishedAt])
   @@index([category])
@@ -706,6 +708,150 @@ model AiAgentRun {
 
   @@index([workflowId, status])
   @@index([createdAt])
+}
+
+// =============================================================================
+// Social publishing — website post remains the source of truth.
+// Blog.status stays DRAFT | PUBLISHED. This lifecycle is separate.
+// =============================================================================
+
+enum SocialPlatform {
+  LINKEDIN
+  INSTAGRAM
+  FACEBOOK
+  GOOGLE_BUSINESS
+}
+
+enum SocialAccountStatus {
+  CONNECTED
+  EXPIRED
+  REVOKED
+  ERROR
+}
+
+enum SocialLifecycleStatus {
+  DRAFT
+  NEEDS_REVIEW
+  APPROVED
+  READY_TO_PUBLISH
+  PUBLISHING
+  PARTIALLY_PUBLISHED
+  PUBLISHED
+  PUBLISH_FAILED
+  CANCELLED
+}
+
+enum SocialJobStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum SocialAttemptStatus {
+  PENDING
+  PUBLISHING
+  PUBLISHED
+  FAILED
+  SKIPPED
+}
+
+/// Connected official-API account. Tokens are encrypted and server-only.
+model SocialAccount {
+  id                String              @id @default(cuid())
+  platform          SocialPlatform
+  label             String
+  externalAccountId String
+  status            SocialAccountStatus @default(CONNECTED)
+  accessTokenEnc    String              @db.Text
+  refreshTokenEnc   String?             @db.Text
+  expiresAt         DateTime?
+  scopes            String?
+  metadata          Json?
+  connectedByUserId String?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  @@unique([platform, externalAccountId])
+  @@index([platform, status])
+}
+
+/// One social publishing record per website post.
+model SocialDistribution {
+  id               String                @id @default(cuid())
+  blogId           String                @unique
+  blog             Blog                  @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  status           SocialLifecycleStatus @default(NEEDS_REVIEW)
+  approvedAt       DateTime?
+  approvedByUserId String?
+  createdAt        DateTime              @default(now())
+  updatedAt        DateTime              @updatedAt
+  variants         SocialVariant[]
+  jobs             SocialPublishJob[]
+}
+
+/// Platform caption derived from the website post. Does not rewrite Blog.
+model SocialVariant {
+  id             String             @id @default(cuid())
+  distributionId String
+  distribution   SocialDistribution @relation(fields: [distributionId], references: [id], onDelete: Cascade)
+  platform       SocialPlatform
+  caption        String             @db.Text
+  hashtags       String[]           @default([])
+  linkUrl        String
+  imageUrl       String?
+  sourceHash     String
+  contentHash    String
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  @@unique([distributionId, platform])
+}
+
+/// One click of Publish Everywhere. scheduledFor is reserved for a later scheduler.
+model SocialPublishJob {
+  id             String           @id @default(cuid())
+  distributionId String
+  distribution   SocialDistribution @relation(fields: [distributionId], references: [id], onDelete: Cascade)
+  blogId         String
+  blog           Blog             @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  status         SocialJobStatus  @default(QUEUED)
+  idempotencyKey String           @unique
+  platforms      SocialPlatform[]
+  scheduledFor   DateTime?
+  startedAt      DateTime?
+  completedAt    DateTime?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  attempts       SocialPublishAttempt[]
+
+  @@index([blogId, createdAt])
+  @@index([status, createdAt])
+}
+
+/// Per-platform result. idempotencyKey blocks a second publish of the same version.
+model SocialPublishAttempt {
+  id             String              @id @default(cuid())
+  jobId          String
+  job            SocialPublishJob    @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  blogId         String
+  platform       SocialPlatform
+  status         SocialAttemptStatus @default(PENDING)
+  attemptCount   Int                 @default(0)
+  retryable      Boolean             @default(false)
+  externalPostId String?
+  publishedUrl   String?
+  errorCode      String?
+  errorMessage   String?             @db.Text
+  errorDetail    String?             @db.Text
+  contentHash    String
+  idempotencyKey String              @unique
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+
+  @@index([blogId, platform, status])
+  @@index([jobId])
 }
 
 /// Durable memory records for brand / run context

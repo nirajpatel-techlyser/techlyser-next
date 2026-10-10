@@ -29,6 +29,11 @@ ALTER TABLE IF EXISTS "AiSeoGeoRun" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS "AiWriterRun" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS "AiAgentRun" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE IF EXISTS "AiMemory" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS "SocialAccount" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS "SocialDistribution" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS "SocialVariant" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS "SocialPublishJob" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE IF EXISTS "SocialPublishAttempt" ENABLE ROW LEVEL SECURITY;
 
 -- Defense in depth: revoke direct table grants from API roles (if present).
 REVOKE ALL ON TABLE "User" FROM anon, authenticated;
@@ -57,3 +62,8 @@ REVOKE ALL ON TABLE "AiSeoGeoRun" FROM anon, authenticated;
 REVOKE ALL ON TABLE "AiWriterRun" FROM anon, authenticated;
 REVOKE ALL ON TABLE "AiAgentRun" FROM anon, authenticated;
 REVOKE ALL ON TABLE "AiMemory" FROM anon, authenticated;
+REVOKE ALL ON TABLE "SocialAccount" FROM anon, authenticated;
+REVOKE ALL ON TABLE "SocialDistribution" FROM anon, authenticated;
+REVOKE ALL ON TABLE "SocialVariant" FROM anon, authenticated;
+REVOKE ALL ON TABLE "SocialPublishJob" FROM anon, authenticated;
+REVOKE ALL ON TABLE "SocialPublishAttempt" FROM anon, authenticated;

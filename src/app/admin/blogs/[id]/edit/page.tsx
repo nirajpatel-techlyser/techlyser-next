@@ -1,6 +1,9 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import BlogForm from "@/components/admin/forms/BlogForm";
+import SocialPublishPanel from "@/components/admin/social/SocialPublishPanel";
+import { LIFECYCLE_LABEL } from "@/social/labels";
+import { composeSocialPublishView } from "@/social/store";
 
 type PageProps = {
   params: Promise<{ id: string }>;
@@ -20,6 +23,19 @@ export default async function EditBlogPage({ params }: PageProps) {
     notFound();
   }
 
+  const social = await composeSocialPublishView({
+    blogId: blog.id,
+    title: blog.title,
+    slug: blog.slug,
+    excerpt: blog.excerpt || "",
+    content: blog.content,
+    featuredImage: blog.featuredImage,
+    tags: blog.tags,
+    linkedinPersonalPost: blog.linkedinPersonalPost || "",
+    linkedinPagePost: blog.linkedinPagePost || "",
+    websiteStatus: blog.status,
+  });
+
   return (
     <div className="space-y-6">
       <div>
@@ -27,7 +43,30 @@ export default async function EditBlogPage({ params }: PageProps) {
           Edit Blog
         </h1>
         <p className="mt-2 text-slate-600">{blog.title}</p>
+        <dl className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm text-slate-600">
+          <div>
+            <dt className="inline font-medium text-slate-800">Website status: </dt>
+            <dd className="inline">{blog.status === "PUBLISHED" ? "Published" : "Draft"}</dd>
+          </div>
+          <div>
+            <dt className="inline font-medium text-slate-800">Social: </dt>
+            <dd className="inline">{LIFECYCLE_LABEL[social.lifecycle] || social.lifecycle}</dd>
+          </div>
+          <div>
+            <dt className="inline font-medium text-slate-800">Image: </dt>
+            <dd className="inline">{blog.featuredImage ? "Attached" : "Missing"}</dd>
+          </div>
+          <div>
+            <dt className="inline font-medium text-slate-800">Created: </dt>
+            <dd className="inline">{blog.createdAt.toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })}</dd>
+          </div>
+          <div>
+            <dt className="inline font-medium text-slate-800">Updated: </dt>
+            <dd className="inline">{blog.updatedAt.toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })}</dd>
+          </div>
+        </dl>
       </div>
+      <SocialPublishPanel initial={social} />
       <BlogForm
         initialValues={{
           id: blog.id,

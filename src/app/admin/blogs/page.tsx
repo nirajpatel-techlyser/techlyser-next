@@ -61,6 +61,15 @@ export default async function AdminBlogsPage({
     }),
   ]);
 
+  const socialRows =
+    posts.length === 0
+      ? []
+      : await prisma.socialDistribution.findMany({
+          where: { blogId: { in: posts.map((post) => post.id) } },
+          select: { blogId: true, status: true },
+        });
+  const socialByBlog = new Map(socialRows.map((row) => [row.blogId, row.status]));
+
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
   return (
@@ -114,6 +123,7 @@ export default async function AdminBlogsPage({
           publishedAt: post.publishedAt?.toISOString() ?? null,
           createdAt: post.createdAt.toISOString(),
           updatedAt: post.updatedAt.toISOString(),
+          socialStatus: socialByBlog.get(post.id) ?? null,
         }))}
       />
 

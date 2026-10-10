@@ -8,6 +8,7 @@ import {
   Bot,
   CalendarRange,
   FileText,
+  History,
   LayoutDashboard,
   LogOut,
   MessageSquare,
@@ -15,6 +16,7 @@ import {
   PlusCircle,
   Search,
   Settings,
+  Share2,
   Sparkles,
 } from "lucide-react";
 
@@ -27,6 +29,8 @@ const navItems = [
   { href: "/admin/ai/autopilot", label: "Daily Autopilot", icon: Sparkles },
   { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/admin/blogs", label: "Blogs", icon: FileText },
+  { href: "/admin/social/accounts", label: "Social accounts", icon: Share2 },
+  { href: "/admin/social/history", label: "Social history", icon: History },
   { href: "/admin/comments", label: "Comments", icon: MessageSquare },
   { href: "/admin/settings", label: "Settings", icon: Settings },
   { href: "/admin/blogs/new", label: "New Blog", icon: PlusCircle },
