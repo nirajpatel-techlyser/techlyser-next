@@ -32,6 +32,7 @@ export default async function SocialHistoryPage({
             platform: true,
             status: true,
             publishedUrl: true,
+            secondaryPublishedUrl: true,
             errorMessage: true,
             retryable: true,
           },
@@ -84,7 +85,12 @@ export default async function SocialHistoryPage({
                     </span>
                     {attempt.publishedUrl ? (
                       <a href={attempt.publishedUrl} target="_blank" rel="noopener noreferrer" className="font-semibold text-primary hover:underline">
-                        Open
+                        {attempt.secondaryPublishedUrl ? "Profile" : "Open"}
+                      </a>
+                    ) : null}
+                    {attempt.secondaryPublishedUrl ? (
+                      <a href={attempt.secondaryPublishedUrl} target="_blank" rel="noopener noreferrer" className="font-semibold text-primary hover:underline">
+                        Page
                       </a>
                     ) : null}
                     {attempt.status === "FAILED" ? (

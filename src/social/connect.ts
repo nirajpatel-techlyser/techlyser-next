@@ -48,17 +48,61 @@ export async function connectLinkedIn(code: string, userId: string) {
   if (!profile.sub) {
     throw new SocialPublishError("AUTH", "LinkedIn did not return a profile. Try connecting again.");
   }
+  const page = await findLinkedInPage(token.access_token);
   await upsertSocialAccount({
     platform: "LINKEDIN",
-    label: profile.name || "LinkedIn member",
+    label: page ? `${profile.name || "LinkedIn"} + ${page.name}` : profile.name || "LinkedIn member",
     externalAccountId: profile.sub,
     accessToken: token.access_token,
     refreshToken: token.refresh_token,
     expiresAt: expiry(token.expires_in),
-    scopes: token.scope || "openid profile w_member_social",
-    metadata: { personUrn: `urn:li:person:${profile.sub}` },
+    scopes: token.scope || "openid profile w_member_social w_organization_social",
+    metadata: {
+      personUrn: `urn:li:person:${profile.sub}`,
+      ...(page ? { organizationUrn: page.urn, organizationName: page.name } : {}),
+    },
     connectedByUserId: userId,
   });
+}
+
+const LINKEDIN_HEADERS = {
+  "X-Restli-Protocol-Version": "2.0.0",
+  "LinkedIn-Version": "202511",
+};
+
+async function findLinkedInPage(accessToken: string) {
+  const response = await socialFetch(
+    "https://api.linkedin.com/rest/organizationAcls?q=roleAssignee&role=ADMINISTRATOR&state=APPROVED",
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        ...LINKEDIN_HEADERS,
+      },
+    },
+  );
+  if (!response.ok) return null;
+  const data = (await response.json()) as { elements?: { organization?: string }[] };
+  const urns = (data.elements || [])
+    .map((row) => row.organization)
+    .filter((urn): urn is string => Boolean(urn));
+  let chosen: { urn: string; name: string } | null = null;
+  for (const urn of urns.slice(0, 8)) {
+    const id = urn.split(":").pop();
+    if (!id) continue;
+    const org = await socialFetch(`https://api.linkedin.com/rest/organizations/${id}`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        ...LINKEDIN_HEADERS,
+      },
+    });
+    const body = org.ok ? ((await org.json()) as { localizedName?: string }) : {};
+    const name = body.localizedName || "";
+    if (/techlyser/i.test(name)) {
+      chosen = { urn, name };
+      break;
+    }
+  }
+  return chosen;
 }
 
 type MetaPage = {

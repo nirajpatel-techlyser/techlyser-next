@@ -248,10 +248,20 @@ async function runOneAttempt(input: {
   }
 
   try {
+    const saved = await prisma.socialPublishAttempt.findUnique({
+      where: { id: input.attemptId },
+      select: {
+        externalPostId: true,
+        publishedUrl: true,
+        secondaryExternalPostId: true,
+        secondaryPublishedUrl: true,
+      },
+    });
     const result = await publisher.publish({
       caption: variant,
       account,
       image: input.image,
+      resume: saved,
     });
     await prisma.socialPublishAttempt.update({
       where: { id: input.attemptId },
@@ -260,6 +270,8 @@ async function runOneAttempt(input: {
         retryable: false,
         externalPostId: result.externalPostId,
         publishedUrl: result.publishedUrl,
+        secondaryExternalPostId: result.secondaryExternalPostId ?? null,
+        secondaryPublishedUrl: result.secondaryPublishedUrl ?? null,
         errorCode: null,
         errorMessage: null,
         errorDetail: null,
@@ -288,6 +300,14 @@ async function runOneAttempt(input: {
         errorCode: mapped.code,
         errorMessage: mapped.message,
         errorDetail: mapped.detail,
+        ...(mapped.partial
+          ? {
+              externalPostId: mapped.partial.externalPostId,
+              publishedUrl: mapped.partial.publishedUrl,
+              secondaryExternalPostId: mapped.partial.secondaryExternalPostId ?? null,
+              secondaryPublishedUrl: mapped.partial.secondaryPublishedUrl ?? null,
+            }
+          : {}),
       },
     });
   }
@@ -417,6 +437,7 @@ export async function readJobStatus(jobId: string) {
           platform: true,
           status: true,
           publishedUrl: true,
+          secondaryPublishedUrl: true,
           errorMessage: true,
           retryable: true,
           externalPostId: true,

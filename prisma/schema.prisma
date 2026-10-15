@@ -840,8 +840,10 @@ model SocialPublishAttempt {
   status         SocialAttemptStatus @default(PENDING)
   attemptCount   Int                 @default(0)
   retryable      Boolean             @default(false)
-  externalPostId String?
-  publishedUrl   String?
+  externalPostId          String?
+  publishedUrl            String?
+  secondaryExternalPostId String?
+  secondaryPublishedUrl   String?
   errorCode      String?
   errorMessage   String?             @db.Text
   errorDetail    String?             @db.Text

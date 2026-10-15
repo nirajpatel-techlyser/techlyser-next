@@ -166,6 +166,7 @@ export async function composeSocialPublishView(post: WebsitePostSource): Promise
         platform: true,
         status: true,
         publishedUrl: true,
+        secondaryPublishedUrl: true,
         errorMessage: true,
         retryable: true,
         contentHash: true,

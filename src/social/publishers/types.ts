@@ -14,6 +14,15 @@ export type PublisherAccount = {
 export type PublishOutput = {
   externalPostId: string;
   publishedUrl: string | null;
+  secondaryExternalPostId?: string | null;
+  secondaryPublishedUrl?: string | null;
+};
+
+export type PublishResume = {
+  externalPostId: string | null;
+  publishedUrl: string | null;
+  secondaryExternalPostId: string | null;
+  secondaryPublishedUrl: string | null;
 };
 
 export type ImagePayload = {
@@ -28,5 +37,6 @@ export interface SocialPublisher {
     caption: SocialCaption;
     account: PublisherAccount;
     image: ImagePayload | null;
+    resume?: PublishResume | null;
   }): Promise<PublishOutput>;
 }

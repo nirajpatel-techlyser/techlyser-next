@@ -160,9 +160,19 @@ export default function SocialPublishPanel({ initial }: { initial: SocialPublish
                 href={platform.attempt.publishedUrl}
                 target="_blank"
                 rel="noopener noreferrer"
+                className="mt-2 mr-4 inline-block text-sm font-medium text-primary hover:underline"
+              >
+                {platform.attempt.secondaryPublishedUrl ? "View profile post" : "View published post"}
+              </a>
+            ) : null}
+            {platform.attempt?.secondaryPublishedUrl ? (
+              <a
+                href={platform.attempt.secondaryPublishedUrl}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="mt-2 inline-block text-sm font-medium text-primary hover:underline"
               >
-                View published post
+                View LinkedIn Page post
               </a>
             ) : null}
           </div>

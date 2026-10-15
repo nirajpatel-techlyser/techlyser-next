@@ -60,6 +60,7 @@ export type AttemptSnapshot = {
   platform: SocialPlatform;
   status: SocialAttemptStatus;
   publishedUrl: string | null;
+  secondaryPublishedUrl: string | null;
   errorMessage: string | null;
   retryable: boolean;
   contentHash: string;

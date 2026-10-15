@@ -22,6 +22,12 @@ export class SocialPublishError extends Error {
   code: SocialErrorCode;
   detail: string;
   retryable: boolean;
+  partial?: {
+    externalPostId: string;
+    publishedUrl: string | null;
+    secondaryExternalPostId?: string | null;
+    secondaryPublishedUrl?: string | null;
+  };
 
   constructor(code: SocialErrorCode, message: string, detail = "") {
     super(message);

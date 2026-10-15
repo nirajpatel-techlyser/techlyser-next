@@ -18,13 +18,13 @@ If the migration was already applied, Prisma will report that the types exist. D
 ## LinkedIn
 
 1. Create an app at https://www.linkedin.com/developers/apps
-2. Add the product **Share on LinkedIn** and **Sign In with LinkedIn using OpenID Connect**.
+2. Add the products **Share on LinkedIn** and **Sign In with LinkedIn using OpenID Connect**. Do not add Community Management API to this app. LinkedIn disables that request when any other product is already on the app.
 3. Redirect URL: `https://techlyser.com/api/social/linkedin/callback`
    Local: `http://localhost:3000/api/social/linkedin/callback`
 4. Set `LINKEDIN_CLIENT_ID` and `LINKEDIN_CLIENT_SECRET`.
 5. In admin, click **Connect LinkedIn** and approve `openid`, `profile`, and `w_member_social`.
 
-Publishing goes to the connected member profile. The caption prefers the saved LinkedIn personal draft, then the company-page draft, then the excerpt. Company-page posting (`w_organization_social`) is not requested, because LinkedIn often rejects the whole login when that product is not approved on the app.
+Page posting needs a second, empty LinkedIn app that has only Community Management API. After that product is approved, one publish can write the same caption to the member profile and to the Techlyser Page. If the Page post fails after the profile post succeeded, retry continues from the Page and does not post the profile again.
 
 The live post is not verified until you connect the app and publish one approved post.
 

@@ -42,6 +42,13 @@ function isGemini3Model(model: string): boolean {
   return /^gemini-3(?:\.|$|-)/.test(model);
 }
 
+/** Used only after the configured Gemini model stays overloaded. */
+const GEMINI_FALLBACK_MODELS = ["gemini-2.5-flash", "gemini-2.0-flash"];
+
+function isGeminiOverload(error: Error) {
+  return /high demand|unavailable|resource.?exhausted|try again later/i.test(error.message);
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
@@ -413,8 +420,22 @@ export async function callWriterLlm(
 
   if (provider === "gemini") {
     const apiKey = process.env.GEMINI_API_KEY!.trim();
-    const payload = await callGeminiWriter(systemPrompt, userPrompt, model, apiKey);
-    return { payload, model: `${provider}/${model}`, provider };
+    const models = [model, ...GEMINI_FALLBACK_MODELS.filter((candidate) => candidate !== model)];
+    let lastError: Error | null = null;
+    for (const candidate of models) {
+      try {
+        const payload = await callGeminiWriter(systemPrompt, userPrompt, candidate, apiKey);
+        if (candidate !== model) {
+          console.warn(`[writer.llm] primary model overloaded; wrote with ${candidate}`);
+        }
+        return { payload, model: `${provider}/${candidate}`, provider };
+      } catch (error) {
+        lastError = error instanceof Error ? error : new Error("Gemini request failed.");
+        if (!isGeminiOverload(lastError)) throw lastError;
+        console.warn(`[writer.llm] ${candidate} overloaded, trying the next Gemini model`);
+      }
+    }
+    throw lastError ?? new Error("Gemini request failed.");
   }
 
   let content: string;
