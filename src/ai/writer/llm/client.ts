@@ -162,7 +162,8 @@ async function callGeminiPlain(input: {
   };
 
   if (isGemini3Model(input.model)) {
-    generationConfig.thinkingConfig = { thinkingLevel: "minimal" };
+    // gemini-3.8-flash rejects "minimal"; "low" works across Gemini 3 Flash models.
+    generationConfig.thinkingConfig = { thinkingLevel: "low" };
   } else {
     generationConfig.temperature = 0.7;
     generationConfig.thinkingConfig = { thinkingBudget: 0 };
@@ -222,7 +223,8 @@ async function callGemini(input: {
   };
 
   if (isGemini3Model(input.model)) {
-    generationConfig.thinkingConfig = { thinkingLevel: "minimal" };
+    // gemini-3.8-flash rejects "minimal"; "low" works across Gemini 3 Flash models.
+    generationConfig.thinkingConfig = { thinkingLevel: "low" };
   } else {
     generationConfig.temperature = 0.7;
     generationConfig.thinkingConfig = { thinkingBudget: 0 };
