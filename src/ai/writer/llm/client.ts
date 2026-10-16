@@ -42,11 +42,13 @@ function isGemini3Model(model: string): boolean {
   return /^gemini-3(?:\.|$|-)/.test(model);
 }
 
-/** Used only after the configured Gemini model stays overloaded. */
-const GEMINI_FALLBACK_MODELS = ["gemini-2.5-flash", "gemini-2.0-flash"];
+/** Used only after the configured Gemini model stays overloaded or retired. */
+const GEMINI_FALLBACK_MODELS = ["gemini-3.6-flash", "gemini-3.5-flash-lite"];
 
 function isGeminiOverload(error: Error) {
-  return /high demand|unavailable|resource.?exhausted|try again later/i.test(error.message);
+  return /high demand|unavailable|no longer available|resource.?exhausted|try again later/i.test(
+    error.message,
+  );
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
