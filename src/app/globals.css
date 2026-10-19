@@ -309,7 +309,7 @@ h6 {
 }
 
 /* Soft remaps for public site only — never touch admin UI */
-html[data-theme="dark"] .bg-white:not(.bg-solid-white):not(.keep-light):not(.admin-shell):not(.admin-shell *) {
+html[data-theme="dark"] .bg-white:not(.bg-solid-white):not(.keep-light):not(.keep-light *):not(.admin-shell):not(.admin-shell *) {
   background-color: #111111;
 }
 
@@ -338,16 +338,28 @@ html[data-theme="dark"]
   background-color: #1a1a1a;
 }
 
-/* Native <select> menus inherit the page text color; force readable options */
+/* Native <select>: keep field transparent; options stay readable when open */
 html[data-theme="dark"] select {
   color-scheme: light;
-  background-color: #ffffff;
+  background-color: transparent;
   color: #0f172a;
 }
 
 html[data-theme="dark"] select option {
   background-color: #ffffff;
   color: #0f172a;
+}
+
+.keep-light input,
+.keep-light select,
+.keep-light textarea {
+  background-color: transparent;
+  color: #0f172a;
+}
+
+.keep-light input::placeholder,
+.keep-light textarea::placeholder {
+  color: #94a3b8;
 }
 
 .font-heading {
