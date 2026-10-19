@@ -338,6 +338,18 @@ html[data-theme="dark"]
   background-color: #1a1a1a;
 }
 
+/* Native <select> menus inherit the page text color; force readable options */
+html[data-theme="dark"] select {
+  color-scheme: light;
+  background-color: #ffffff;
+  color: #0f172a;
+}
+
+html[data-theme="dark"] select option {
+  background-color: #ffffff;
+  color: #0f172a;
+}
+
 .font-heading {
   font-family: var(--font-nunito), Nunito, Arial, Helvetica, sans-serif;
 }

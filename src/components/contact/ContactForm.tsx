@@ -1,236 +1,282 @@
 "use client";
+
 import { useState } from "react";
 import ContactInfo from "./ContactInfo";
-
 import { Button, Card, Container, Section } from "@/components/ui";
+import {
+  CONTACT_BUDGETS,
+  CONTACT_SERVICES,
+  type ContactFieldErrors,
+  normalizeContactPayload,
+  validateContactPayload,
+} from "@/lib/contact";
+
+const emptyForm = {
+  name: "",
+  email: "",
+  phone: "",
+  company: "",
+  service: "",
+  budget: "",
+  message: "",
+  website: "",
+};
+
+const fieldClass =
+  "w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-blue-600";
+const fieldErrorClass =
+  "w-full rounded-xl border border-red-400 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-red-500";
 
 export default function ContactForm() {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    company: "",
-    service: "",
-    budget: "",
-    message: "",
-  });
-
+  const [formData, setFormData] = useState(emptyForm);
+  const [errors, setErrors] = useState<ContactFieldErrors>({});
   const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useState<"success" | "error" | "">("");
+  const [statusMessage, setStatusMessage] = useState("");
+
   const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >,
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
   ) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
+    const { name, value } = e.target;
+    setFormData((current) => ({ ...current, [name]: value }));
+    setErrors((current) => {
+      if (!(name in current)) return current;
+      const next = { ...current };
+      delete next[name as keyof ContactFieldErrors];
+      return next;
     });
+    setStatus("");
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setStatus("");
+    setStatusMessage("");
+
+    const payload = normalizeContactPayload(formData);
+    const result = validateContactPayload(payload);
+    if (!result.ok) {
+      setErrors(result.errors);
+      setStatus("error");
+      setStatusMessage("Please fix the highlighted fields and try again.");
+      return;
+    }
 
     setLoading(true);
-    setStatus("");
+    setErrors({});
 
     try {
       const response = await fetch("/api/contact", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
       });
+      const data = (await response.json()) as {
+        success?: boolean;
+        error?: string;
+        errors?: ContactFieldErrors;
+      };
 
-      const data = await response.json();
-
-      if (response.ok) {
+      if (response.ok && data.success) {
         setStatus("success");
-
-        setFormData({
-          name: "",
-          email: "",
-          phone: "",
-          company: "",
-          service: "",
-          budget: "",
-          message: "",
-        });
-      } else {
-        setStatus("error");
-        console.error(data);
+        setStatusMessage("Your message has been sent successfully!");
+        setFormData(emptyForm);
+        return;
       }
-    } catch (error) {
-      console.error(error);
-      setStatus("error");
-    }
 
-    setLoading(false);
+      if (data.errors) setErrors(data.errors);
+      setStatus("error");
+      setStatusMessage(data.error || "Something went wrong. Please try again.");
+    } catch {
+      setStatus("error");
+      setStatusMessage("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <Section>
       <Container>
         <div className="grid gap-12 lg:grid-cols-[2fr_1fr]">
-          {/* Left - Contact Form */}
-          <Card className="rounded-3xl p-8 lg:p-10">
-            <h2 className="text-3xl font-bold text-slate-900">
-              Tell us about your project
-            </h2>
-
+          <Card className="keep-light rounded-3xl p-8 lg:p-10">
+            <h2 className="text-3xl font-bold text-slate-900">Tell us about your project</h2>
             <p className="mt-3 text-slate-600">
-              Fill out the form below and we'll get back to you within one
-              business day.
+              Fill out the form below and we&apos;ll get back to you within one business day.
             </p>
 
-            <form onSubmit={handleSubmit} className="mt-10 space-y-6">
-              {/* Grid Inputs */}
-              <div className="grid gap-6 md:grid-cols-2">
-                {/* Name */}
-                <div>
-                  <label className="mb-2 block text-sm font-medium text-slate-700">
-                    Full Name
-                  </label>
+            <form onSubmit={handleSubmit} className="mt-10 space-y-6" noValidate>
+              {/* Honeypot — leave empty */}
+              <div className="absolute -left-[9999px] h-0 w-0 overflow-hidden" aria-hidden="true">
+                <label htmlFor="website">Website</label>
+                <input
+                  id="website"
+                  type="text"
+                  name="website"
+                  value={formData.website}
+                  onChange={handleChange}
+                  tabIndex={-1}
+                  autoComplete="off"
+                />
+              </div>
 
+              <div className="grid gap-6 md:grid-cols-2">
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-slate-700" htmlFor="name">
+                    Full Name <span className="text-red-600">*</span>
+                  </label>
                   <input
+                    id="name"
                     type="text"
                     name="name"
                     value={formData.name}
                     onChange={handleChange}
                     placeholder="John Doe"
-                    className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-blue-600"
+                    autoComplete="name"
+                    required
+                    maxLength={120}
+                    className={errors.name ? fieldErrorClass : fieldClass}
                   />
+                  {errors.name ? <p className="mt-1 text-sm text-red-600">{errors.name}</p> : null}
                 </div>
 
-                {/* Email */}
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-slate-700">
-                    Email Address
+                  <label className="mb-2 block text-sm font-medium text-slate-700" htmlFor="email">
+                    Email Address <span className="text-red-600">*</span>
                   </label>
-
                   <input
+                    id="email"
                     type="email"
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
                     placeholder="john@example.com"
-                    className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-blue-600"
+                    autoComplete="email"
+                    required
+                    maxLength={254}
+                    className={errors.email ? fieldErrorClass : fieldClass}
                   />
+                  {errors.email ? <p className="mt-1 text-sm text-red-600">{errors.email}</p> : null}
                 </div>
 
-                {/* Phone */}
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-slate-700">
+                  <label className="mb-2 block text-sm font-medium text-slate-700" htmlFor="phone">
                     Phone Number
                   </label>
-
                   <input
+                    id="phone"
                     type="tel"
                     name="phone"
                     value={formData.phone}
                     onChange={handleChange}
                     placeholder="+91 98765 43210"
-                    className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-blue-600"
+                    autoComplete="tel"
+                    maxLength={20}
+                    className={errors.phone ? fieldErrorClass : fieldClass}
                   />
+                  {errors.phone ? <p className="mt-1 text-sm text-red-600">{errors.phone}</p> : null}
                 </div>
 
-                {/* Company */}
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-slate-700">
+                  <label className="mb-2 block text-sm font-medium text-slate-700" htmlFor="company">
                     Company Name
                   </label>
-
                   <input
+                    id="company"
                     type="text"
                     name="company"
                     value={formData.company}
                     onChange={handleChange}
                     placeholder="Your Company"
-                    className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-blue-600"
+                    autoComplete="organization"
+                    maxLength={160}
+                    className={fieldClass}
                   />
                 </div>
 
-                {/* Service */}
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-slate-700">
-                    Service
+                  <label className="mb-2 block text-sm font-medium text-slate-700" htmlFor="service">
+                    Service <span className="text-red-600">*</span>
                   </label>
-
                   <select
+                    id="service"
                     name="service"
                     value={formData.service}
                     onChange={handleChange}
-                    className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-blue-600"
+                    required
+                    className={errors.service ? fieldErrorClass : fieldClass}
                   >
-                    <option>Select a Service</option>
-                    <option>Shopify Development</option>
-                    <option>Next.js Development</option>
-                    <option>WordPress Development</option>
-                    <option>UI / UX Design</option>
-                    <option>Performance Optimization</option>
-                    <option>Technical SEO</option>
+                    <option value="">Select a Service</option>
+                    {CONTACT_SERVICES.map((service) => (
+                      <option key={service} value={service}>
+                        {service}
+                      </option>
+                    ))}
                   </select>
+                  {errors.service ? (
+                    <p className="mt-1 text-sm text-red-600">{errors.service}</p>
+                  ) : null}
                 </div>
 
-                {/* Budget */}
                 <div>
-                  <label className="mb-2 block text-sm font-medium text-slate-700">
-                    Project Budget
+                  <label className="mb-2 block text-sm font-medium text-slate-700" htmlFor="budget">
+                    Project Budget <span className="text-red-600">*</span>
                   </label>
-
                   <select
+                    id="budget"
                     name="budget"
                     value={formData.budget}
                     onChange={handleChange}
-                    className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-blue-600"
+                    required
+                    className={errors.budget ? fieldErrorClass : fieldClass}
                   >
-                    <option>Select Budget</option>
-                    <option>Less than $1,000</option>
-                    <option>$1,000 - $3,000</option>
-                    <option>$3,000 - $5,000</option>
-                    <option>$5,000 - $10,000</option>
-                    <option>$10,000+</option>
+                    <option value="">Select Budget</option>
+                    {CONTACT_BUDGETS.map((budget) => (
+                      <option key={budget} value={budget}>
+                        {budget}
+                      </option>
+                    ))}
                   </select>
+                  {errors.budget ? (
+                    <p className="mt-1 text-sm text-red-600">{errors.budget}</p>
+                  ) : null}
                 </div>
               </div>
 
-              {/* Message */}
               <div>
-                <label className="mb-2 block text-sm font-medium text-slate-700">
-                  Project Details
+                <label className="mb-2 block text-sm font-medium text-slate-700" htmlFor="message">
+                  Project Details <span className="text-red-600">*</span>
                 </label>
-
                 <textarea
+                  id="message"
                   rows={6}
                   name="message"
                   value={formData.message}
                   onChange={handleChange}
                   placeholder="Tell us about your project, goals, timeline, and any specific requirements..."
-                  className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-blue-600"
+                  required
+                  minLength={20}
+                  maxLength={5000}
+                  className={errors.message ? fieldErrorClass : fieldClass}
                 />
+                {errors.message ? (
+                  <p className="mt-1 text-sm text-red-600">{errors.message}</p>
+                ) : null}
               </div>
 
-              {/* Submit */}
-              <Button disabled={loading}>
+              <Button disabled={loading} type="submit">
                 {loading ? "Sending..." : "Send Message"}
               </Button>
 
-              {status === "success" && (
-                <p className="text-green-600 font-medium">
-                  ✅ Your message has been sent successfully!
-                </p>
-              )}
-
-              {status === "error" && (
-                <p className="text-red-600 font-medium">
-                  ❌ Something went wrong. Please try again.
-                </p>
-              )}
+              {status === "success" ? (
+                <p className="font-medium text-green-600">{statusMessage}</p>
+              ) : null}
+              {status === "error" ? (
+                <p className="font-medium text-red-600">{statusMessage}</p>
+              ) : null}
             </form>
           </Card>
 
-          {/* Right - Contact Info */}
           <ContactInfo />
         </div>
       </Container>
