@@ -205,7 +205,7 @@ export async function runDailyAutopilot(
     if (!selected) {
       report.skipped = true;
       report.skipReason = "No Growth Engine topic passed relevance / filters";
-      await completeRun(run.id, report);
+      await completeRun(run.id, report, report.skipReason);
       return report;
     }
     const topic = selected.topic;

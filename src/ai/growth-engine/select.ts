@@ -27,6 +27,26 @@ function shopifyPriority(decision: GrowthDecision): number {
   return hay.includes("shopify") ? 1 : 0;
 }
 
+const CONTENT_IDEA_FALLBACK_MIN = 64;
+
+function isOnBrandFallback(decision: GrowthDecision) {
+  const hay = `${decision.title} ${decision.keyword}`.toLowerCase();
+  return /shopify|next\.?js|wordpress|ecommerce|conversion|headless/.test(hay);
+}
+
+/** When nothing scores 70, still write the next on-brand content idea. */
+function pickContentIdeaFallback(rejected: GrowthDecision[]) {
+  return rejected
+    .filter((row) => {
+      if (row.source !== "contentIdea") return false;
+      if (!row.scores.thirdPartyPass) return false;
+      if ((row.rejectReason || "").startsWith("Duplicate")) return false;
+      if (row.techlyserGrowthScore < CONTENT_IDEA_FALLBACK_MIN) return false;
+      return isOnBrandFallback(row);
+    })
+    .sort((a, b) => b.techlyserGrowthScore - a.techlyserGrowthScore)[0];
+}
+
 function tokenOverlap(a: string, b: string): number {
   const ta = new Set(
     a
@@ -122,9 +142,8 @@ export async function selectGrowthTopic(): Promise<{
   if (pool.length === 0) return null;
 
   const { accepted, rejected } = await rankPool(pool);
-  if (accepted.length === 0) return null;
-
-  const best = accepted[0];
+  const best = accepted[0] || pickContentIdeaFallback(rejected);
+  if (!best) return null;
   const candidate = pool.find((c) => c.id === best.candidateId);
   if (!candidate) return null;
 

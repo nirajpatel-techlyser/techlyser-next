@@ -126,6 +126,7 @@ html[data-theme="dark"] {
 /* Light panels that must stay readable in dark theme */
 .bg-solid-white,
 .keep-light {
+  color-scheme: light;
   background-color: #ffffff !important;
   color: #0a0a0a !important;
 }
@@ -338,13 +339,7 @@ html[data-theme="dark"]
   background-color: #1a1a1a;
 }
 
-/* Native <select>: keep field transparent; options stay readable when open */
-html[data-theme="dark"] select {
-  color-scheme: light;
-  background-color: transparent;
-  color: #0f172a;
-}
-
+/* Open select lists stay readable on dark pages */
 html[data-theme="dark"] select option {
   background-color: #ffffff;
   color: #0f172a;
@@ -353,8 +348,10 @@ html[data-theme="dark"] select option {
 .keep-light input,
 .keep-light select,
 .keep-light textarea {
-  background-color: transparent;
-  color: #0f172a;
+  color-scheme: light;
+  background-color: transparent !important;
+  color: #0a0a0a !important;
+  -webkit-text-fill-color: #0a0a0a;
 }
 
 .keep-light input::placeholder,
