@@ -856,6 +856,132 @@ model SocialPublishAttempt {
   @@index([jobId])
 }
 
+enum LeadStatus {
+  DISCOVERED
+  NEEDS_REVIEW
+  QUALIFIED
+  DISQUALIFIED
+  CONTACTED
+  REPLIED
+  CONVERTED
+}
+
+enum LeadJobStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum LeadSocialPlatform {
+  INSTAGRAM
+  FACEBOOK
+  LINKEDIN
+  YOUTUBE
+  OTHER
+}
+
+enum LeadVerification {
+  UNVERIFIED
+  VERIFIED
+  REJECTED
+}
+
+/// One research run. Targets are stored so a Vercel restart can continue.
+model LeadResearchJob {
+  id               String         @id @default(cuid())
+  status           LeadJobStatus  @default(QUEUED)
+  targetCountry    String
+  city             String?
+  niche            String
+  keywords         String
+  leadLimit        Int
+  shopifyOnly      Boolean        @default(true)
+  minScore         Int            @default(50)
+  provider         String
+  targets          Json
+  cursor           Int            @default(0)
+  discoveredCount  Int            @default(0)
+  errorMessage     String?        @db.Text
+  createdByUserId  String?
+  startedAt        DateTime?
+  completedAt      DateTime?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  leads            Lead[]
+
+  @@index([status, createdAt])
+}
+
+/// One business. Deduped by normalized website domain. Never auto-merged by name.
+model Lead {
+  id                   String     @id @default(cuid())
+  domain               String     @unique
+  website              String
+  name                 String
+  targetCountry        String
+  countryCode          String?
+  city                 String?
+  locationNote         String?
+  publicEmail          String?
+  shopifyDetected      Boolean    @default(false)
+  shopifyConfidence    String     @default("none")
+  shopifyEvidence      Json
+  shopifyCheckedAt     DateTime?
+  score                Int        @default(0)
+  scoreExplanation     String     @db.Text
+  observedFacts        Json
+  hypotheses           Json
+  recommendedServices  String[]
+  source               String
+  status               LeadStatus @default(DISCOVERED)
+  notes                String?    @db.Text
+  lastVerifiedAt       DateTime?
+  jobId                String?
+  job                  LeadResearchJob? @relation(fields: [jobId], references: [id], onDelete: SetNull)
+  profiles             LeadSocialProfile[]
+  drafts               LeadOutreachDraft[]
+  createdAt            DateTime   @default(now())
+  updatedAt            DateTime   @updatedAt
+
+  @@index([status, score])
+  @@index([targetCountry, status])
+  @@index([jobId])
+}
+
+model LeadSocialProfile {
+  id           String              @id @default(cuid())
+  leadId       String
+  lead         Lead                @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  platform     LeadSocialPlatform
+  url          String
+  verification LeadVerification    @default(UNVERIFIED)
+  evidence     String
+  checkedAt    DateTime            @default(now())
+
+  @@unique([leadId, platform])
+  @@index([leadId])
+}
+
+model LeadOutreachDraft {
+  id        String   @id @default(cuid())
+  leadId    String
+  lead      Lead     @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  channel   String
+  body      String   @db.Text
+  createdAt DateTime @default(now())
+
+  @@index([leadId, createdAt])
+}
+
+model LeadSuppression {
+  id        String   @id @default(cuid())
+  domain    String   @unique
+  reason    String?
+  createdAt DateTime @default(now())
+}
+
 /// Durable memory records for brand / run context
 model AiMemory {
   id        String   @id @default(cuid())
