@@ -40,67 +40,65 @@ export async function saveWriterDraftBlog(input: {
 
   const slug = await resolveUniqueSlug(input.output.slug);
 
-  const blog = await prisma.$transaction(async (tx) => {
-    const created = await tx.blog.create({
-      data: {
-        title: input.output.seoTitle,
-        slug,
-        excerpt: input.output.excerpt,
-        content: input.output.articleHtml,
-        category: input.input.category,
-        tags: input.output.tags,
-        seoTitle: input.output.seoTitle,
-        seoDescription: input.output.metaDescription,
-        metaKeywords: input.input.keyword,
-        linkedinPersonalPost: input.output.linkedinPersonalPostHtml || null,
-        linkedinPagePost: input.output.linkedinPagePostHtml || null,
-        status: BlogStatus.DRAFT,
-        featured: false,
-        commentsEnabled: false,
-        readingTime: input.output.readingTimeMinutes,
-        publishedAt: null,
-        scheduledAt: null,
-      },
-    });
-
-    await tx.aiWriterRun.update({
-      where: { id: input.runId },
-      data: { blogId: created.id },
-    });
-
-    if (input.input.contentIdeaId) {
-      const idea = await tx.contentIdea.findUnique({
-        where: { id: input.input.contentIdeaId },
-      });
-      if (idea) {
-        await tx.contentIdea.update({
-          where: { id: input.input.contentIdeaId },
-          data: {
-            blogId: created.id,
-            slug,
-            outline: input.output.outline,
-            status: "DRAFT",
-            metadata: JSON.parse(
-              JSON.stringify({
-                writerRunId: input.runId,
-                featuredImagePrompt: input.output.featuredImagePrompt,
-                schema: input.output.schema,
-                toc: input.output.toc,
-                faqs: input.output.faqs,
-                howTo: input.output.howTo ?? null,
-                comparisonTable: input.output.comparisonTable ?? null,
-                cta: input.output.cta,
-              }),
-            ) as Prisma.InputJsonValue,
-          },
-        });
-      }
-    }
-
-    return created;
+  // Avoid interactive $transaction — Neon pooled (PgBouncer) drops long interactive txs.
+  const created = await prisma.blog.create({
+    data: {
+      title: input.output.seoTitle,
+      slug,
+      excerpt: input.output.excerpt,
+      content: input.output.articleHtml,
+      category: input.input.category,
+      tags: input.output.tags,
+      seoTitle: input.output.seoTitle,
+      seoDescription: input.output.metaDescription,
+      metaKeywords: input.input.keyword,
+      linkedinPersonalPost: input.output.linkedinPersonalPostHtml || null,
+      linkedinPagePost: input.output.linkedinPagePostHtml || null,
+      status: BlogStatus.DRAFT,
+      featured: false,
+      commentsEnabled: false,
+      readingTime: input.output.readingTimeMinutes,
+      publishedAt: null,
+      scheduledAt: null,
+    },
   });
 
-  return { slug: blog.slug, blogId: blog.id };
+  await prisma.aiWriterRun.update({
+    where: { id: input.runId },
+    data: { blogId: created.id },
+  });
+
+  if (input.input.contentIdeaId) {
+    const idea = await prisma.contentIdea.findUnique({
+      where: { id: input.input.contentIdeaId },
+      select: { id: true },
+    });
+    if (idea) {
+      await prisma.contentIdea.update({
+        where: { id: input.input.contentIdeaId },
+        data: {
+          blogId: created.id,
+          slug,
+          outline: input.output.outline,
+          status: "DRAFT",
+          metadata: JSON.parse(
+            JSON.stringify({
+              writerRunId: input.runId,
+              featuredImagePrompt: input.output.featuredImagePrompt,
+              schema: input.output.schema,
+              toc: input.output.toc,
+              faqs: input.output.faqs,
+              howTo: input.output.howTo ?? null,
+              comparisonTable: input.output.comparisonTable ?? null,
+              cta: input.output.cta,
+            }),
+          ) as Prisma.InputJsonValue,
+        },
+      });
+    }
+  }
+
+  return { slug: created.slug, blogId: created.id };
 }
 
 export async function completeWriterRun(input: {

@@ -58,8 +58,8 @@ export default async function AdminAutopilotPage() {
           <code className="text-xs">techlyserGrowthScore</code> (must be ≥ 70),
           applies a strict third-party promotion filter, then{" "}
           <code className="text-xs">validateContent()</code> before any
-          auto-publish. Research is skipped on cron — use Run now for a market
-          refresh. Default: <strong>DRAFT only</strong>.
+          auto-publish. Research is skipped by default so the draft finishes
+          inside Vercel&apos;s time limit. Default: <strong>DRAFT only</strong>.
         </p>
         <div className="mt-4 flex flex-wrap gap-4 text-sm text-slate-600">
           <span>
@@ -91,8 +91,8 @@ export default async function AdminAutopilotPage() {
           <RunAutopilotButton />
         </div>
         <p className="mt-3 text-xs text-slate-500">
-          Admin button har click pe naya DRAFT (+ research). Daily cron max 1
-          successful run/day without research. Prefer{" "}
+          Admin button and daily cron both write a DRAFT first (no market
+          research). Cron max 1 successful run/day. Prefer{" "}
           <code className="text-xs">GEMINI_API_KEY</code>. Images: upload in Blog
           edit.
         </p>

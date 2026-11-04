@@ -50,7 +50,7 @@ export async function cleanupStuckAutopilotRuns(maxAgeMinutes = 10) {
       status: "FAILED",
       currentStep: "failed",
       errorMessage:
-        "Timed out during research (Vercel killed the function). Cron now skips research and writes the draft first.",
+        "Autopilot run stayed RUNNING until Vercel killed the function (usually during AI writing). Cron already skips market research; retry with Run now.",
       completedAt: new Date(),
     },
   });
@@ -222,21 +222,30 @@ export async function runDailyAutopilot(
     });
 
     report.steps.write = { ok: false };
-    const draft = await generateArticleDraft({
-      keyword: topic.keyword,
-      audience: topic.audience,
-      searchIntent: topic.searchIntent,
-      category: topic.category,
-      tone: topic.tone,
-      length: topic.length,
-      contentIdeaId: topic.contentIdeaId,
-    });
+    const draft = await withTimeout(
+      generateArticleDraft({
+        keyword: topic.keyword,
+        audience: topic.audience,
+        searchIntent: topic.searchIntent,
+        category: topic.category,
+        tone: topic.tone,
+        length: topic.length,
+        contentIdeaId: topic.contentIdeaId,
+      }),
+      240_000,
+      "AI writer",
+    );
     report.blogId = draft.blogId;
     report.slug = draft.slug;
     report.steps.write = {
       ok: true,
       detail: `${draft.seoTitle} (${draft.readingTimeMinutes} min)`,
     };
+
+    await prisma.aiAgentRun.update({
+      where: { id: run.id },
+      data: { currentStep: "seo" },
+    });
 
     await markTopicUsed(topic, draft.blogId);
 

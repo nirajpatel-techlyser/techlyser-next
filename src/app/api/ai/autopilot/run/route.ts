@@ -14,10 +14,10 @@ export async function POST(request: Request) {
       dryRun?: boolean;
       refreshMarket?: boolean;
     };
-    // Admin manual runs always generate; cron still enforces once-per-day.
+    // Default write-first like cron. Pass refreshMarket:true only when you want a market refresh.
     const report = await runDailyAutopilot({
       dryRun: body.dryRun,
-      refreshMarket: body.refreshMarket,
+      refreshMarket: body.refreshMarket === true,
       oncePerDay: false,
     });
     return NextResponse.json({ success: true, report });
