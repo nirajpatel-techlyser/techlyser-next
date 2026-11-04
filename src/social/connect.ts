@@ -1,7 +1,19 @@
-import { expectOk, socialFetch } from "@/social/http";
+import { expectOk, sleep, socialFetch } from "@/social/http";
 import { redirectUri } from "@/social/oauth-config";
 import { SocialPublishError } from "@/social/errors";
 import { upsertSocialAccount } from "@/social/store";
+
+/** Soft retry for Google 429 during first-time connect (quota can spike after OAuth). */
+async function withGoogleConnectRetry(fn: () => Promise<Response>) {
+  let last: Response | null = null;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const response = await fn();
+    last = response;
+    if (response.status !== 429) return response;
+    if (attempt < 2) await sleep(1500 * 2 ** attempt);
+  }
+  return last as Response;
+}
 
 type TokenResponse = {
   access_token?: string;
@@ -201,9 +213,10 @@ export async function connectGoogleBusiness(code: string, userId: string) {
       "Google did not return an access token. Try connecting again.",
     );
   }
-  const accountsRes = await socialFetch(
-    "https://mybusinessaccountmanagement.googleapis.com/v1/accounts",
-    { headers: { Authorization: `Bearer ${token.access_token}` } },
+  const accountsRes = await withGoogleConnectRetry(() =>
+    socialFetch("https://mybusinessaccountmanagement.googleapis.com/v1/accounts", {
+      headers: { Authorization: `Bearer ${token.access_token}` },
+    }),
   );
   await expectOk(accountsRes, "Google Business Profile");
   const accounts = ((await accountsRes.json()) as { accounts?: GoogleAccount[] }).accounts || [];
@@ -214,9 +227,11 @@ export async function connectGoogleBusiness(code: string, userId: string) {
       "No Google Business Profile account was found for this Google login.",
     );
   }
-  const locationsRes = await socialFetch(
-    `https://mybusinessbusinessinformation.googleapis.com/v1/${account.name}/locations?readMask=name,title&pageSize=10`,
-    { headers: { Authorization: `Bearer ${token.access_token}` } },
+  const locationsRes = await withGoogleConnectRetry(() =>
+    socialFetch(
+      `https://mybusinessbusinessinformation.googleapis.com/v1/${account.name}/locations?readMask=name,title&pageSize=10`,
+      { headers: { Authorization: `Bearer ${token.access_token}` } },
+    ),
   );
   await expectOk(locationsRes, "Google Business Profile");
   const locations = ((await locationsRes.json()) as { locations?: GoogleLocation[] }).locations || [];

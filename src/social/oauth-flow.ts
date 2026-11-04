@@ -89,7 +89,11 @@ export async function finishSocialConnect(input: {
       caught instanceof SocialPublishError
         ? caught.message
         : "The account could not be connected. Try again.";
-    console.error("[social] oauth callback failed", { platform: input.platform });
+    console.error("[social] oauth callback failed", {
+      platform: input.platform,
+      code: caught instanceof SocialPublishError ? caught.code : "UNKNOWN",
+      detail: caught instanceof SocialPublishError ? caught.detail : undefined,
+    });
     return accountsRedirect({ error: message });
   }
 }

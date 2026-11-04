@@ -41,8 +41,41 @@ export function isRetryableCode(code: string | null | undefined) {
   return RETRYABLE.has((code || "") as SocialErrorCode);
 }
 
+function looksLikeGoogleApiDisabled(body: string) {
+  return /SERVICE_DISABLED|accessNotConfigured|has not been used|API has not been enabled|not been activated/i.test(
+    body,
+  );
+}
+
+function looksLikeGoogleQuota(body: string) {
+  return /RESOURCE_EXHAUSTED|Quota exceeded|quotaMetric|rateLimitExceeded/i.test(body);
+}
+
+function looksLikeGooglePermission(body: string) {
+  return /PERMISSION_DENIED|insufficientPermissions|ACCESS_TOKEN_SCOPE_INSUFFICIENT|Business Profile API access/i.test(
+    body,
+  );
+}
+
 export function mapHttpFailure(platformLabel: string, status: number, body: string) {
   const detail = body.replace(/\s+/g, " ").slice(0, 500);
+  const isGoogle = /google business/i.test(platformLabel);
+
+  if (isGoogle && (looksLikeGoogleApiDisabled(detail) || (status === 403 && looksLikeGoogleApiDisabled(detail)))) {
+    return new SocialPublishError(
+      "CONFIG",
+      "Enable My Business Account Management, Business Information, and Google My Business APIs in Google Cloud, wait a few minutes, then reconnect.",
+      detail,
+    );
+  }
+  if (isGoogle && (status === 403 || status === 401) && looksLikeGooglePermission(detail)) {
+    return new SocialPublishError(
+      "PERMISSION",
+      "Google has not approved Business Profile API access for this Cloud project yet. Request access, then reconnect.",
+      detail,
+    );
+  }
+
   if (status === 401 || status === 403) {
     return new SocialPublishError(
       "AUTH",
@@ -50,10 +83,12 @@ export function mapHttpFailure(platformLabel: string, status: number, body: stri
       detail,
     );
   }
-  if (status === 429) {
+  if (status === 429 || (isGoogle && looksLikeGoogleQuota(detail))) {
     return new SocialPublishError(
       "RATE_LIMIT",
-      `${platformLabel} is rate limiting requests. Wait a minute, then retry ${platformLabel}.`,
+      isGoogle
+        ? "Google Business Profile quota/rate limit hit. Wait 2–5 minutes, confirm the 3 My Business APIs are enabled with quota, then Connect once."
+        : `${platformLabel} is rate limiting requests. Wait a minute, then retry ${platformLabel}.`,
       detail,
     );
   }

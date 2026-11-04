@@ -112,6 +112,22 @@ test("expired token errors stay user-facing", () => {
   assert.doesNotMatch(error.message, /OAuthException/);
 });
 
+test("Google API disabled is mapped to a setup message", () => {
+  const error = mapHttpFailure(
+    "Google Business Profile",
+    403,
+    JSON.stringify({ error: { status: "PERMISSION_DENIED", message: "API has not been used in project" } }),
+  );
+  assert.equal(error.code, "CONFIG");
+  assert.match(error.message, /Enable My Business/);
+});
+
+test("Google 429 keeps a clear wait-and-retry message", () => {
+  const error = mapHttpFailure("Google Business Profile", 429, "RESOURCE_EXHAUSTED");
+  assert.equal(error.code, "RATE_LIMIT");
+  assert.match(error.message, /Wait 2/);
+});
+
 test("oauth state rejects a tampered payload", () => {
   const state = createOAuthState({ platform: "LINKEDIN", userId: "user_1" });
   const verified = verifyOAuthState(state);
