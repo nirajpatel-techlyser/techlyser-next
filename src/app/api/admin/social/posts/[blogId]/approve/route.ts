@@ -28,6 +28,7 @@ export async function POST(_request: Request, context: RouteContext) {
     approved: true,
     hasContent: true,
     featuredImage: post.featuredImage,
+    socialImages: post.socialImages,
     selected: accounts.map((account) => account.platform),
     connected: accounts.map((account) => account.platform),
   });
