@@ -1,5 +1,6 @@
 /**
- * Clear off-brand Vercel news from the queue and add fresh Shopify topics.
+ * Clear off-brand / exhausted queue items and seed business-outcome topics
+ * across Shopify, WordPress, Next.js, React, PHP, and AngularJS.
  * Usage: npx tsx --env-file=.env.local scripts/refill-autopilot-topics.ts
  */
 import { PrismaClient } from "@prisma/client";
@@ -14,69 +15,116 @@ const FRESH: Array<{
   priority: number;
   keywords: string[];
 }> = [
+  // Shopify ~25%
   {
-    title: "Shopify checkout customization that stays upgrade-safe",
-    slug: "shopify-checkout-customization-upgrade-safe",
+    title: "How Shopify can help retail businesses expand beyond their local market",
+    slug: "shopify-retail-expand-beyond-local-market",
     angle:
-      "How brands extend checkout without breaking Plus upgrades: Checkout Extensibility, apps vs scripts, and when Techlyser should rebuild.",
+      "Business outcome guide for local retailers: online catalog, checkout trust, delivery expectations, and when a Shopify rebuild beats a brochure site.",
     priority: 96,
-    keywords: ["shopify checkout", "shopify plus", "checkout extensibility"],
+    keywords: ["shopify retail", "local to online", "ecommerce growth"],
   },
   {
-    title: "When a Shopify theme rebuild pays for itself in 90 days",
-    slug: "shopify-theme-rebuild-roi-90-days",
+    title: "Shopify product page mistakes that quietly kill conversions",
+    slug: "shopify-product-page-mistakes-kill-conversions",
     angle:
-      "ROI framework for founders: conversion lift, page speed, app debt removal, and maintenance cost after a custom theme rebuild.",
+      "Practical PDP checklist for D2C founders: trust signals, mobile UX, speed, reviews placement, and app clutter Techlyser usually removes.",
     priority: 95,
-    keywords: ["shopify theme rebuild", "shopify conversion", "theme debt"],
+    keywords: ["shopify product page", "conversion", "pdp ux"],
   },
   {
-    title: "Headless Shopify with Next.js: who actually needs it",
-    slug: "headless-shopify-nextjs-who-needs-it",
+    title: "When Shopify store speed becomes a sales problem",
+    slug: "when-shopify-store-speed-becomes-sales-problem",
     angle:
-      "Clear decision guide for D2C brands: online store 2.0 vs Hydrogen/Next.js headless, cost, SEO, and team skills.",
-    priority: 95,
-    keywords: ["headless shopify", "next.js shopify", "hydrogen"],
-  },
-  {
-    title: "Fixing Shopify Core Web Vitals without killing design",
-    slug: "shopify-core-web-vitals-without-killing-design",
-    angle:
-      "Practical LCP/INP fixes on Shopify themes: image strategy, app audit, Liquid rendering, and what agencies should measure first.",
+      "Connect Core Web Vitals and theme debt to lost carts, paid traffic waste, and a clear decision path for theme vs app cleanup.",
     priority: 94,
-    keywords: ["shopify core web vitals", "shopify speed", "lcp"],
+    keywords: ["shopify speed", "core web vitals", "cart abandonment"],
   },
+  // WordPress ~15%
   {
-    title: "Shopify subscription and membership UX that does not hurt AOV",
-    slug: "shopify-subscription-membership-ux-aov",
+    title: "How a WordPress website can generate better leads for service businesses",
+    slug: "wordpress-website-better-leads-service-businesses",
     angle:
-      "Subscription UX patterns for Shopify: selling plans, PDP friction, retention offers, and common app stack mistakes.",
+      "Lead-focused WordPress structure for local and service firms: landing pages, forms, SEO pages, trust content, and performance basics.",
     priority: 93,
-    keywords: ["shopify subscriptions", "selling plans", "aov"],
+    keywords: ["wordpress leads", "service business website", "landing pages"],
   },
   {
-    title: "International Shopify stores: markets, duties, and theme pitfalls",
-    slug: "international-shopify-markets-duties-theme",
+    title: "WordPress SEO foundations that improve online visibility without hacks",
+    slug: "wordpress-seo-foundations-online-visibility",
     angle:
-      "Markets setup, duties at checkout, multi-currency UX, and theme issues brands hit when expanding US/EU/AU.",
+      "Business-friendly SEO on WordPress: intent pages, technical hygiene, internal links, and when a redesign beats more plugins.",
+    priority: 92,
+    keywords: ["wordpress seo", "online visibility", "technical seo"],
+  },
+  // Next.js ~15%
+  {
+    title: "How website performance influences customer experience and search visibility",
+    slug: "website-performance-customer-experience-search-visibility",
+    angle:
+      "Explain why slow sites lose trust and rankings, and when Next.js is the right architecture for growth-focused businesses.",
+    priority: 94,
+    keywords: ["next.js performance", "customer experience", "search visibility"],
+  },
+  {
+    title: "When a business should move from a traditional CMS site to Next.js",
+    slug: "when-business-should-move-to-nextjs",
+    angle:
+      "Decision guide for founders: SEO needs, scalability, marketing velocity, hosting cost, and team skills before a Next.js rebuild.",
     priority: 93,
-    keywords: ["shopify markets", "international ecommerce", "multi currency"],
+    keywords: ["next.js migration", "cms to next.js", "scalable website"],
+  },
+  // React ~10%
+  {
+    title: "How interactive React experiences improve customer engagement on business sites",
+    slug: "react-interactive-experiences-customer-engagement",
+    angle:
+      "Business cases for React: portals, dashboards, product configurators, and engagement loops that static pages cannot support.",
+    priority: 91,
+    keywords: ["react.js", "customer engagement", "web application"],
+  },
+  // PHP ~10%
+  {
+    title: "How custom PHP applications can reduce manual work in growing businesses",
+    slug: "custom-php-applications-reduce-manual-work",
+    angle:
+      "Operational efficiency angle: CRM-lite workflows, approvals, API integrations, and when custom PHP beats spreadsheets and generic SaaS.",
+    priority: 92,
+    keywords: ["php custom software", "workflow automation", "business operations"],
   },
   {
-    title: "Shopify collection page CRO for paid traffic",
-    slug: "shopify-collection-page-cro-paid-traffic",
+    title: "PHP API integrations that connect sales, support, and operations without chaos",
+    slug: "php-api-integrations-sales-support-operations",
     angle:
-      "Collection filters, merchandising, mobile density, and load behavior that waste Meta/Google ads for Shopify brands.",
-    priority: 92,
-    keywords: ["shopify collection page", "cro", "paid traffic"],
+      "Practical integration patterns for SMEs: CRM, payments, inventory sync, and ownership rules so systems stay maintainable.",
+    priority: 90,
+    keywords: ["php api integration", "crm", "operations efficiency"],
+  },
+  // AngularJS ~5%
+  {
+    title: "When to modernize an AngularJS app before technical debt blocks growth",
+    slug: "modernize-angularjs-before-technical-debt-blocks-growth",
+    angle:
+      "Business continuity guide: security risk, hiring cost, performance, and staged modernization paths without a big-bang rewrite.",
+    priority: 89,
+    keywords: ["angularjs modernization", "legacy application", "technical debt"],
+  },
+  // Cross-tech ~20%
+  {
+    title: "Digital systems that help local businesses attract customers and build trust online",
+    slug: "digital-systems-local-businesses-attract-customers-trust",
+    angle:
+      "Cross-stack playbook: website credibility, lead capture, speed, and choosing Shopify vs WordPress vs custom when budgets are tight.",
+    priority: 91,
+    keywords: ["local business website", "lead generation", "digital trust"],
   },
   {
-    title: "Migrating from WordPress WooCommerce to Shopify without SEO loss",
-    slug: "woocommerce-to-shopify-migration-seo",
+    title: "How outdated websites quietly lose customers before the sales conversation starts",
+    slug: "outdated-websites-lose-customers-before-sales",
     angle:
-      "Redirect maps, URL structure, reviews, and content migration checklist for brands moving to Shopify with Techlyser.",
+      "Founder-facing diagnosis: trust, mobile UX, page speed, and a practical rebuild roadmap across WordPress, Next.js, or Shopify.",
     priority: 92,
-    keywords: ["woocommerce to shopify", "shopify migration", "seo migration"],
+    keywords: ["outdated website", "customer trust", "website redesign"],
   },
 ];
 
@@ -89,20 +137,28 @@ async function main() {
         { title: { contains: "Vercel", mode: "insensitive" } },
         { title: { contains: "D1 ", mode: "insensitive" } },
         { title: { contains: "Muse Spark", mode: "insensitive" } },
-        { title: { contains: "web gateway", mode: "insensitive" } },
+        { title: { contains: "AI Gateway", mode: "insensitive" } },
+        { title: { contains: "Token Pass", mode: "insensitive" } },
       ],
     },
     data: { status: "REJECTED" },
   });
 
-  const rejectedDup = await prisma.contentIdea.updateMany({
+  const rejectedOpps = await prisma.opportunity.updateMany({
     where: {
-      blogId: null,
-      title: {
-        equals: "How founders should brief a Shopify agency for CRO and growth work",
-      },
+      status: { in: ["NEW", "REVIEWED", "QUEUED"] },
+      contentIdeaId: null,
+      OR: [
+        { title: { contains: "Vercel", mode: "insensitive" } },
+        { title: { contains: "AI Gateway", mode: "insensitive" } },
+        { title: { contains: "OpenAI", mode: "insensitive" } },
+        { title: { contains: "Cloudflare", mode: "insensitive" } },
+        { title: { contains: "Token Pass", mode: "insensitive" } },
+        { title: { contains: "Daemons", mode: "insensitive" } },
+        { title: { contains: "Turbopack", mode: "insensitive" } },
+      ],
     },
-    data: { status: "REJECTED" },
+    data: { status: "DISMISSED" },
   });
 
   let created = 0;
@@ -125,26 +181,33 @@ async function main() {
         angle: idea.angle,
         status: "QUEUED",
         priority: idea.priority,
-        targetWords: 1700,
-        metadata: { keywords: idea.keywords, pillars: ["shopify-growth"] },
+        targetWords: 1600,
+        outline:
+          "Business problem\nWhy it matters\nPractical recommendations\nTechnology fit\nCommon mistakes\nTechlyser CTA",
+        metadata: {
+          keywords: idea.keywords,
+          stack: idea.keywords[0],
+          source: "editorial-master-prompt-refill",
+        },
       },
     });
     created += 1;
   }
 
-  const next = await selectGrowthTopic();
+  const selected = await selectGrowthTopic();
   console.log(
     JSON.stringify(
       {
         rejectedNews: rejectedNews.count,
-        rejectedDuplicate: rejectedDup.count,
+        rejectedOpps: rejectedOpps.count,
         created,
         skipped,
-        nextTopic: next
+        nextTopic: selected
           ? {
-              title: next.topic.title,
-              score: next.result.decision.techlyserGrowthScore,
-              accepted: next.result.decision.accepted,
+              title: selected.topic.title,
+              keyword: selected.topic.keyword,
+              score: selected.result.decision.techlyserGrowthScore,
+              accepted: selected.result.decision.accepted,
             }
           : null,
       },
@@ -152,11 +215,13 @@ async function main() {
       2,
     ),
   );
-  await prisma.$disconnect();
 }
 
-main().catch(async (error) => {
-  console.error(error instanceof Error ? error.message : "refill failed");
-  await prisma.$disconnect();
-  process.exit(1);
-});
+main()
+  .catch((error) => {
+    console.error(error instanceof Error ? error.message : error);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });

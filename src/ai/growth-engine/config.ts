@@ -10,8 +10,8 @@ export const GROWTH_SCORE_WEIGHTS = {
 export const GROWTH_THRESHOLDS = {
   /** Hard reject below this Techlyser relevance (0–1 diagnostic). */
   minRelevance: 0.35,
-  /** Primary gate: techlyserGrowthScore must be >= 70. */
-  minTechlyserGrowthScore: 70,
+  /** Primary gate: techlyserGrowthScore must be >= 68 for on-brand service topics. */
+  minTechlyserGrowthScore: 68,
   /** Legacy 0–1 composite (kept for older callers). */
   minGrowthScore: 0.7,
   poolLimitIdeas: 40,

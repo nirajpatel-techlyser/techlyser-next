@@ -13,7 +13,7 @@ export {
   TARGET_AUDIENCE_PROFILE as DEFAULT_TECHLYSER_AUDIENCE,
 } from "./positioning";
 
-/** Commerce / platform anchors (still valuable, not exclusive). */
+/** Platform / service anchors across Techlyser's stack (not Shopify-only). */
 export const COMMERCE_ANCHORS = [
   "shopify",
   "shopify plus",
@@ -27,6 +27,18 @@ export const COMMERCE_ANCHORS = [
   "online retail",
   "storefront",
   "woocommerce",
+  "wordpress",
+  "next.js",
+  "nextjs",
+  "react",
+  "react.js",
+  "reactjs",
+  "php",
+  "angular",
+  "angularjs",
+  "web application",
+  "custom software",
+  "crm",
 ] as const;
 
 export const GROWTH_PRACTICE_TERMS = [

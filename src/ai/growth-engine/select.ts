@@ -22,16 +22,21 @@ function mapIntent(
   return "informational";
 }
 
-function shopifyPriority(decision: GrowthDecision): number {
+function stackPriority(decision: GrowthDecision): number {
   const hay = `${decision.title} ${decision.keyword}`.toLowerCase();
-  return hay.includes("shopify") ? 1 : 0;
+  // Light preference only — keep Shopify from dominating every day.
+  if (/shopify/.test(hay)) return 2;
+  if (/wordpress|woocommerce|next\.?js|react|php|angular/.test(hay)) return 1;
+  return 0;
 }
 
-const CONTENT_IDEA_FALLBACK_MIN = 64;
+const CONTENT_IDEA_FALLBACK_MIN = 58;
 
 function isOnBrandFallback(decision: GrowthDecision) {
   const hay = `${decision.title} ${decision.keyword}`.toLowerCase();
-  return /shopify|next\.?js|wordpress|ecommerce|conversion|headless/.test(hay);
+  return /shopify|next\.?js|wordpress|woocommerce|react|php|angular|ecommerce|conversion|headless|lead|performance|automation/.test(
+    hay,
+  );
 }
 
 /** When nothing scores 70, still write the next on-brand content idea. */
@@ -122,10 +127,11 @@ async function rankPool(
   const accepted = decisions
     .filter((d) => d.accepted)
     .sort((a, b) => {
-      // Shopify stays first whenever both topics pass the score gate.
-      const shopifyDelta = shopifyPriority(b) - shopifyPriority(a);
-      if (shopifyDelta !== 0) return shopifyDelta;
-      return b.techlyserGrowthScore - a.techlyserGrowthScore;
+      const scoreDelta = b.techlyserGrowthScore - a.techlyserGrowthScore;
+      if (Math.abs(scoreDelta) >= 3) return scoreDelta;
+      const stackDelta = stackPriority(b) - stackPriority(a);
+      if (stackDelta !== 0) return stackDelta;
+      return scoreDelta;
     });
   const rejected = decisions.filter((d) => !d.accepted);
   return { accepted, rejected };

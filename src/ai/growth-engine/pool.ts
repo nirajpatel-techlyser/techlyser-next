@@ -1,3 +1,4 @@
+import { isOffBrandProductTopic, isTechlyserNicheTopic } from "@/ai/brand/niche";
 import { prisma } from "@/lib/prisma";
 import { GROWTH_THRESHOLDS } from "./config";
 import type { GrowthCandidate } from "./types";
@@ -53,29 +54,41 @@ export async function buildTopicPool(): Promise<GrowthCandidate[]> {
       summary: idea.angle || idea.title,
       keyword,
       keywords,
-      category: idea.cluster?.name || "Shopify Growth",
+      category: idea.cluster?.name || "Web Development",
       intentLabel: idea.keyword?.intent || idea.angle,
       priority: idea.priority ?? 0,
       targetWords: idea.targetWords,
     };
   });
 
-  const fromOpps: GrowthCandidate[] = opportunities.map((row) => ({
-    source: "opportunity",
-    id: row.id,
-    title: row.title,
-    summary: row.summary || row.title,
-    keyword: pickKeyword(row.keywords, row.title),
-    keywords: row.keywords || [],
-    category: row.category || "Shopify Growth",
-    intentLabel: row.intentLabel,
-    priority: Math.round((row.opportunityScore || 0) * 100),
-    opportunityScore: row.opportunityScore,
-    techlyserRelevanceScore: row.techlyserRelevanceScore,
-    commercialIntentScore: row.commercialIntentScore,
-    keywordGapScore: row.keywordGapScore,
-    existingContentScore: row.existingContentScore,
-  }));
+  const fromOpps: GrowthCandidate[] = opportunities
+    .filter((row) => {
+      if (isOffBrandProductTopic(row.title, row.summary)) return false;
+      if (
+        /\b(turbopack|daemon|ai gateway|token pass|flamegraph|chunks your|now available|public beta|security update for upstream)\b/i.test(
+          `${row.title} ${row.summary || ""}`,
+        )
+      ) {
+        return false;
+      }
+      return isTechlyserNicheTopic(row.title, row.summary, ...(row.keywords || []));
+    })
+    .map((row) => ({
+      source: "opportunity" as const,
+      id: row.id,
+      title: row.title,
+      summary: row.summary || row.title,
+      keyword: pickKeyword(row.keywords, row.title),
+      keywords: row.keywords || [],
+      category: row.category || "Web Development",
+      intentLabel: row.intentLabel,
+      priority: Math.round((row.opportunityScore || 0) * 100),
+      opportunityScore: row.opportunityScore,
+      techlyserRelevanceScore: row.techlyserRelevanceScore,
+      commercialIntentScore: row.commercialIntentScore,
+      keywordGapScore: row.keywordGapScore,
+      existingContentScore: row.existingContentScore,
+    }));
 
   // Prefer content ideas slightly by listing them first before equal-score ties
   // are broken in select (ideas already tend to have higher priority seeds).

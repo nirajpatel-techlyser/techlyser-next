@@ -21,26 +21,48 @@ export type TechlyserGrowthScoreBreakdown = {
 
 const CUSTOMER_PROBLEM_TERMS = [
   "slow",
+  "speed",
   "convert",
   "conversion",
   "mobile",
   "outdated",
+  "legacy",
   "cms",
   "seo",
+  "visibility",
   "checkout",
   "integration",
   "scale",
   "scalability",
   "performance",
+  "core web vitals",
   "redesign",
   "rebuild",
+  "modernis",
+  "moderniz",
   "roi",
   "founder",
   "business",
   "merchant",
+  "retail",
   "d2c",
   "ecommerce",
+  "e-commerce",
   "website",
+  "store",
+  "lead",
+  "leads",
+  "customers",
+  "customer",
+  "retention",
+  "engagement",
+  "manual work",
+  "automation",
+  "workflow",
+  "operations",
+  "growth",
+  "sales",
+  "trust",
 ] as const;
 
 const SEO_TERMS = [
@@ -83,7 +105,14 @@ const TECHNICAL_TERMS = [
   "architecture",
   "api",
   "next.js",
+  "nextjs",
   "react",
+  "react.js",
+  "php",
+  "angular",
+  "angularjs",
+  "wordpress",
+  "shopify",
   "performance",
   "liquid",
   "hydrogen",
@@ -93,6 +122,7 @@ const TECHNICAL_TERMS = [
   "headless",
   "core web vitals",
   "security",
+  "crm",
 ] as const;
 
 const LEAD_TERMS = [
@@ -108,6 +138,9 @@ const LEAD_TERMS = [
   "shopify",
   "next.js",
   "wordpress",
+  "php",
+  "react",
+  "angular",
   "ai integration",
 ] as const;
 
@@ -218,13 +251,25 @@ export function computeTechlyserGrowthScore(
   if (leadHits >= 2) leadPotential = 10;
   else if (leadHits >= 1) leadPotential = 6;
   if (
-    (hay.includes("shopify") || hay.includes("website") || hay.includes("ecommerce")) &&
+    (hay.includes("shopify") ||
+      hay.includes("wordpress") ||
+      hay.includes("next.js") ||
+      hay.includes("nextjs") ||
+      hay.includes("react") ||
+      hay.includes("php") ||
+      hay.includes("angular") ||
+      hay.includes("website") ||
+      hay.includes("ecommerce")) &&
     (hay.includes("cro") ||
       hay.includes("agency") ||
       hay.includes("migration") ||
       hay.includes("performance") ||
       hay.includes("redesign") ||
-      hay.includes("founder"))
+      hay.includes("rebuild") ||
+      hay.includes("automation") ||
+      hay.includes("founder") ||
+      hay.includes("growth") ||
+      hay.includes("lead"))
   ) {
     leadPotential = Math.max(leadPotential, 10);
   }
