@@ -30,16 +30,16 @@ function synthesizeFaqs(ctx: SeoModuleContext): SeoFaqItem[] {
   return [
     {
       question: `What is ${kw}?`,
-      answer: `${kw} covers the strategy, tooling, and delivery practices Techlyser uses to help brands improve ecommerce outcomes in India and worldwide.`,
+      answer: `${kw} covers the strategy, tooling, and execution choices that help businesses improve visibility, experience, and growth outcomes.`,
     },
     {
       question: `Who should consider ${kw}?`,
-      answer: `Founders, ecommerce leads, and technical teams evaluating Shopify, headless, or performance work related to ${kw}.`,
+      answer: `Founders, marketing leads, and technical teams facing slow sites, weak conversion, outdated systems, or unclear digital priorities related to ${kw}.`,
     },
     {
-      question: `How does Techlyser approach ${kw}?`,
+      question: `What should you do first with ${kw}?`,
       answer:
-        "Discovery first: goals, stack audit, scoped milestones, then implementation with QA, SEO safeguards, and post-launch support.",
+        "Start with discovery: clarify goals, audit the current stack, define success metrics, then sequence practical milestones with QA and SEO safeguards.",
     },
   ];
 }

@@ -15,23 +15,23 @@ export function generateFallbackPayload(input: WriterInput): WriterLlmPayload {
   const articleMarkdown = [
     section(
       `Why ${input.keyword} matters for ${input.audience}`,
-      `This guide explains ${input.keyword} for ${input.audience} with a ${input.tone} tone. Techlyser teams in India help brands plan, build, and scale Shopify and headless commerce projects with clear timelines and measurable outcomes.`,
+      `This guide explains ${input.keyword} for ${input.audience} in plain business language: what breaks, what to measure, and what to fix first — without filler or a sales pitch.`,
     ),
     section(
       "Key considerations before you start",
-      `- Define success metrics (conversion, AOV, speed, or operational efficiency)\n- Map integrations (ERP, CRM, payments, analytics)\n- Choose build vs. migrate vs. optimize based on ${input.searchIntent} intent\n- Budget for discovery, implementation, QA, and launch support`,
+      `- Define success metrics (conversion, leads, speed, retention, or operational efficiency)\n- Map integrations (ERP, CRM, payments, analytics)\n- Choose build vs. migrate vs. optimize based on ${input.searchIntent} intent\n- Budget for discovery, implementation, QA, and launch support`,
     ),
     section(
       "Recommended approach",
-      `For ${input.searchIntent} searches, prioritize clarity: scope the MVP, document assumptions, and sequence work across theme, apps, performance, and SEO. A typical ${input.length} engagement targets roughly ${targetWords} words of depth — enough to answer objections without filler.`,
+      `For ${input.searchIntent} searches, prioritize clarity: scope the MVP, document assumptions, and sequence work across product, performance, and SEO. Aim for practical depth (~${targetWords} words of useful guidance) without padding.`,
     ),
     section(
-      "What to expect from an agency partner",
-      `Look for Shopify Plus or Next.js experience, transparent milestones, and post-launch optimization. Techlyser combines engineering with ecommerce strategy so ${input.audience} can ship faster with fewer rework cycles.`,
+      "Common mistakes to avoid",
+      `Skipping discovery, stacking too many tools, ignoring mobile performance, and measuring vanity metrics instead of leads/sales usually create rework. Fix ownership and success criteria before choosing technology.`,
     ),
     section(
       "Next steps",
-      `Use the checklist below, review FAQs, and book a consultation if you need a tailored roadmap for ${input.keyword}.`,
+      `Use the checklist and FAQs below to decide what you can do in-house versus what needs specialized help for ${input.keyword}.`,
     ),
   ].join("\n");
 
@@ -39,20 +39,20 @@ export function generateFallbackPayload(input: WriterInput): WriterLlmPayload {
     `- Why ${input.keyword} matters for ${input.audience}`,
     `- Key considerations before you start`,
     `- Recommended approach`,
-    `- What to expect from an agency partner`,
+    `- Common mistakes to avoid`,
     `- Next steps`,
     `- FAQs`,
   ].join("\n");
 
   return {
     seoTitle: `${input.keyword} — Guide for ${input.audience}`.slice(0, 60),
-    metaDescription: `Learn ${input.keyword} for ${input.audience}. Practical ${input.category} guidance from Techlyser — timelines, costs, and next steps.`.slice(
+    metaDescription: `Learn ${input.keyword} for ${input.audience}. Practical ${input.category} guidance — planning, trade-offs, and clear next steps.`.slice(
       0,
       160,
     ),
     slug,
     outline,
-    excerpt: `A ${input.tone} guide to ${input.keyword} for ${input.audience}, covering planning, execution, and when to engage experts.`,
+    excerpt: `A ${input.tone} guide to ${input.keyword} for ${input.audience}, covering planning, execution, and common mistakes.`,
     articleMarkdown,
     faqs: [
       {
@@ -64,14 +64,14 @@ export function generateFallbackPayload(input: WriterInput): WriterLlmPayload {
         answer: `Most projects run several weeks to a few months depending on complexity, content volume, and approval cycles. Discovery should happen before fixed dates are promised.`,
       },
       {
-        question: "What does it typically cost in India?",
+        question: "What does it typically cost?",
         answer:
-          "Budget depends on scope: audits and small fixes differ from full rebuilds or headless migrations. Request a scoped estimate rather than comparing hourly rates alone.",
+          "Budget depends on scope: audits and small fixes differ from full rebuilds or platform migrations. Compare scoped outcomes, not hourly rates alone.",
       },
       {
-        question: "When should we hire an agency?",
+        question: "When do we need outside help?",
         answer:
-          "Hire when internal capacity, platform expertise, or launch deadlines exceed what your team can absorb. Agencies reduce risk on integrations, performance, and QA.",
+          "Bring in specialists when internal capacity, platform expertise, or launch deadlines exceed what your team can absorb — especially for integrations, performance, and QA.",
       },
     ],
     howTo:
@@ -93,8 +93,8 @@ export function generateFallbackPayload(input: WriterInput): WriterLlmPayload {
                 text: "Sequence must-have vs. nice-to-have for launch.",
               },
               {
-                name: "Select a partner",
-                text: "Evaluate Shopify/Next.js experience, process, and references.",
+                name: "Decide ownership",
+                text: "Clarify what your team owns vs where specialist help reduces risk.",
               },
             ],
           }
@@ -116,41 +116,41 @@ export function generateFallbackPayload(input: WriterInput): WriterLlmPayload {
                 "Limited bandwidth for complex integrations",
               ],
               [
-                "Agency (Techlyser)",
-                "End-to-end Shopify / headless builds",
-                "Requires discovery and structured milestones",
+                "Specialist partner",
+                "End-to-end builds and migrations",
+                "Needs clear discovery and milestones",
               ],
             ],
           }
         : null,
     cta: { ...WRITER_DEFAULT_CTA },
-    featuredImagePrompt: `Professional blog hero image about ${input.keyword}, modern ecommerce workspace, subtle Techlyser brand colors (deep blue and white), clean composition, no text, photorealistic, 16:9`,
+    featuredImagePrompt: `Professional blog hero image about ${input.keyword}, modern business workspace, clean composition, no text, photorealistic, 16:9`,
     tags: [
       slugifyTaxonomy(input.category),
-      slugifyTaxonomy(input.keyword.split(" ")[0] || "commerce"),
-      "techlyser",
+      slugifyTaxonomy(input.keyword.split(" ")[0] || "business"),
+      "digital-growth",
     ].filter(Boolean),
     linkedinPersonalPost: [
       `I've been getting a lot of questions about ${input.keyword}.`,
       ``,
-      `For ${input.audience}, the biggest unlock is usually clarity: scope, timeline, and the right partner — not just the cheapest hourly rate.`,
+      `For ${input.audience}, the biggest unlock is usually clarity: the real problem, the metric that matters, and what to fix first — not the flashiest tool.`,
       ``,
-      `We put together a practical guide covering what to check before you start.`,
+      `We published a practical guide covering what to check before you start.`,
       ``,
-      `If you're evaluating this right now, happy to compare notes.`,
+      `If you're evaluating this right now, what is the hardest part for you?`,
       ``,
-      `#Shopify #Ecommerce #${slugifyTaxonomy(input.category).replace(/-/g, "")} #Techlyser`,
+      `#DigitalGrowth #${slugifyTaxonomy(input.category).replace(/-/g, "")}`,
     ].join("\n"),
     linkedinPagePost: [
-      `New Techlyser guide: ${input.keyword}`,
+      `New guide: ${input.keyword}`,
       ``,
-      `Built for ${input.audience} who need a clear path from planning to launch — without the fluff.`,
+      `Built for ${input.audience} who need a clear path from planning to action — without the fluff.`,
       ``,
-      `Inside: practical considerations, delivery expectations, and how we approach this at Techlyser.`,
+      `Inside: practical considerations, common mistakes, and decision checkpoints.`,
       ``,
-      `Want a scoped roadmap? Book a free consultation.`,
+      `What would you add to the checklist?`,
       ``,
-      `#ShopifyDevelopersIndia #Ecommerce #Techlyser #${slugifyTaxonomy(input.category).replace(/-/g, "")}`,
+      `#BusinessGrowth #${slugifyTaxonomy(input.category).replace(/-/g, "")}`,
     ].join("\n"),
   };
 }

@@ -38,3 +38,6 @@ export const CONTENT_OBJECTIVES = [
 
 export const TECHLYSER_CONTENT_PHILOSOPHY =
   "When our clients' businesses grow, Techlyser grows with them.";
+
+/** Editorial rule for every automated draft. */
+export const EDUCATE_FIRST_RULE = `Do not force-promote Techlyser services. Educate business owners with practical solutions. Enquiries and brand trust improve when readers feel understood — not when content sells.`;

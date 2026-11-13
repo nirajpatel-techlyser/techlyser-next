@@ -39,8 +39,8 @@ export function hasLlmProvider(): boolean {
 }
 
 export const WRITER_DEFAULT_CTA = {
-  headline: "Need expert help with your project?",
-  body: "Techlyser builds Shopify, Next.js, and headless commerce solutions for brands in India and worldwide.",
-  buttonText: "Get a free consultation",
-  href: "/contact",
+  headline: "Want to go deeper on this topic?",
+  body: "Explore practical guides and digital solutions for businesses improving visibility, experience, and growth.",
+  buttonText: "Browse resources",
+  href: "/resources",
 } as const;
