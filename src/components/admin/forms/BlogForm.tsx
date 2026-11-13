@@ -6,6 +6,7 @@ import { BlogStatus } from "@prisma/client";
 import { createBlog, updateBlog, type BlogInput } from "@/actions/blogs";
 import TiptapEditor from "@/components/admin/editor/TiptapEditor";
 import ImageUploader from "@/components/admin/forms/ImageUploader";
+import SocialImagesUploader from "@/components/admin/forms/SocialImagesUploader";
 import LinkedInPostEditor from "@/components/admin/forms/LinkedInPostEditor";
 
 function slugify(value: string) {
@@ -24,6 +25,7 @@ export type BlogFormValues = {
   excerpt: string;
   content: string;
   featuredImage: string | null;
+  socialImages: string[];
   category: string;
   tags: string;
   author: string;
@@ -49,6 +51,7 @@ const defaults: BlogFormValues = {
   excerpt: "",
   content: "",
   featuredImage: null,
+  socialImages: [],
   category: "Shopify",
   tags: "",
   author: "Techlyser Web Solutions",
@@ -98,6 +101,7 @@ export default function BlogForm({ initialValues }: BlogFormProps) {
       excerpt: values.excerpt,
       content: values.content,
       featuredImage: values.featuredImage,
+      socialImages: values.socialImages,
       category: values.category || null,
       tags: tagList,
       author: values.author || "Techlyser Web Solutions",
@@ -214,6 +218,18 @@ export default function BlogForm({ initialValues }: BlogFormProps) {
               <ImageUploader
                 value={values.featuredImage}
                 onChange={(url) => updateField("featuredImage", url)}
+              />
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <h3 className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-500">
+              Social media images
+            </h3>
+            <div className="mt-4">
+              <SocialImagesUploader
+                value={values.socialImages}
+                onChange={(urls) => updateField("socialImages", urls)}
               />
             </div>
           </div>

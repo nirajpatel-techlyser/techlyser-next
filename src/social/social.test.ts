@@ -20,6 +20,7 @@ const post: WebsitePostSource = {
   excerpt: "A slow theme costs more than another app.",
   content: "<p>Measure the theme before adding apps.</p>",
   featuredImage: "https://res.cloudinary.com/demo/image/upload/sample.jpg",
+  socialImages: [],
   tags: ["Shopify", "CRO"],
   linkedinPersonalPost: "",
   linkedinPagePost: "<p>Founders should fix theme speed before buying another app.</p>",
@@ -46,6 +47,25 @@ test("captions keep paragraphs, decode entities, and end with the article line",
   assert.doesNotMatch(linkedin.caption, /&#39;/);
   assert.ok(instagram.hashtags.includes("#shopify"));
   assert.equal(instagram.imageUrl, post.featuredImage);
+  assert.deepEqual(instagram.imageUrls, [post.featuredImage]);
+});
+
+test("social images keep blog-edit order for IG/FB/LI and GBP uses featured", () => {
+  const ordered = [
+    "https://res.cloudinary.com/demo/image/upload/one.jpg",
+    "https://res.cloudinary.com/demo/image/upload/two.jpg",
+    "https://res.cloudinary.com/demo/image/upload/three.jpg",
+  ];
+  const withSocial = { ...post, socialImages: ordered };
+  const instagram = buildSocialCaption(withSocial, "INSTAGRAM");
+  const facebook = buildSocialCaption(withSocial, "FACEBOOK");
+  const linkedin = buildSocialCaption(withSocial, "LINKEDIN");
+  const gbp = buildSocialCaption(withSocial, "GOOGLE_BUSINESS");
+  assert.deepEqual(instagram.imageUrls, ordered);
+  assert.deepEqual(facebook.imageUrls, ordered);
+  assert.deepEqual(linkedin.imageUrls, ordered);
+  assert.deepEqual(gbp.imageUrls, [post.featuredImage]);
+  assert.equal(gbp.imageUrl, post.featuredImage);
 });
 
 test("publish is blocked without approval, image, or a connection", () => {

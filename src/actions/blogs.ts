@@ -16,6 +16,7 @@ const blogSchema = z.object({
   excerpt: z.string().optional(),
   content: z.string().min(1),
   featuredImage: z.string().optional().nullable(),
+  socialImages: z.array(z.string().url()).max(6).default([]),
   category: z.string().optional().nullable(),
   tags: z.array(z.string()).default([]),
   author: z.string().default("Techlyser Web Solutions"),
@@ -69,6 +70,7 @@ export async function createBlog(raw: BlogInput) {
     data: {
       ...data,
       featuredImage: data.featuredImage || null,
+      socialImages: data.socialImages || [],
       category: data.category || null,
       seoTitle: data.seoTitle || data.title,
       seoDescription: data.seoDescription || data.excerpt || null,
@@ -117,6 +119,7 @@ export async function updateBlog(id: string, raw: BlogInput) {
     data: {
       ...data,
       featuredImage: data.featuredImage || null,
+      socialImages: data.socialImages || [],
       category: data.category || null,
       seoTitle: data.seoTitle || data.title,
       seoDescription: data.seoDescription || data.excerpt || null,
@@ -172,6 +175,7 @@ export async function duplicateBlog(id: string) {
       excerpt: blog.excerpt,
       content: blog.content,
       featuredImage: blog.featuredImage,
+      socialImages: blog.socialImages || [],
       category: blog.category,
       tags: blog.tags,
       author: blog.author,

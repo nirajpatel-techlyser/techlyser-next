@@ -7,9 +7,22 @@ export type PublishGateInput = {
   approved: boolean;
   hasContent: boolean;
   featuredImage: string | null;
+  socialImages?: string[];
   selected: SocialPlatform[];
   connected: SocialPlatform[];
 };
+
+function hasImageForPlatform(
+  platform: SocialPlatform,
+  featuredImage: string | null,
+  socialImages: string[] | undefined,
+) {
+  if (platform === "GOOGLE_BUSINESS") {
+    return isPublicHttpsUrl(featuredImage);
+  }
+  const social = (socialImages || []).some((url) => isPublicHttpsUrl(url));
+  return social || isPublicHttpsUrl(featuredImage);
+}
 
 export function evaluatePublish(input: PublishGateInput) {
   const reasons: string[] = [];
@@ -34,8 +47,15 @@ export function evaluatePublish(input: PublishGateInput) {
     if (!connected.has(platform)) {
       reasons.push(`Connect ${label} before publishing there.`);
     }
-    if (imageRequired(platform) && !isPublicHttpsUrl(input.featuredImage)) {
-      reasons.push(`Add an https image before publishing to ${label}.`);
+    if (
+      imageRequired(platform) &&
+      !hasImageForPlatform(platform, input.featuredImage, input.socialImages)
+    ) {
+      reasons.push(
+        platform === "GOOGLE_BUSINESS"
+          ? `Add an https featured image before publishing to ${label}.`
+          : `Add social images or a featured https image before publishing to ${label}.`,
+      );
     }
   }
   return { ok: reasons.length === 0, reasons };

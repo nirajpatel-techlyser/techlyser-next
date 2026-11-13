@@ -46,11 +46,25 @@ async function uploadLinkedInImage(input: {
   return imageUrn;
 }
 
+function linkedInContent(mediaIds: string[]) {
+  if (mediaIds.length === 0) return {};
+  if (mediaIds.length === 1) {
+    return { content: { media: { id: mediaIds[0] } } };
+  }
+  return {
+    content: {
+      multiImage: {
+        images: mediaIds.map((id) => ({ id })),
+      },
+    },
+  };
+}
+
 async function createLinkedInPost(input: {
   token: string;
   author: string;
   caption: string;
-  mediaId: string | null;
+  mediaIds: string[];
 }) {
   return withTransientRetry("LinkedIn", async () => {
     const response = await socialFetch("https://api.linkedin.com/rest/posts", {
@@ -70,7 +84,7 @@ async function createLinkedInPost(input: {
           targetEntities: [],
           thirdPartyDistributionChannels: [],
         },
-        ...(input.mediaId ? { content: { media: { id: input.mediaId } } } : {}),
+        ...linkedInContent(input.mediaIds),
         lifecycleState: "PUBLISHED",
         isReshareDisabledByAuthor: false,
       }),
@@ -90,13 +104,31 @@ async function createLinkedInPost(input: {
   });
 }
 
+async function uploadLinkedInImages(input: {
+  token: string;
+  owner: string;
+  images: { bytes: Buffer; mime: string }[];
+}) {
+  const mediaIds: string[] = [];
+  for (const image of input.images) {
+    const mediaId = await uploadLinkedInImage({
+      token: input.token,
+      owner: input.owner,
+      bytes: image.bytes,
+      mime: image.mime,
+    });
+    mediaIds.push(mediaId);
+  }
+  return mediaIds;
+}
+
 export const linkedInPublisher: SocialPublisher = {
   platform: "LINKEDIN",
   validate(caption) {
     if (!caption.caption.trim()) return "LinkedIn caption is empty.";
     return null;
   },
-  async publish({ caption, account, image, resume }) {
+  async publish({ caption, account, image, images, resume }) {
     const person =
       typeof account.metadata?.personUrn === "string"
         ? account.metadata.personUrn
@@ -106,23 +138,25 @@ export const linkedInPublisher: SocialPublisher = {
         ? account.metadata.organizationUrn
         : null;
 
+    const payloads =
+      images && images.length > 0 ? images : image ? [image] : [];
+
     let profileId = resume?.externalPostId || "";
     let profileUrl = resume?.publishedUrl ?? null;
     if (!profileId) {
-      const mediaId =
-        image && caption.imageUrl
-          ? await uploadLinkedInImage({
+      const mediaIds =
+        payloads.length > 0
+          ? await uploadLinkedInImages({
               token: account.accessToken,
               owner: person,
-              bytes: image.bytes,
-              mime: image.mime,
+              images: payloads,
             })
-          : null;
+          : [];
       const posted = await createLinkedInPost({
         token: account.accessToken,
         author: person,
         caption: caption.caption,
-        mediaId,
+        mediaIds,
       });
       profileId = posted.externalPostId;
       profileUrl = posted.publishedUrl;
@@ -142,20 +176,19 @@ export const linkedInPublisher: SocialPublisher = {
     }
 
     try {
-      const mediaId =
-        image && caption.imageUrl
-          ? await uploadLinkedInImage({
+      const mediaIds =
+        payloads.length > 0
+          ? await uploadLinkedInImages({
               token: account.accessToken,
               owner: organization,
-              bytes: image.bytes,
-              mime: image.mime,
+              images: payloads,
             })
-          : null;
+          : [];
       const page = await createLinkedInPost({
         token: account.accessToken,
         author: organization,
         caption: caption.caption,
-        mediaId,
+        mediaIds,
       });
       return {
         externalPostId: profileId,

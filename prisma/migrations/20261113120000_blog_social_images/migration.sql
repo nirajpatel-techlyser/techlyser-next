@@ -1,0 +1,5 @@
+-- AlterTable
+ALTER TABLE "Blog" ADD COLUMN IF NOT EXISTS "socialImages" TEXT[] DEFAULT ARRAY[]::TEXT[];
+
+-- AlterTable
+ALTER TABLE "SocialVariant" ADD COLUMN IF NOT EXISTS "imageUrls" TEXT[] DEFAULT ARRAY[]::TEXT[];

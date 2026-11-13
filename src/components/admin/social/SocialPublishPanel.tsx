@@ -185,7 +185,17 @@ export default function SocialPublishPanel({ initial }: { initial: SocialPublish
             {previewRow.label} preview
           </p>
           <p className="mt-2 whitespace-pre-wrap text-sm text-slate-800">{previewRow.caption}</p>
-          {previewRow.imageUrl ? (
+          {previewRow.imageUrls?.length ? (
+            <p className="mt-2 text-xs text-slate-500">
+              Images ({previewRow.imageUrls.length}, order preserved):{" "}
+              {previewRow.imageUrls.map((url, index) => (
+                <span key={`${url}-${index}`}>
+                  {index > 0 ? " · " : ""}
+                  {index + 1}
+                </span>
+              ))}
+            </p>
+          ) : previewRow.imageUrl ? (
             <p className="mt-2 text-xs text-slate-500">Image: {previewRow.imageUrl}</p>
           ) : (
             <p className="mt-2 text-xs text-slate-500">No public https image on this post.</p>

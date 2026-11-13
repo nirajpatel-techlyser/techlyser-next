@@ -37,6 +37,8 @@ export interface SocialPublisher {
     caption: SocialCaption;
     account: PublisherAccount;
     image: ImagePayload | null;
+    /** Ordered downloaded images for LinkedIn multi-image (same order as caption.imageUrls). */
+    images?: ImagePayload[];
     resume?: PublishResume | null;
   }): Promise<PublishOutput>;
 }

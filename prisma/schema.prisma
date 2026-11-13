@@ -79,6 +79,8 @@ model Blog {
   excerpt          String?       @db.Text
   content          String        @db.Text
   featuredImage    String?
+  /// Ordered HTTPS images for social only (website uses featuredImage). Max 6 in app logic.
+  socialImages     String[]      @default([])
   category         String?
   tags             String[]      @default([])
   author           String        @default("Techlyser Web Solutions")
@@ -801,6 +803,8 @@ model SocialVariant {
   hashtags       String[]           @default([])
   linkUrl        String
   imageUrl       String?
+  /// Ordered social images for this platform variant (IG/FB/LI multi-image).
+  imageUrls      String[]           @default([])
   sourceHash     String
   contentHash    String
   createdAt      DateTime           @default(now())

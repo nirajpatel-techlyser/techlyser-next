@@ -9,6 +9,8 @@ const LIMITS: Record<SocialPlatform, number> = {
   GOOGLE_BUSINESS: 1400,
 };
 
+export const MAX_SOCIAL_IMAGES = 6;
+
 function decodeHtmlEntities(value: string) {
   const fromCode = (code: number, original: string) =>
     code > 0 && code <= 0x10ffff ? String.fromCodePoint(code) : original;
@@ -44,6 +46,25 @@ export function isPublicHttpsUrl(value: string | null | undefined) {
   } catch {
     return false;
   }
+}
+
+/** Ordered HTTPS images for a platform. GBP always uses featured; others prefer socialImages. */
+export function resolvePlatformImages(
+  post: Pick<WebsitePostSource, "featuredImage" | "socialImages">,
+  platform: SocialPlatform,
+): string[] {
+  if (platform === "GOOGLE_BUSINESS") {
+    return isPublicHttpsUrl(post.featuredImage) && post.featuredImage
+      ? [post.featuredImage]
+      : [];
+  }
+  const social = (post.socialImages || [])
+    .filter((url) => isPublicHttpsUrl(url))
+    .slice(0, MAX_SOCIAL_IMAGES);
+  if (social.length > 0) return social;
+  return isPublicHttpsUrl(post.featuredImage) && post.featuredImage
+    ? [post.featuredImage]
+    : [];
 }
 
 function clip(value: string, max: number) {
@@ -94,6 +115,7 @@ export function sourceHashFor(post: WebsitePostSource) {
         excerpt: post.excerpt,
         lead: leadText(post),
         image: post.featuredImage,
+        socialImages: post.socialImages || [],
         tags: post.tags,
         personal: post.linkedinPersonalPost,
         page: post.linkedinPagePost,
@@ -108,6 +130,7 @@ export function contentHashFor(input: {
   hashtags: string[];
   linkUrl: string;
   imageUrl: string | null;
+  imageUrls?: string[];
 }) {
   return createHash("sha256")
     .update(
@@ -117,6 +140,7 @@ export function contentHashFor(input: {
         hashtags: input.hashtags,
         linkUrl: input.linkUrl,
         imageUrl: input.imageUrl,
+        imageUrls: input.imageUrls || [],
       }),
     )
     .digest("hex");
@@ -148,7 +172,8 @@ export function buildSocialCaption(
 ): SocialCaption {
   const linkUrl = absoluteUrl(`/${post.slug}`);
   const hashtags = platform === "INSTAGRAM" ? hashtagsFromTags(post.tags) : [];
-  const imageUrl = isPublicHttpsUrl(post.featuredImage) ? post.featuredImage : null;
+  const imageUrls = resolvePlatformImages(post, platform);
+  const imageUrl = imageUrls[0] || null;
   const caption = captionFor(platform, post, linkUrl, hashtags);
   const sourceHash = sourceHashFor(post);
   return {
@@ -157,6 +182,7 @@ export function buildSocialCaption(
     hashtags,
     linkUrl,
     imageUrl,
+    imageUrls,
     sourceHash,
     contentHash: contentHashFor({
       platform,
@@ -164,6 +190,7 @@ export function buildSocialCaption(
       hashtags,
       linkUrl,
       imageUrl,
+      imageUrls,
     }),
   };
 }

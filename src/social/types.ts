@@ -39,6 +39,8 @@ export type WebsitePostSource = {
   excerpt: string;
   content: string;
   featuredImage: string | null;
+  /** Ordered social-only images from blog edit (1→N). */
+  socialImages: string[];
   tags: string[];
   linkedinPersonalPost: string;
   linkedinPagePost: string;
@@ -50,7 +52,10 @@ export type SocialCaption = {
   caption: string;
   hashtags: string[];
   linkUrl: string;
+  /** First image (compat + GBP / single-image paths). */
   imageUrl: string | null;
+  /** Ordered images for IG/FB/LI multi-image. */
+  imageUrls: string[];
   sourceHash: string;
   contentHash: string;
 };
@@ -74,6 +79,7 @@ export type PlatformPreview = {
   hashtags: string[];
   linkUrl: string;
   imageUrl: string | null;
+  imageUrls: string[];
   imageRequired: boolean;
   connected: boolean;
   accountLabel: string | null;
@@ -87,6 +93,7 @@ export type SocialPublishView = {
   approved: boolean;
   websitePublished: boolean;
   featuredImage: string | null;
+  socialImages: string[];
   canPublish: boolean;
   reasons: string[];
   platforms: PlatformPreview[];

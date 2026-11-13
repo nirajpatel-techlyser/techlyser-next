@@ -55,6 +55,7 @@ async function saveVariants(
             hashtags: nextTags,
             linkUrl: caption.linkUrl,
             imageUrl: caption.imageUrl,
+            imageUrls: caption.imageUrls,
             sourceHash: caption.sourceHash,
             contentHash,
           },
@@ -68,6 +69,7 @@ async function saveVariants(
             hashtags: nextTags,
             linkUrl: caption.linkUrl,
             imageUrl: caption.imageUrl,
+            imageUrls: caption.imageUrls,
             sourceHash: caption.sourceHash,
             contentHash,
           },
@@ -95,6 +97,7 @@ export async function startPublishJob(input: {
     approved: Boolean(distribution.approvedAt),
     hasContent: Boolean(post.title.trim() && post.content.trim()),
     featuredImage: post.featuredImage,
+    socialImages: post.socialImages,
     selected: input.platforms,
     connected: accounts.map((account) => account.platform),
   });
@@ -199,6 +202,7 @@ async function runOneAttempt(input: {
   blogId: string;
   platform: SocialPlatform;
   image: Awaited<ReturnType<typeof downloadImageOnce>>;
+  images?: Awaited<ReturnType<typeof downloadImageOnce>>[];
 }) {
   const claimed = await prisma.socialPublishAttempt.updateMany({
     where: { id: input.attemptId, status: { in: ["PENDING", "FAILED"] } },
@@ -214,6 +218,7 @@ async function runOneAttempt(input: {
       hashtags: true,
       linkUrl: true,
       imageUrl: true,
+      imageUrls: true,
       sourceHash: true,
       contentHash: true,
     },
@@ -232,8 +237,18 @@ async function runOneAttempt(input: {
     return;
   }
 
+  const caption = {
+    ...variant,
+    imageUrls:
+      variant.imageUrls?.length > 0
+        ? variant.imageUrls
+        : variant.imageUrl
+          ? [variant.imageUrl]
+          : [],
+  };
+
   const publisher = publisherFor(input.platform);
-  const problem = publisher.validate(variant);
+  const problem = publisher.validate(caption);
   if (problem) {
     await prisma.socialPublishAttempt.update({
       where: { id: input.attemptId },
@@ -257,10 +272,27 @@ async function runOneAttempt(input: {
         secondaryPublishedUrl: true,
       },
     });
+    let images = (input.images || []).filter(Boolean) as NonNullable<
+      Awaited<ReturnType<typeof downloadImageOnce>>
+    >[];
+    if (input.platform === "LINKEDIN" && images.length === 0) {
+      const urls =
+        caption.imageUrls.length > 0
+          ? caption.imageUrls
+          : caption.imageUrl
+            ? [caption.imageUrl]
+            : [];
+      images = [];
+      for (const url of urls) {
+        const downloaded = await downloadImageOnce(url);
+        if (downloaded) images.push(downloaded);
+      }
+    }
     const result = await publisher.publish({
-      caption: variant,
+      caption,
       account,
-      image: input.image,
+      image: images[0] || input.image,
+      images,
       resume: saved,
     });
     await prisma.socialPublishAttempt.update({
@@ -332,45 +364,12 @@ export async function runSocialJob(jobId: string) {
   });
   if (!job) return;
 
-  const needsImage = job.attempts.some((attempt) => attempt.platform === "LINKEDIN");
-  let image: Awaited<ReturnType<typeof downloadImageOnce>> = null;
-  if (needsImage) {
-    const variant = await prisma.socialVariant.findFirst({
-      where: { distribution: { blogId: job.blogId }, platform: "LINKEDIN" },
-      select: { imageUrl: true },
-    });
-    try {
-      image = await downloadImageOnce(variant?.imageUrl ?? null);
-    } catch (error) {
-      const message =
-        error instanceof SocialPublishError
-          ? error.message
-          : "The featured image could not be downloaded.";
-      await prisma.socialPublishAttempt.updateMany({
-        where: { jobId, platform: "LINKEDIN", status: "PENDING" },
-        data: {
-          status: "FAILED",
-          retryable: false,
-          errorCode: "INVALID_IMAGE",
-          errorMessage: message,
-        },
-      });
-    }
-  }
-
   for (const attempt of job.attempts) {
-    if (attempt.platform === "LINKEDIN" && image === null && needsImage) {
-      const failed = await prisma.socialPublishAttempt.findUnique({
-        where: { id: attempt.id },
-        select: { status: true },
-      });
-      if (failed?.status === "FAILED") continue;
-    }
     await runOneAttempt({
       attemptId: attempt.id,
       blogId: job.blogId,
       platform: attempt.platform,
-      image,
+      image: null,
     });
   }
   await finishJob(jobId, job.blogId);
@@ -388,37 +387,11 @@ export async function retrySocialAttempt(attemptId: string) {
   if (attempt.status === "PUBLISHING") {
     return { jobId: attempt.jobId, created: false, status: 200 as const };
   }
-  const variant = await prisma.socialVariant.findFirst({
-    where: { distribution: { blogId: attempt.blogId }, platform: attempt.platform },
-    select: { imageUrl: true },
-  });
-  let image: Awaited<ReturnType<typeof downloadImageOnce>> = null;
-  if (attempt.platform === "LINKEDIN") {
-    try {
-      image = await downloadImageOnce(variant?.imageUrl ?? null);
-    } catch (error) {
-      const message =
-        error instanceof SocialPublishError
-          ? error.message
-          : "The featured image could not be downloaded.";
-      await prisma.socialPublishAttempt.update({
-        where: { id: attempt.id },
-        data: {
-          status: "FAILED",
-          retryable: false,
-          errorCode: "INVALID_IMAGE",
-          errorMessage: message,
-        },
-      });
-      await finishJob(attempt.jobId, attempt.blogId);
-      return { jobId: attempt.jobId, created: false, status: 200 as const };
-    }
-  }
   await runOneAttempt({
     attemptId: attempt.id,
     blogId: attempt.blogId,
     platform: attempt.platform,
-    image,
+    image: null,
   });
   await finishJob(attempt.jobId, attempt.blogId);
   return { jobId: attempt.jobId, created: false, status: 200 as const };
