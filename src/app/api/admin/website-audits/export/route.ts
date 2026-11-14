@@ -12,7 +12,7 @@ export const runtime = "nodejs";
 const AUDIT_STATUSES = new Set<string>(Object.values(WebsiteAuditStatus));
 const LEAD_STATUSES = new Set<string>(Object.values(WebsiteAuditLeadStatus));
 
-function csvEscape(value: string | number | null | undefined) {
+function csvEscape(value: string | number | boolean | null | undefined) {
   const text = value == null ? "" : String(value);
   if (/[",\n\r]/.test(text)) return `"${text.replace(/"/g, '""')}"`;
   return text;
