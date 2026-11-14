@@ -999,3 +999,102 @@ model AiMemory {
   @@unique([scope, key])
   @@index([scope])
 }
+
+enum WebsiteAuditStatus {
+  PENDING
+  FETCHING
+  ANALYZING
+  GENERATING_RECOMMENDATIONS
+  AWAITING_EMAIL
+  GENERATING_PDF
+  SENDING_EMAIL
+  COMPLETED
+  FAILED
+}
+
+enum WebsiteAuditJobStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+enum WebsiteAuditLeadStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  DISQUALIFIED
+}
+
+/// Inbound visitor who requested a Website Growth Audit report.
+model WebsiteAuditLead {
+  id                String                 @id @default(cuid())
+  name              String?
+  email             String
+  companyName       String?
+  websiteUrl        String
+  marketingConsent  Boolean                @default(false)
+  consentAt         DateTime?
+  status            WebsiteAuditLeadStatus @default(NEW)
+  notes             String?                @db.Text
+  createdAt         DateTime               @default(now())
+  updatedAt         DateTime               @updatedAt
+  audits            WebsiteAudit[]
+
+  @@index([email, createdAt])
+  @@index([status, createdAt])
+}
+
+/// One website growth audit run (technical findings + AI recommendations + report).
+model WebsiteAudit {
+  id                   String             @id @default(cuid())
+  leadId               String?
+  lead                 WebsiteAuditLead?  @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  websiteUrl           String
+  normalizedUrl        String
+  status               WebsiteAuditStatus @default(PENDING)
+  overallScore         Int?
+  categoryScores       Json?
+  technicalFindings    Json?
+  aiRecommendations    Json?
+  pagesAnalyzed        Json?
+  reportHtml           String?            @db.Text
+  reportPdfBase64      String?            @db.Text
+  reportFileName       String?
+  emailSentAt          DateTime?
+  emailError           String?            @db.Text
+  errorCode            String?
+  errorMessage         String?            @db.Text
+  checksPerformed      Int                @default(0)
+  checksUnavailable    Int                @default(0)
+  requestIpHash        String?
+  startedAt            DateTime?
+  completedAt          DateTime?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  jobs                 WebsiteAuditJob[]
+
+  @@index([status, createdAt])
+  @@index([normalizedUrl, createdAt])
+  @@index([leadId])
+}
+
+/// Durable step runner for a single audit (survives serverless restarts).
+model WebsiteAuditJob {
+  id            String                @id @default(cuid())
+  auditId       String
+  audit         WebsiteAudit          @relation(fields: [auditId], references: [id], onDelete: Cascade)
+  status        WebsiteAuditJobStatus @default(QUEUED)
+  step          String                @default("queued")
+  progress      Int                   @default(0)
+  errorCode     String?
+  errorMessage  String?               @db.Text
+  retryCount    Int                   @default(0)
+  startedAt     DateTime?
+  completedAt   DateTime?
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
+
+  @@index([auditId, status])
+  @@index([status, createdAt])
+}

@@ -37,6 +37,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "weekly" as const,
     },
     {
+      path: "/website-growth-audit",
+      priority: 0.9,
+      changeFrequency: "weekly" as const,
+    },
+    {
       path: "/resources",
       priority: 0.9,
       changeFrequency: "weekly" as const,

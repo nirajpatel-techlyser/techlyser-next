@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Navbar from "@/components/layout/Navbar";
+import WebsiteAuditStrip from "@/components/sections/WebsiteAuditStrip";
 import Hero from "@/components/sections/Hero";
 import FreeAuditHighlight from "@/components/sections/FreeAuditHighlight";
 import FeaturedIn from "@/components/sections/FeaturedIn";
@@ -70,6 +71,7 @@ export default function Home() {
       <JsonLd data={jsonLd} />
       <div className="bg-surface-dark">
         <Navbar />
+        <WebsiteAuditStrip />
         <Hero />
         <FreeAuditHighlight />
 

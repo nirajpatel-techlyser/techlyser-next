@@ -42,6 +42,7 @@ const RESERVED_PATHS = new Set([
   "shopify-developers-india",
   "shopify-developers",
   "free-shopify-audit",
+  "website-growth-audit",
   "resources",
   "category",
   "tag",

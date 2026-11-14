@@ -12,6 +12,7 @@ const companyLinks = [
   { href: "/resources", label: "Free Resources" },
   { href: "/contact", label: "Contact" },
   { href: "/free-shopify-audit", label: "Free Shopify Audit" },
+  { href: "/website-growth-audit", label: "Website Growth Audit" },
 ];
 
 export default async function SiteFooter() {

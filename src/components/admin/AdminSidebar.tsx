@@ -19,6 +19,7 @@ import {
   Settings,
   Share2,
   Sparkles,
+  ClipboardCheck,
 } from "lucide-react";
 
 const navItems = [
@@ -31,6 +32,7 @@ const navItems = [
   { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/admin/blogs", label: "Blogs", icon: FileText },
   { href: "/admin/lead-generation", label: "Lead generation", icon: Users },
+  { href: "/admin/website-audits", label: "Website audits", icon: ClipboardCheck },
   { href: "/admin/social/accounts", label: "Social accounts", icon: Share2 },
   { href: "/admin/social/history", label: "Social history", icon: History },
   { href: "/admin/comments", label: "Comments", icon: MessageSquare },

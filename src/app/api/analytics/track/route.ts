@@ -58,6 +58,7 @@ export async function POST(request: Request) {
       "tag",
       "resources",
       "free-shopify-audit",
+      "website-growth-audit",
       "shopify-developers-india",
       "shopify-developers",
     ]);

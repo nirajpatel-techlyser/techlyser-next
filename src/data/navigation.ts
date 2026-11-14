@@ -32,11 +32,16 @@ export const navigation: NavigationItem[] = [
   },
   {
     id: 6,
+    label: "Website Audit",
+    href: "/website-growth-audit",
+  },
+  {
+    id: 7,
     label: "About",
     href: "/about",
   },
   {
-    id: 7,
+    id: 8,
     label: "Contact",
     href: "/contact",
   },

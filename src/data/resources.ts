@@ -28,6 +28,13 @@ export const leadMagnets: ResourceLink[] = [
     badge: "Lead magnet",
   },
   {
+    title: "Free Website Growth Audit",
+    description:
+      "Analyze any public website for design, SEO, UX, performance, and conversion opportunities — then get a branded PDF report by email.",
+    href: "/website-growth-audit",
+    badge: "Lead magnet",
+  },
+  {
     title: "Shopify Developers India hub",
     description:
       "Nationwide Shopify agency guide with city pages for Indore, Mumbai, Ahmedabad, Bangalore, Pune, Delhi, Hyderabad, Chennai, and Gujarat.",
