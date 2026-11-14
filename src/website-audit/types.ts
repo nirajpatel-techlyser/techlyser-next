@@ -1,3 +1,5 @@
+import type { PageKind } from "@/website-audit/platform";
+
 export type AuditCategoryId =
   | "seo"
   | "uiux"
@@ -32,6 +34,13 @@ export type AnalyzedPage = {
   status: "ok" | "failed";
   error?: string;
   htmlLength?: number;
+  kind?: PageKind;
+};
+
+export type PlatformSummary = {
+  platform: string;
+  themeHint: string | null;
+  confidence: "verified" | "potential";
 };
 
 export type CategoryScore = {
@@ -53,6 +62,7 @@ export type TechnicalAuditResult = {
   checksUnavailable: number;
   auditedAt: string;
   limitations: string[];
+  platform?: PlatformSummary;
 };
 
 export type AiRecommendation = {

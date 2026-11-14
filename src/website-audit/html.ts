@@ -139,8 +139,11 @@ export function discoverCandidatePaths(html: string, origin: string) {
     /about/i,
     /service/i,
     /product/i,
+    /collection/i,
+    /cart/i,
     /contact/i,
     /pricing/i,
+    /story|mission/i,
     /work|portfolio|case/i,
   ];
   const picked: string[] = [];
@@ -155,7 +158,7 @@ export function discoverCandidatePaths(html: string, origin: string) {
     } catch {
       // ignore
     }
-    if (picked.length >= 4) break;
+    if (picked.length >= 8) break;
   }
   return picked;
 }

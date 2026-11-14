@@ -3,6 +3,9 @@
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { ArrowRight, CheckCircle2, Loader2 } from "lucide-react";
+import AuditEmailModal, {
+  type AuditEmailPayload,
+} from "@/components/website-audit/AuditEmailModal";
 
 type AuditStatusResponse = {
   id: string;
@@ -38,33 +41,40 @@ const STEP_LABELS: Record<string, string> = {
   fetching: "Checking website availability…",
   analyzing: "Analyzing structure, SEO, UX and conversion signals…",
   generating_recommendations: "Preparing growth recommendations…",
-  awaiting_email: "Report preview ready",
+  awaiting_email: "Preparing your branded PDF report…",
   generating_pdf: "Generating your PDF report…",
   sending_email: "Sending your report email…",
   completed: "Completed",
+  completed_with_email_error: "Report ready (email delivery issue)",
 };
+
+const ACTIVE_STATUSES = new Set([
+  "PENDING",
+  "FETCHING",
+  "ANALYZING",
+  "GENERATING_RECOMMENDATIONS",
+  "AWAITING_EMAIL",
+  "GENERATING_PDF",
+  "SENDING_EMAIL",
+]);
 
 export default function WebsiteGrowthAuditWizard() {
   const searchParams = useSearchParams();
   const initialUrl = searchParams.get("url")?.trim() || "";
-  const autoStarted = useRef(false);
+  const initialId = searchParams.get("id")?.trim() || "";
+  const bootstrapped = useRef(false);
 
   const [url, setUrl] = useState(initialUrl);
   const [honeypot, setHoneypot] = useState("");
-  const [auditId, setAuditId] = useState<string | null>(null);
+  const [auditId, setAuditId] = useState<string | null>(initialId || null);
   const [audit, setAudit] = useState<AuditStatusResponse | null>(null);
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy] = useState(Boolean(initialId));
   const [error, setError] = useState("");
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [companyName, setCompanyName] = useState("");
-  const [consent, setConsent] = useState(false);
   const [doneMessage, setDoneMessage] = useState("");
+  const [modalOpen, setModalOpen] = useState(false);
 
   const progress = audit?.job?.progress ?? 0;
   const stepLabel = STEP_LABELS[audit?.job?.step || ""] || audit?.status || "";
-
-  const canClaim = audit?.status === "AWAITING_EMAIL" || audit?.status === "COMPLETED";
 
   async function refresh(id: string) {
     const response = await fetch(`/api/website-growth-audit/${id}`);
@@ -78,14 +88,26 @@ export default function WebsiteGrowthAuditWizard() {
     const response = await fetch(`/api/website-growth-audit/${id}/advance`, {
       method: "POST",
     });
-    const data = (await response.json()) as { success?: boolean; error?: string };
+    const data = (await response.json()) as {
+      success?: boolean;
+      error?: string;
+      emailSent?: boolean;
+      emailError?: string;
+    };
     if (!response.ok || data.success === false) {
       throw new Error(data.error || "Analysis failed");
+    }
+    if (data.emailSent === false && data.emailError) {
+      setDoneMessage(
+        `Your report was prepared, but email delivery failed: ${data.emailError}`,
+      );
+    } else if (data.emailSent === true) {
+      setDoneMessage("Your report has been emailed. Check your inbox (and spam folder).");
     }
     return refresh(id);
   }
 
-  async function startAudit(targetUrl: string) {
+  async function startWithEmail(targetUrl: string, payload: AuditEmailPayload) {
     setError("");
     setDoneMessage("");
     setAudit(null);
@@ -94,7 +116,13 @@ export default function WebsiteGrowthAuditWizard() {
       const response = await fetch("/api/website-growth-audit/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: targetUrl, website: honeypot }),
+        body: JSON.stringify({
+          url: targetUrl,
+          email: payload.email,
+          name: payload.name,
+          consent: true,
+          website: honeypot,
+        }),
       });
       const data = (await response.json()) as {
         success?: boolean;
@@ -104,6 +132,7 @@ export default function WebsiteGrowthAuditWizard() {
       if (!response.ok || !data.auditId) {
         throw new Error(data.error || "Could not start audit");
       }
+      setModalOpen(false);
       setAuditId(data.auditId);
     } catch (err) {
       setBusy(false);
@@ -120,15 +149,15 @@ export default function WebsiteGrowthAuditWizard() {
       try {
         const current = await refresh(auditId!);
         if (cancelled) return;
-        if (
-          current.status === "PENDING" ||
-          current.status === "FETCHING" ||
-          current.status === "ANALYZING" ||
-          current.status === "GENERATING_RECOMMENDATIONS"
-        ) {
+        if (ACTIVE_STATUSES.has(current.status)) {
           await advance(auditId!);
           if (!cancelled) timer = setTimeout(loop, 1200);
           return;
+        }
+        if (current.status === "COMPLETED" && current.emailSentAt) {
+          setDoneMessage(
+            "Your report has been emailed. Check your inbox (and spam folder).",
+          );
         }
       } catch (err) {
         if (!cancelled) {
@@ -149,57 +178,23 @@ export default function WebsiteGrowthAuditWizard() {
   }, [auditId]);
 
   useEffect(() => {
-    if (!initialUrl || autoStarted.current) return;
-    autoStarted.current = true;
-    setUrl(initialUrl);
-    void startAudit(initialUrl);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- start once from homepage strip query
-  }, [initialUrl]);
-
-  async function onStart(event: FormEvent) {
-    event.preventDefault();
-    await startAudit(url);
-  }
-
-  async function onClaim(event: FormEvent) {
-    event.preventDefault();
-    if (!auditId) return;
-    setError("");
-    setBusy(true);
-    try {
-      const response = await fetch(`/api/website-growth-audit/${auditId}/claim`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email,
-          name,
-          companyName,
-          consent: true,
-          marketingConsent: false,
-          website: honeypot,
-        }),
-      });
-      const data = (await response.json()) as {
-        success?: boolean;
-        error?: string;
-        emailSent?: boolean;
-        warning?: string;
-      };
-      if (!response.ok || data.success === false) {
-        throw new Error(data.error || "Could not send report");
-      }
-      setDoneMessage(
-        data.emailSent === false
-          ? data.warning ||
-              "Your report was prepared, but email delivery failed. Please try again shortly."
-          : "Your report has been emailed. Check your inbox (and spam folder).",
-      );
-      await refresh(auditId);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not send report");
-    } finally {
-      setBusy(false);
+    if (bootstrapped.current) return;
+    bootstrapped.current = true;
+    if (initialId) {
+      setAuditId(initialId);
+      return;
     }
+    if (initialUrl) {
+      setUrl(initialUrl);
+      setModalOpen(true);
+    }
+  }, [initialId, initialUrl]);
+
+  function onStart(event: FormEvent) {
+    event.preventDefault();
+    if (!url.trim()) return;
+    setError("");
+    setModalOpen(true);
   }
 
   const exampleCategories = useMemo(
@@ -215,7 +210,10 @@ export default function WebsiteGrowthAuditWizard() {
 
   return (
     <div className="space-y-8">
-      <form onSubmit={onStart} className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
+      <form
+        onSubmit={onStart}
+        className="rounded-2xl border border-white/10 bg-white/5 p-6 backdrop-blur-sm"
+      >
         <label className="block text-sm font-medium text-hero-fg">Website URL</label>
         <div className="mt-3 flex flex-col gap-3 sm:flex-row">
           <input
@@ -231,7 +229,7 @@ export default function WebsiteGrowthAuditWizard() {
             disabled={busy}
             className="btn-brand inline-flex items-center justify-center gap-2 rounded-[5px] px-6 py-3 text-sm font-semibold disabled:opacity-60"
           >
-            {busy && !canClaim ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+            {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
             Analyze My Website
             <ArrowRight className="h-4 w-4" />
           </button>
@@ -246,7 +244,7 @@ export default function WebsiteGrowthAuditWizard() {
           aria-hidden="true"
         />
         <p className="mt-3 text-xs text-hero-fg-muted">
-          Public websites only. We never invent scores or rankings.
+          Public websites only. We ask for your email first, then analyze and send the PDF report.
         </p>
       </form>
 
@@ -287,24 +285,31 @@ export default function WebsiteGrowthAuditWizard() {
         </div>
       ) : null}
 
-      {audit && (audit.status === "AWAITING_EMAIL" || audit.status === "COMPLETED") ? (
+      {audit && audit.status === "COMPLETED" ? (
         <div className="space-y-6 rounded-2xl border border-white/10 bg-white p-6 text-slate-900 shadow-sm">
           <div>
-            <h2 className="text-2xl font-semibold tracking-tight">Your Website Growth Report Is Ready</h2>
+            <h2 className="text-2xl font-semibold tracking-tight">
+              Your Website Growth Report Is Ready
+            </h2>
             <p className="mt-2 text-sm text-slate-600">
-              Preview below. Enter your business email to receive the personalized PDF report.
+              Preview below. Your branded PDF has been prepared
+              {audit.emailSentAt ? " and emailed to you" : ""}.
             </p>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="rounded-xl border border-slate-200 p-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Overall score</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Overall score
+              </p>
               <p className="mt-2 text-3xl font-semibold text-slate-900">
                 {audit.overallScore == null ? "Insufficient data" : `${audit.overallScore}/100`}
               </p>
             </div>
             <div className="rounded-xl border border-slate-200 p-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Categories</p>
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                Categories
+              </p>
               <ul className="mt-2 space-y-1 text-sm text-slate-700">
                 {(audit.categoryScores || []).slice(0, 4).map((c) => (
                   <li key={c.id}>
@@ -327,57 +332,6 @@ export default function WebsiteGrowthAuditWizard() {
             </ul>
           </div>
 
-          {audit.status !== "COMPLETED" || !audit.emailSentAt ? (
-            <form onSubmit={onClaim} className="space-y-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
-              <div className="grid gap-3 sm:grid-cols-2">
-                <input
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Name (optional)"
-                  className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-primary"
-                />
-                <input
-                  value={companyName}
-                  onChange={(e) => setCompanyName(e.target.value)}
-                  placeholder="Company (optional)"
-                  className="rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-primary"
-                />
-              </div>
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Business email"
-                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-primary"
-              />
-              <label className="flex items-start gap-3 text-sm text-slate-700">
-                <input
-                  type="checkbox"
-                  required
-                  checked={consent}
-                  onChange={(e) => setConsent(e.target.checked)}
-                  className="mt-1"
-                />
-                <span>
-                  I agree to receive my requested website audit report from Techlyser.
-                  Questions about how we use your details?{" "}
-                  <a href="/contact" className="text-primary underline">
-                    Contact us
-                  </a>
-                  .
-                </span>
-              </label>
-              <button
-                type="submit"
-                disabled={busy || !consent}
-                className="rounded-[5px] bg-primary px-5 py-3 text-sm font-semibold text-white disabled:opacity-60"
-              >
-                {busy ? "Sending…" : "Email My Report"}
-              </button>
-            </form>
-          ) : null}
-
           {doneMessage ? (
             <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
               {doneMessage}
@@ -391,6 +345,16 @@ export default function WebsiteGrowthAuditWizard() {
           {error}
         </p>
       ) : null}
+
+      <AuditEmailModal
+        open={modalOpen}
+        websiteUrl={url.trim() || "your website"}
+        busy={busy && !auditId}
+        onClose={() => {
+          if (!(busy && !auditId)) setModalOpen(false);
+        }}
+        onConfirm={(payload) => startWithEmail(url.trim(), payload)}
+      />
     </div>
   );
 }

@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SAMPLE — Website Growth Audit PDF · TruBrain</title>
+  <style>
+    :root {
+      --orange: #ff5400;
+      --black: #0b1220;
+      --ink: #0f172a;
+      --muted: #64748b;
+      --line: #e2e8f0;
+      --paper: #ffffff;
+      --soft: #f8fafc;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: #94a3b8;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--ink);
+      line-height: 1.55;
+    }
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 20px;
+      background: #111827;
+      color: #fff;
+      font-size: 13px;
+    }
+    .toolbar strong { color: #fdba74; }
+    .toolbar button {
+      border: 0;
+      border-radius: 6px;
+      background: var(--orange);
+      color: #fff;
+      font-weight: 700;
+      padding: 10px 14px;
+      cursor: pointer;
+    }
+    .sheet-wrap {
+      max-width: 820px;
+      margin: 24px auto 48px;
+      display: grid;
+      gap: 28px;
+      padding: 0 12px 40px;
+    }
+    .page {
+      background: var(--paper);
+      width: 100%;
+      min-height: 1040px;
+      box-shadow: 0 18px 50px rgba(15, 23, 42, 0.28);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .brand-strip {
+      background: var(--black);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px 28px;
+    }
+    .brand-strip img { height: 34px; width: auto; display: block; }
+    .brand-meta {
+      text-align: right;
+      font-size: 11px;
+      line-height: 1.45;
+      color: #cbd5e1;
+    }
+    .brand-meta a { color: #fff; text-decoration: none; }
+    .accent { height: 4px; background: linear-gradient(90deg, var(--orange), #ff0000); }
+    .content { padding: 24px 28px 16px; flex: 1; }
+    .footer-strip {
+      background: var(--black);
+      color: #94a3b8;
+      font-size: 11px;
+      padding: 12px 28px;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .footer-strip strong { color: #fff; }
+    .eyebrow {
+      color: var(--orange);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      margin: 0 0 8px;
+    }
+    h1 { margin: 0 0 10px; font-size: 26px; line-height: 1.2; }
+    h2 { margin: 0 0 10px; font-size: 17px; }
+    h3 { margin: 0 0 8px; font-size: 14px; }
+    p { margin: 0 0 10px; }
+    .muted { color: var(--muted); font-size: 12.5px; }
+    .score-row {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 14px;
+      margin: 14px 0 6px;
+      align-items: stretch;
+    }
+    .score-box {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px;
+      background: var(--soft);
+      text-align: center;
+    }
+    .score-box .num { font-size: 34px; font-weight: 800; color: var(--orange); line-height: 1; }
+    .meta-card {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px 14px;
+      background: #fff;
+      font-size: 12.5px;
+    }
+    .meta-card div { margin: 3px 0; }
+    .device-banner {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 8px 0 14px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .device-banner.desktop { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+    .device-banner.mobile { background: #f5f3ff; color: #6d28d9; border: 1px solid #ddd6fe; }
+    .shot-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 0 0 14px;
+    }
+    .shot-grid.mobile-pair {
+      grid-template-columns: 1fr 1fr;
+      max-width: 520px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .shot {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+      background: #fff;
+    }
+    .shot-label {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 7px 10px;
+    }
+    .shot-label.actual { background: #fee2e2; color: #991b1b; }
+    .shot-label.suggested { background: #ffedd5; color: #9a3412; }
+    .shot-frame {
+      height: 168px;
+      background: #0f172a;
+      position: relative;
+      overflow: hidden;
+    }
+    .shot-frame.tall { height: 260px; }
+    .shot-frame.mobile {
+      height: 320px;
+      max-width: 180px;
+      margin: 0 auto;
+      border-left: 1px solid #334155;
+      border-right: 1px solid #334155;
+    }
+    .shot-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top center;
+      display: block;
+    }
+    .shot-caption {
+      padding: 8px 10px;
+      font-size: 11.5px;
+      color: var(--muted);
+      border-top: 1px solid var(--line);
+    }
+    .page-tag {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      background: #e2e8f0;
+      color: #334155;
+      border-radius: 99px;
+      padding: 3px 8px;
+      margin-bottom: 6px;
+    }
+    .suggested-mock {
+      height: 100%;
+      padding: 12px;
+      background: linear-gradient(180deg, #fff7ed, #ffffff);
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+    .mock-nav {
+      height: 16px;
+      border-radius: 4px;
+      background: var(--black);
+      display: flex;
+      align-items: center;
+      padding: 0 8px;
+      gap: 4px;
+    }
+    .mock-nav span {
+      width: 16px; height: 3px; border-radius: 99px; background: #475569;
+    }
+    .mock-nav span.cta { width: 26px; background: var(--orange); margin-left: auto; }
+    .mock-hero {
+      flex: 1;
+      border-radius: 8px;
+      border: 1px dashed #fdba74;
+      background: #fff;
+      padding: 8px;
+      font-size: 10.5px;
+      color: #9a3412;
+    }
+    .mock-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; }
+    .mock-card {
+      height: 36px;
+      border-radius: 6px;
+      background: #fff;
+      border: 1px solid #fed7aa;
+    }
+    .finding {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px;
+      margin: 0 0 12px;
+      background: #fff;
+    }
+    .finding .title {
+      display: flex;
+      gap: 8px;
+      align-items: baseline;
+      flex-wrap: wrap;
+      margin-bottom: 6px;
+    }
+    .finding .title strong { font-size: 14px; }
+    .pill {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      border-radius: 99px;
+      padding: 3px 8px;
+      background: #ffedd5;
+      color: #9a3412;
+    }
+    .finding .body { font-size: 13px; color: #334155; }
+    .finding .body p { margin: 0 0 7px; }
+    .finding .body p:last-child { margin-bottom: 0; }
+    .note {
+      border-left: 3px solid var(--orange);
+      background: #fff7ed;
+      padding: 12px 14px;
+      font-size: 13px;
+      margin: 14px 0;
+    }
+    .cats {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12.5px;
+      margin-top: 6px;
+    }
+    .cats th, .cats td {
+      border: 1px solid var(--line);
+      padding: 7px 9px;
+      text-align: left;
+    }
+    .cats th { background: var(--soft); }
+    .sample-banner {
+      background: #fff7ed;
+      border: 1px solid #fdba74;
+      color: #9a3412;
+      font-size: 12px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+    .index-list {
+      margin: 8px 0 0;
+      padding-left: 18px;
+      font-size: 12.5px;
+      color: #334155;
+    }
+    .index-list li { margin: 4px 0; }
+    @media print {
+      body { background: #fff; }
+      .toolbar { display: none !important; }
+      .sheet-wrap { margin: 0; padding: 0; max-width: none; gap: 0; }
+      .page {
+        box-shadow: none;
+        min-height: auto;
+        page-break-after: always;
+        break-after: page;
+      }
+      .page:last-child { page-break-after: auto; }
+    }
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <div>
+      <strong>DESIGN SAMPLE ONLY</strong> — 10 screenshot slots · Desktop + Mobile separated · TruBrain (Shopify) internal pages.
+    </div>
+    <button type="button" onclick="window.print()">Print / Save as PDF</button>
+  </div>
+
+  <div class="sheet-wrap">
+    <!-- PAGE 1: Cover + index -->
+    <article class="page">
+      <header class="brand-strip">
+        <img src="https://techlyser.com/images/TEXHLYSER_white_Logo.png" alt="Techlyser" />
+        <div class="brand-meta">
+          <div><a href="tel:+919753808608">+91 97538 08608</a></div>
+          <div><a href="https://techlyser.com">techlyser.com</a> · info@techlyser.com</div>
+        </div>
+      </header>
+      <div class="accent"></div>
+      <div class="content">
+        <div class="sample-banner">
+          Design sample for review. 10 visual slots: Desktop (6) + Mobile (4). Shopify internals: Home, Collection, Product, Cart + About. Suggested frames are illustrative concepts.
+        </div>
+        <p class="eyebrow">Website Growth Audit</p>
+        <h1>Is your website helping your business grow?</h1>
+        <p class="muted">Prepared for TruBrain · https://trubrain.com · 14 November 2026</p>
+
+        <div class="score-row">
+          <div class="score-box">
+            <div class="num">73</div>
+            <div class="muted">Overall / 100</div>
+          </div>
+          <div class="meta-card">
+            <div><strong>Checks performed:</strong> 16 verified · <strong>Unavailable:</strong> 2 (not invented)</div>
+            <div><strong>Platform:</strong> Shopify detected · <strong>Theme signals:</strong> Motion</div>
+            <div><strong>Pages reviewed:</strong> Home, Collection, Product, Cart, About</div>
+            <div><strong>Devices:</strong> Desktop and Mobile shown separately below</div>
+          </div>
+        </div>
+
+        <h2 style="margin-top:18px">Screenshot map (easy for visitors)</h2>
+        <div class="shot-grid" style="grid-template-columns:1fr 1fr">
+          <div class="meta-card">
+            <strong>Desktop visuals (6)</strong>
+            <ol class="index-list">
+              <li>Homepage — Actual vs Suggested</li>
+              <li>Collection page — Actual vs Suggested</li>
+              <li>Product page — Actual vs Suggested</li>
+            </ol>
+          </div>
+          <div class="meta-card">
+            <strong>Mobile visuals (4)</strong>
+            <ol class="index-list">
+              <li>Homepage mobile — Actual vs Suggested</li>
+              <li>Cart / checkout entry — Actual vs Suggested</li>
+            </ol>
+            <p class="muted" style="margin:8px 0 0">Also referenced: About page (desktop strip on later page).</p>
+          </div>
+        </div>
+
+        <table class="cats" style="margin-top:16px">
+          <thead>
+            <tr><th>Category</th><th>Score</th><th>Summary</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>SEO &amp; Visibility</td><td>78</td><td>Solid base; title/meta polish can lift clarity.</td></tr>
+            <tr><td>UI/UX &amp; Design</td><td>70</td><td>Hierarchy and spacing can feel tighter.</td></tr>
+            <tr><td>Conversion Readiness</td><td>68</td><td>CTAs and trust proof can be clearer.</td></tr>
+            <tr><td>Mobile Experience</td><td>72</td><td>Type, images, nav need mobile-first tuning.</td></tr>
+            <tr><td>Performance</td><td>N/A*</td><td>Marked unavailable — not invented.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <footer class="footer-strip">
+        <div><strong>Techlyser</strong> · Website Growth Audit</div>
+        <div>+91 97538 08608 · techlyser.com</div>
+      </footer>
+    </article>
+
+    <!-- PAGE 2: Desktop Home + Collection -->
+    <article class="page">
+      <header class="brand-strip">
+        <img src="https://techlyser.com/images/TEXHLYSER_white_Logo.png" alt="Techlyser" />
+        <div class="brand-meta">
+          <div><a href="tel:+919753808608">+91 97538 08608</a></div>
+          <div><a href="https://techlyser.com">techlyser.com</a></div>
+        </div>
+      </header>
+      <div class="accent"></div>
+      <div class="content">
+        <div class="device-banner desktop">Desktop experience · Screenshots 1–4</div>
+
+        <span class="page-tag">Shopify · Homepage</span>
+        <h2>1–2. Homepage (Desktop)</h2>
+        <div class="shot-grid">
+          <div class="shot">
+            <div class="shot-label actual">Actual — Desktop homepage</div>
+            <div class="shot-frame">
+              <img src="https://image.thum.io/get/width/1400/crop/900/noanimate/https://trubrain.com" alt="TruBrain homepage desktop" />
+            </div>
+            <div class="shot-caption">Current first screen: message, hero weight, and primary CTA competition.</div>
+          </div>
+          <div class="shot">
+            <div class="shot-label suggested">Suggested — Desktop homepage</div>
+            <div class="shot-frame">
+              <div class="suggested-mock">
+                <div class="mock-nav"><span></span><span></span><span></span><span class="cta"></span></div>
+                <div class="mock-hero">One value line · one primary CTA · trust strip under hero</div>
+                <div class="mock-row"><div class="mock-card"></div><div class="mock-card"></div><div class="mock-card"></div></div>
+              </div>
+            </div>
+            <div class="shot-caption">Illustrative: clearer hierarchy and conversion path above the fold.</div>
+          </div>
+        </div>
+
+        <span class="page-tag">Shopify · Collection</span>
+        <h2>3–4. Collection page (Desktop)</h2>
+        <div class="shot-grid">
+          <div class="shot">
+            <div class="shot-label actual">Actual — Collection</div>
+            <div class="shot-frame">
+              <img src="https://image.thum.io/get/width/1400/crop/900/noanimate/https://trubrain.com/collections/all" alt="TruBrain collection desktop" />
+            </div>
+            <div class="shot-caption">Product grid scanning, filters, and card CTA clarity.</div>
+          </div>
+          <div class="shot">
+            <div class="shot-label suggested">Suggested — Collection</div>
+            <div class="shot-frame">
+              <div class="suggested-mock">
+                <div class="mock-nav"><span></span><span></span><span class="cta"></span></div>
+                <div class="mock-hero" style="flex:0.45">Clear collection title + filter chips</div>
+                <div class="mock-row"><div class="mock-card"></div><div class="mock-card"></div><div class="mock-card"></div></div>
+                <div class="mock-row"><div class="mock-card"></div><div class="mock-card"></div><div class="mock-card"></div></div>
+              </div>
+            </div>
+            <div class="shot-caption">Illustrative: tighter cards, consistent CTAs, easier scan path.</div>
+          </div>
+        </div>
+      </div>
+      <footer class="footer-strip">
+        <div><strong>Techlyser</strong> · Desktop pages 1–2</div>
+        <div>+91 97538 08608 · techlyser.com</div>
+      </footer>
+    </article>
+
+    <!-- PAGE 3: Desktop Product + Cart -->
+    <article class="page">
+      <header class="brand-strip">
+        <img src="https://techlyser.com/images/TEXHLYSER_white_Logo.png" alt="Techlyser" />
+        <div class="brand-meta">
+          <div><a href="tel:+919753808608">+91 97538 08608</a></div>
+          <div><a href="https://techlyser.com">techlyser.com</a></div>
+        </div>
+      </header>
+      <div class="accent"></div>
+      <div class="content">
+        <div class="device-banner desktop">Desktop experience · Screenshots 5–6 + About reference</div>
+
+        <span class="page-tag">Shopify · Product</span>
+        <h2>5–6. Product page (Desktop)</h2>
+        <div class="shot-grid">
+          <div class="shot">
+            <div class="shot-label actual">Actual — Product page</div>
+            <div class="shot-frame tall">
+              <img src="https://image.thum.io/get/width/1400/crop/1100/noanimate/https://trubrain.com/collections/all" alt="TruBrain product desktop reference" />
+            </div>
+            <div class="shot-caption">Gallery, price, ATC button, and trust near the buy box.</div>
+          </div>
+          <div class="shot">
+            <div class="shot-label suggested">Suggested — Product page</div>
+            <div class="shot-frame tall">
+              <div class="suggested-mock">
+                <div class="mock-nav"><span></span><span></span><span class="cta"></span></div>
+                <div class="mock-row" style="grid-template-columns:1.1fr 0.9fr;flex:1">
+                  <div class="mock-hero">Larger gallery · cleaner thumbs</div>
+                  <div class="mock-hero">Title · price · ATC<br/>Reviews snippet · shipping note</div>
+                </div>
+                <div class="mock-hero" style="flex:0.35;color:#64748b;border-color:#cbd5e1">Benefits / ingredients below fold</div>
+              </div>
+            </div>
+            <div class="shot-caption">Illustrative: buy box focus + proof next to Add to Cart.</div>
+          </div>
+        </div>
+
+        <span class="page-tag">Shopify · Cart / About</span>
+        <h2 style="margin-top:6px">Also reviewed on desktop</h2>
+        <div class="shot-grid">
+          <div class="shot">
+            <div class="shot-label actual">Actual — Cart entry / mini-cart</div>
+            <div class="shot-frame">
+              <img src="https://image.thum.io/get/width/1400/crop/900/noanimate/https://trubrain.com/cart" alt="TruBrain cart desktop" />
+            </div>
+            <div class="shot-caption">Cart clarity, upsell noise, and checkout CTA strength.</div>
+          </div>
+          <div class="shot">
+            <div class="shot-label actual">Actual — About / story page</div>
+            <div class="shot-frame">
+              <img src="https://image.thum.io/get/width/1400/crop/900/noanimate/https://trubrain.com/pages/about-us" alt="TruBrain about desktop" />
+            </div>
+            <div class="shot-caption">Brand story page — trust content that can feed homepage/PDP proof.</div>
+          </div>
+        </div>
+        <p class="muted">Non-Shopify sites would swap Collection/Product/Cart for About, Contact, Story, Services, and other public pages found during crawl.</p>
+      </div>
+      <footer class="footer-strip">
+        <div><strong>Techlyser</strong> · Desktop product &amp; support pages</div>
+        <div>+91 97538 08608 · techlyser.com</div>
+      </footer>
+    </article>
+
+    <!-- PAGE 4: Mobile -->
+    <article class="page">
+      <header class="brand-strip">
+        <img src="https://techlyser.com/images/TEXHLYSER_white_Logo.png" alt="Techlyser" />
+        <div class="brand-meta">
+          <div><a href="tel:+919753808608">+91 97538 08608</a></div>
+          <div><a href="https://techlyser.com">techlyser.com</a></div>
+        </div>
+      </header>
+      <div class="accent"></div>
+      <div class="content">
+        <div class="device-banner mobile">Mobile experience · Screenshots 7–10</div>
+        <p class="muted" style="margin-top:-6px">Mobile is shown separately so visitors can quickly compare phone UX without mixing desktop layouts.</p>
+
+        <span class="page-tag">Mobile · Homepage</span>
+        <h2>7–8. Homepage (Mobile)</h2>
+        <div class="shot-grid mobile-pair">
+          <div class="shot">
+            <div class="shot-label actual">Actual — Mobile home</div>
+            <div class="shot-frame mobile">
+              <img src="https://image.thum.io/get/width/480/crop/900/noanimate/https://trubrain.com" alt="TruBrain homepage mobile" />
+            </div>
+            <div class="shot-caption">Spacing, type scale, hero image weight, sticky nav.</div>
+          </div>
+          <div class="shot">
+            <div class="shot-label suggested">Suggested — Mobile home</div>
+            <div class="shot-frame mobile">
+              <div class="suggested-mock">
+                <div class="mock-nav"><span></span><span class="cta"></span></div>
+                <div class="mock-hero">Shorter hero · thumb-friendly CTA</div>
+                <div class="mock-card"></div>
+                <div class="mock-card"></div>
+                <div class="mock-hero" style="flex:0.5;color:#64748b;border-color:#cbd5e1">Trust row</div>
+              </div>
+            </div>
+            <div class="shot-caption">Illustrative: faster path to shop on small screens.</div>
+          </div>
+        </div>
+
+        <span class="page-tag">Mobile · Cart</span>
+        <h2>9–10. Cart / checkout entry (Mobile)</h2>
+        <div class="shot-grid mobile-pair">
+          <div class="shot">
+            <div class="shot-label actual">Actual — Mobile cart</div>
+            <div class="shot-frame mobile">
+              <img src="https://image.thum.io/get/width/480/crop/900/noanimate/https://trubrain.com/cart" alt="TruBrain cart mobile" />
+            </div>
+            <div class="shot-caption">Line items, shipping notes, checkout button reachability.</div>
+          </div>
+          <div class="shot">
+            <div class="shot-label suggested">Suggested — Mobile cart</div>
+            <div class="shot-frame mobile">
+              <div class="suggested-mock">
+                <div class="mock-nav"><span></span><span class="cta"></span></div>
+                <div class="mock-hero" style="flex:0.4">Cart summary</div>
+                <div class="mock-card"></div>
+                <div class="mock-card"></div>
+                <div class="mock-hero">Sticky checkout CTA</div>
+              </div>
+            </div>
+            <div class="shot-caption">Illustrative: sticky checkout + less distraction.</div>
+          </div>
+        </div>
+      </div>
+      <footer class="footer-strip">
+        <div><strong>Techlyser</strong> · Mobile screenshots</div>
+        <div>+91 97538 08608 · techlyser.com</div>
+      </footer>
+    </article>
+
+    <!-- PAGE 5: Written recommendations -->
+    <article class="page">
+      <header class="brand-strip">
+        <img src="https://techlyser.com/images/TEXHLYSER_white_Logo.png" alt="Techlyser" />
+        <div class="brand-meta">
+          <div><a href="tel:+919753808608">+91 97538 08608</a></div>
+          <div><a href="https://techlyser.com">techlyser.com</a> · info@techlyser.com</div>
+        </div>
+      </header>
+      <div class="accent"></div>
+      <div class="content">
+        <p class="eyebrow">Recommendations</p>
+        <h2>What to improve (tied to the screenshots above)</h2>
+
+        <div class="finding">
+          <div class="title"><strong>1. Homepage Clarity &amp; First Impression</strong><span class="pill">High</span></div>
+          <div class="body">
+            <p>Strengthen hero message and primary CTA so new visitors know what TruBrain offers and what to do next.</p>
+            <p><strong>See:</strong> Desktop screenshots 1–2 · Mobile screenshots 7–8</p>
+          </div>
+        </div>
+        <div class="finding">
+          <div class="title"><strong>2. Collection browsing</strong><span class="pill">High</span></div>
+          <div class="body">
+            <p>Improve product card consistency, filter clarity, and scan path so shoppers find the right product faster.</p>
+            <p><strong>See:</strong> Desktop screenshots 3–4</p>
+          </div>
+        </div>
+        <div class="finding">
+          <div class="title"><strong>3. Product page conversion</strong><span class="pill">High</span></div>
+          <div class="body">
+            <p>Tighten the buy box: price, ATC, reviews, and shipping reassurance closer together.</p>
+            <p><strong>See:</strong> Desktop screenshots 5–6</p>
+          </div>
+        </div>
+        <div class="finding">
+          <div class="title"><strong>5. Mobile Experience</strong><span class="pill">Medium</span></div>
+          <div class="body">
+            <p>Optimize spacing, typography, image presentation, and navigation for a more seamless mobile journey.</p>
+            <p><strong>See:</strong> Mobile screenshots 7–10</p>
+          </div>
+        </div>
+        <div class="finding">
+          <div class="title"><strong>6. Customer Engagement</strong><span class="pill">Medium</span></div>
+          <div class="body">
+            <p>Improve visibility of reviews, social proof, and newsletter opportunities — especially near product and cart decisions.</p>
+            <p><strong>See:</strong> Product + Cart visuals · About page trust content</p>
+          </div>
+        </div>
+
+        <div class="note">
+          Beyond these points, we’ve also identified <strong>additional improvements specifically related to the Shopify Motion theme</strong> that could further enhance design and functionality — section spacing, homepage template hierarchy, and theme-level conversion blocks.
+        </div>
+
+        <h2>Next step</h2>
+        <p>I’d be happy to walk you through these recommendations and discuss how we can implement them for a more polished, conversion-focused shopping experience.</p>
+        <p><strong>Discuss your plan:</strong> <a href="https://techlyser.com/contact" style="color:var(--orange)">techlyser.com/contact</a> · +91 97538 08608</p>
+      </div>
+      <footer class="footer-strip">
+        <div><strong>Techlyser</strong> · © 2026 · All Rights Reserved</div>
+        <div>+91 97538 08608 · techlyser.com · info@techlyser.com</div>
+      </footer>
+    </article>
+  </div>
+</body>
+</html>

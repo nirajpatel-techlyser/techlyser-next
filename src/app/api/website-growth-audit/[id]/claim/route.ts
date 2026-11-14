@@ -16,7 +16,7 @@ const bodySchema = z.object({
   website: z.string().optional(), // honeypot
 });
 
-export const maxDuration = 60;
+export const maxDuration = 120;
 
 export async function POST(request: Request, context: Ctx) {
   const { id } = await context.params;

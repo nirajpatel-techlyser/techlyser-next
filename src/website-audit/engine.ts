@@ -21,5 +21,6 @@ export async function runTechnicalAudit(normalizedUrl: string): Promise<Technica
     checksUnavailable: scored.checksUnavailable,
     auditedAt: new Date().toISOString(),
     limitations: site.limitations,
+    platform: site.platform,
   };
 }

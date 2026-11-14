@@ -3,21 +3,100 @@ import { prisma } from "@/lib/prisma";
 import { generateAiRecommendations } from "@/website-audit/ai";
 import { runTechnicalAudit } from "@/website-audit/engine";
 import { sendAuditReportEmail } from "@/website-audit/email";
-import { buildReportHtml, buildReportPdfBase64 } from "@/website-audit/report";
+import { buildReportAssets } from "@/website-audit/report";
 import type { AiRecommendation, TechnicalAuditResult } from "@/website-audit/types";
 
-async function setAudit(
-  auditId: string,
-  data: Prisma.WebsiteAuditUpdateInput,
-) {
+async function setAudit(auditId: string, data: Prisma.WebsiteAuditUpdateInput) {
   return prisma.websiteAudit.update({ where: { id: auditId }, data });
 }
 
-async function setJob(
-  jobId: string,
-  data: Prisma.WebsiteAuditJobUpdateInput,
-) {
+async function setJob(jobId: string, data: Prisma.WebsiteAuditJobUpdateInput) {
   return prisma.websiteAuditJob.update({ where: { id: jobId }, data });
+}
+
+async function deliverReport(auditId: string) {
+  const audit = await prisma.websiteAudit.findUnique({
+    where: { id: auditId },
+    include: { jobs: { orderBy: { createdAt: "desc" }, take: 1 }, lead: true },
+  });
+  if (!audit) throw new Error("Audit not found.");
+  if (!audit.lead) throw new Error("Email is required before sending the report.");
+  if (!audit.technicalFindings) throw new Error("Audit is not ready yet.");
+
+  const job = audit.jobs[0];
+  const technical = audit.technicalFindings as unknown as TechnicalAuditResult;
+  const recommendations =
+    (audit.aiRecommendations as unknown as AiRecommendation[]) || [];
+
+  await setAudit(audit.id, { status: "GENERATING_PDF" });
+  if (job) await setJob(job.id, { step: "generating_pdf", progress: 88 });
+
+  const { reportHtml, pdfBase64 } = await buildReportAssets({
+    websiteUrl: audit.normalizedUrl,
+    businessName: audit.lead.companyName || audit.lead.name,
+    result: technical,
+    recommendations,
+  });
+  const fileName = `techlyser-website-growth-audit-${audit.id.slice(0, 8)}.pdf`;
+
+  await setAudit(audit.id, {
+    status: "SENDING_EMAIL",
+    reportHtml,
+    reportPdfBase64: pdfBase64,
+    reportFileName: fileName,
+  });
+  if (job) await setJob(job.id, { step: "sending_email", progress: 94 });
+
+  try {
+    await sendAuditReportEmail({
+      to: audit.lead.email,
+      name: audit.lead.name,
+      websiteUrl: audit.normalizedUrl,
+      pdfBase64,
+      fileName,
+    });
+    await setAudit(audit.id, {
+      status: "COMPLETED",
+      emailSentAt: new Date(),
+      emailError: null,
+      completedAt: new Date(),
+    });
+    if (job) {
+      await setJob(job.id, {
+        status: "COMPLETED",
+        step: "completed",
+        progress: 100,
+        completedAt: new Date(),
+      });
+    }
+    return {
+      auditId: audit.id,
+      email: audit.lead.email,
+      emailSent: true as const,
+    };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Email failed";
+    await setAudit(audit.id, {
+      status: "COMPLETED",
+      emailError: message,
+      completedAt: new Date(),
+    });
+    if (job) {
+      await setJob(job.id, {
+        status: "COMPLETED",
+        step: "completed_with_email_error",
+        progress: 100,
+        completedAt: new Date(),
+        errorMessage: message,
+      });
+    }
+    return {
+      auditId: audit.id,
+      email: audit.lead.email,
+      emailSent: false as const,
+      emailError: message,
+    };
+  }
 }
 
 export async function advanceWebsiteAudit(auditId: string) {
@@ -34,8 +113,22 @@ export async function advanceWebsiteAudit(auditId: string) {
   if (audit.status === "COMPLETED" || audit.status === "FAILED") {
     return { auditId, status: audit.status, progress: job.progress, step: job.step };
   }
-  if (audit.status === "AWAITING_EMAIL") {
-    return { auditId, status: audit.status, progress: job.progress, step: job.step };
+
+  if (
+    audit.status === "AWAITING_EMAIL" ||
+    audit.status === "GENERATING_PDF" ||
+    audit.status === "SENDING_EMAIL"
+  ) {
+    if (!audit.lead) {
+      return { auditId, status: audit.status, progress: job.progress, step: job.step };
+    }
+    const delivered = await deliverReport(auditId);
+    return {
+      status: "COMPLETED" as const,
+      progress: 100,
+      step: delivered.emailSent ? "completed" : "completed_with_email_error",
+      ...delivered,
+    };
   }
 
   await setJob(job.id, {
@@ -50,7 +143,10 @@ export async function advanceWebsiteAudit(auditId: string) {
       audit.status === "ANALYZING" ||
       !audit.technicalFindings
     ) {
-      await setAudit(auditId, { status: "FETCHING", startedAt: audit.startedAt || new Date() });
+      await setAudit(auditId, {
+        status: "FETCHING",
+        startedAt: audit.startedAt || new Date(),
+      });
       await setJob(job.id, { step: "fetching", progress: 15 });
       await setAudit(auditId, { status: "ANALYZING" });
       await setJob(job.id, { step: "analyzing", progress: 40 });
@@ -73,7 +169,14 @@ export async function advanceWebsiteAudit(auditId: string) {
         aiRecommendations: recommendations as unknown as Prisma.InputJsonValue,
       });
       await setJob(job.id, { step: "awaiting_email", progress: 80, status: "RUNNING" });
-      return { auditId, status: "AWAITING_EMAIL" as const, progress: 80, step: "awaiting_email" };
+
+      // Stop here so PDF/screenshots run on the next advance tick (avoids serverless timeout).
+      return {
+        auditId,
+        status: "AWAITING_EMAIL" as const,
+        progress: 80,
+        step: "awaiting_email",
+      };
     }
 
     return {
@@ -109,16 +212,11 @@ export async function completeAuditWithEmail(input: {
 }) {
   const audit = await prisma.websiteAudit.findUnique({
     where: { id: input.auditId },
-    include: { jobs: { orderBy: { createdAt: "desc" }, take: 1 }, lead: true },
+    include: { lead: true },
   });
   if (!audit) throw new Error("Audit not found.");
   if (audit.status === "FAILED") throw new Error("This audit failed. Start a new one.");
   if (!audit.technicalFindings) throw new Error("Audit is not ready yet.");
-
-  const job = audit.jobs[0];
-  const technical = audit.technicalFindings as unknown as TechnicalAuditResult;
-  const recommendations =
-    (audit.aiRecommendations as unknown as AiRecommendation[]) || [];
 
   const lead =
     audit.lead ||
@@ -140,80 +238,5 @@ export async function completeAuditWithEmail(input: {
     });
   }
 
-  await setAudit(audit.id, { status: "GENERATING_PDF" });
-  if (job) await setJob(job.id, { step: "generating_pdf", progress: 88 });
-
-  const reportHtml = buildReportHtml({
-    websiteUrl: audit.normalizedUrl,
-    businessName: input.companyName || input.name,
-    result: technical,
-    recommendations,
-  });
-  const pdfBase64 = buildReportPdfBase64({
-    websiteUrl: audit.normalizedUrl,
-    businessName: input.companyName || input.name,
-    result: technical,
-    recommendations,
-  });
-  const fileName = `techlyser-website-growth-audit-${audit.id.slice(0, 8)}.pdf`;
-
-  await setAudit(audit.id, {
-    status: "SENDING_EMAIL",
-    reportHtml,
-    reportPdfBase64: pdfBase64,
-    reportFileName: fileName,
-  });
-  if (job) await setJob(job.id, { step: "sending_email", progress: 94 });
-
-  try {
-    await sendAuditReportEmail({
-      to: input.email.toLowerCase().trim(),
-      name: input.name,
-      websiteUrl: audit.normalizedUrl,
-      pdfBase64,
-      fileName,
-    });
-    await setAudit(audit.id, {
-      status: "COMPLETED",
-      emailSentAt: new Date(),
-      emailError: null,
-      completedAt: new Date(),
-    });
-    if (job) {
-      await setJob(job.id, {
-        status: "COMPLETED",
-        step: "completed",
-        progress: 100,
-        completedAt: new Date(),
-      });
-    }
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Email failed";
-    await setAudit(audit.id, {
-      status: "COMPLETED",
-      emailError: message,
-      completedAt: new Date(),
-    });
-    if (job) {
-      await setJob(job.id, {
-        status: "COMPLETED",
-        step: "completed_with_email_error",
-        progress: 100,
-        completedAt: new Date(),
-        errorMessage: message,
-      });
-    }
-    return {
-      auditId: audit.id,
-      email: input.email.toLowerCase().trim(),
-      emailSent: false as const,
-      emailError: message,
-    };
-  }
-
-  return {
-    auditId: audit.id,
-    email: input.email.toLowerCase().trim(),
-    emailSent: true as const,
-  };
+  return deliverReport(audit.id);
 }
