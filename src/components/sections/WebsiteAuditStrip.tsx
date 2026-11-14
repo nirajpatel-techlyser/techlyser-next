@@ -21,17 +21,14 @@ export default function WebsiteAuditStrip() {
   }
 
   return (
-    <div className="border-b border-white/10 bg-primary/15">
+    <div className="border-b border-slate-200 bg-white shadow-[0_8px_24px_-16px_rgba(0,0,0,0.35)]">
       <Container>
         <form
           onSubmit={onSubmit}
-          className="flex flex-col gap-3 py-3 sm:flex-row sm:items-center sm:gap-4 sm:py-3.5"
+          className="flex flex-col gap-3 py-3.5 sm:flex-row sm:items-center sm:gap-4 sm:py-4"
         >
-          <p className="shrink-0 text-sm font-semibold text-hero-fg sm:max-w-55 lg:max-w-none">
-            Free Website Growth Audit
-            <span className="mt-0.5 block text-xs font-normal text-hero-fg-muted sm:inline sm:mt-0 sm:ml-2">
-              Paste your site URL — any platform.
-            </span>
+          <p className="shrink-0 text-sm font-bold tracking-tight text-slate-900 sm:text-base">
+            Get Free Website Audit
           </p>
           <div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-center">
             <input
@@ -40,13 +37,13 @@ export default function WebsiteAuditStrip() {
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               placeholder="https://yourwebsite.com"
-              className="w-full rounded-[5px] border border-white/15 bg-black/25 px-3 py-2.5 text-sm text-hero-fg outline-none placeholder:text-hero-fg-muted focus:border-primary"
+              className="w-full rounded-[5px] border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-primary"
               aria-label="Website URL to audit"
             />
             <button
               type="submit"
               disabled={busy}
-              className="btn-brand inline-flex shrink-0 items-center justify-center gap-2 rounded-[5px] px-5 py-2.5 text-sm font-semibold disabled:opacity-60"
+              className="btn-brand inline-flex shrink-0 items-center justify-center gap-2 rounded-[5px] px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
             >
               {busy ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
