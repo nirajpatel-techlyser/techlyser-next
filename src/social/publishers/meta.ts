@@ -100,7 +100,7 @@ export const facebookPublisher: SocialPublisher = {
 };
 
 async function waitForIgContainer(containerId: string, token: string) {
-  for (let i = 0; i < 8; i += 1) {
+  for (let i = 0; i < 12; i += 1) {
     const statusRes = await socialFetch(
       `${GRAPH}/${containerId}?fields=status_code`,
       { headers: { Authorization: `Bearer ${token}` } },
@@ -118,6 +118,10 @@ async function waitForIgContainer(containerId: string, token: string) {
     }
     await sleep(1500 * (i + 1));
   }
+  throw new SocialPublishError(
+    "PLATFORM_TEMPORARY",
+    "Instagram is still processing an image. Wait a moment and retry Instagram so every carousel slide is included.",
+  );
 }
 
 export const instagramPublisher: SocialPublisher = {

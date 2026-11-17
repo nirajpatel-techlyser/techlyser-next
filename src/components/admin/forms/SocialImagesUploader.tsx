@@ -21,39 +21,56 @@ export default function SocialImagesUploader({
   const [error, setError] = useState("");
   const [urlDraft, setUrlDraft] = useState("");
 
-  async function uploadFile(file: File) {
-    if (value.length >= max) {
-      setError(`Maximum ${max} social images.`);
-      return;
+  async function uploadOne(file: File): Promise<string> {
+    const body = new FormData();
+    body.append("file", file);
+    const response = await fetch("/api/upload", { method: "POST", body });
+    const data = (await response.json()) as { url?: string; error?: string };
+    if (!response.ok || !data.url) {
+      throw new Error(data.error || "Upload failed");
     }
-    setUploading(true);
-    setError("");
-    try {
-      const body = new FormData();
-      body.append("file", file);
-      const response = await fetch("/api/upload", { method: "POST", body });
-      const data = (await response.json()) as { url?: string; error?: string };
-      if (!response.ok || !data.url) {
-        throw new Error(data.error || "Upload failed");
-      }
-      onChange([...value, data.url].slice(0, max));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Upload failed");
-    } finally {
-      setUploading(false);
-    }
+    return data.url;
   }
 
   async function handleFile(event: ChangeEvent<HTMLInputElement>) {
     const files = Array.from(event.target.files || []);
     event.target.value = "";
-    for (const file of files) {
-      if (value.length >= max) break;
-      if (!file.type.startsWith("image/")) {
-        setError("Only image files are allowed.");
-        continue;
+    if (files.length === 0) return;
+
+    const room = max - value.length;
+    if (room <= 0) {
+      setError(`Maximum ${max} social images.`);
+      return;
+    }
+
+    const accepted = files.filter((file) => file.type.startsWith("image/"));
+    if (accepted.length === 0) {
+      setError("Only image files are allowed.");
+      return;
+    }
+    if (accepted.length < files.length) {
+      setError("Only image files are allowed. Non-image files were skipped.");
+    } else {
+      setError("");
+    }
+
+    const batch = accepted.slice(0, room);
+    setUploading(true);
+    try {
+      // Accumulate locally so multi-select does not lose earlier files to a stale React value.
+      const next = [...value];
+      for (const file of batch) {
+        const url = await uploadOne(file);
+        next.push(url);
+        onChange(next.slice(0, max));
       }
-      await uploadFile(file);
+      if (accepted.length > room) {
+        setError(`Maximum ${max} social images. Extra files were skipped.`);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      setUploading(false);
     }
   }
 

@@ -68,6 +68,22 @@ test("social images keep blog-edit order for IG/FB/LI and GBP uses featured", ()
   assert.equal(gbp.imageUrl, post.featuredImage);
 });
 
+test("all six social images are kept for IG/FB/LI publish captions", () => {
+  const six = [
+    "https://res.cloudinary.com/demo/image/upload/1.jpg",
+    "https://res.cloudinary.com/demo/image/upload/2.jpg",
+    "https://res.cloudinary.com/demo/image/upload/3.jpg",
+    "https://res.cloudinary.com/demo/image/upload/4.jpg",
+    "https://res.cloudinary.com/demo/image/upload/5.jpg",
+    "https://res.cloudinary.com/demo/image/upload/6.jpg",
+  ];
+  const withSocial = { ...post, socialImages: six };
+  assert.equal(buildSocialCaption(withSocial, "INSTAGRAM").imageUrls.length, 6);
+  assert.equal(buildSocialCaption(withSocial, "FACEBOOK").imageUrls.length, 6);
+  assert.equal(buildSocialCaption(withSocial, "LINKEDIN").imageUrls.length, 6);
+  assert.deepEqual(buildSocialCaption(withSocial, "INSTAGRAM").imageUrls, six);
+});
+
 test("publish is blocked without approval, image, or a connection", () => {
   const missingImage = evaluatePublish({
     websitePublished: true,
