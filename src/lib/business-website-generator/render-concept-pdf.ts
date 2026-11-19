@@ -90,7 +90,7 @@ export async function renderConceptHtmlDesktopCapture(
     await page.emulateMediaType("screen");
 
     await page.setContent(html, {
-      waitUntil: ["domcontentloaded", "networkidle2"],
+      waitUntil: "domcontentloaded",
       timeout: 45000,
     });
     await new Promise((r) => setTimeout(r, 1000));
@@ -150,7 +150,7 @@ export async function renderConceptHtmlToPdf(
     await page.setViewport({ width: 1440, height: 900, deviceScaleFactor: 1 });
     await page.emulateMediaType("screen");
     await page.setContent(html, {
-      waitUntil: ["domcontentloaded", "networkidle2"],
+      waitUntil: "domcontentloaded",
       timeout: 45000,
     });
     await new Promise((r) => setTimeout(r, 800));
