@@ -19,9 +19,8 @@ export default function OpportunitiesSubnav() {
   return (
     <nav className="flex flex-wrap gap-2 border-b border-slate-200 pb-4">
       {items.map((item) => {
-        const active = item.exact
-          ? pathname === item.href
-          : pathname === item.href || pathname.startsWith(`${item.href}/`);
+        const active =
+          pathname === item.href || pathname.startsWith(`${item.href}/`);
         return (
           <Link
             key={item.href}
