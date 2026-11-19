@@ -37,16 +37,16 @@ async function launchBrowser(puppeteer: typeof import("puppeteer")) {
     }
   }
 
-  for (const channel of ["chrome", "msedge"] as const) {
-    try {
-      return await puppeteer.launch({
-        headless: true,
-        channel,
-        args,
-      });
-    } catch {
-      // try next
-    }
+  // Puppeteer's typed channels are Chrome only ("chrome" | "chrome-beta" | …).
+  // Edge is covered above via executablePath on Windows.
+  try {
+    return await puppeteer.launch({
+      headless: true,
+      channel: "chrome",
+      args,
+    });
+  } catch {
+    // fall through to bundled Chromium
   }
 
   return puppeteer.launch({
