@@ -1,4 +1,4 @@
-# Techlyser Web Solutions
+﻿# Techlyser Web Solutions
 
 > Premium Shopify, Shopify Plus, Next.js, Headless Commerce, WordPress, and AI automation agency based in India.
 
@@ -7,7 +7,7 @@
 - Brand: Techlyser / Techlyser Web Solutions
 - Website: https://techlyser.com
 - Email: info@techlyser.com
-- Phone: +91 97538 08608
+- Phone: +91 92037 08608
 - HQ: A-86, Sanskruti Royal City, Rau, Indore, Madhya Pradesh 453331, India
 - Serving: Clients across India and worldwide (headquartered in Indore)
 

@@ -26,6 +26,8 @@ function hasAiModels(client: PrismaClient) {
     aiSeoGeoRun?: unknown;
     researchItem?: unknown;
     socialAccount?: unknown;
+    businessOpportunity?: unknown;
+    businessOpportunityJob?: unknown;
   };
   return Boolean(
     c.opportunity &&
@@ -33,7 +35,9 @@ function hasAiModels(client: PrismaClient) {
       c.aiWriterRun &&
       c.aiSeoGeoRun &&
       c.researchItem &&
-      c.socialAccount,
+      c.socialAccount &&
+      c.businessOpportunity &&
+      c.businessOpportunityJob,
   );
 }
 

@@ -1,0 +1,54 @@
+restaurants.html	Food & Hospitality	Restaurants
+cafes.html	Food & Hospitality	Cafes
+bakeries.html	Food & Hospitality	Bakeries
+bars.html	Food & Hospitality	Bars
+fast-food.html	Food & Hospitality	Fast food
+food-shops.html	Food & Hospitality	Food shops
+catering.html	Food & Hospitality	Catering
+doctors.html	Healthcare	Doctors
+dentists.html	Healthcare	Dentists
+clinics.html	Healthcare	Clinics
+hospitals.html	Healthcare	Hospitals
+physiotherapists.html	Healthcare	Physiotherapists
+pharmacies.html	Healthcare	Pharmacies
+diagnostic-centers.html	Healthcare	Diagnostic centers
+barbers.html	Personal Care	Barbers
+hair-salons.html	Personal Care	Hair salons
+beauty-salons.html	Personal Care	Beauty salons
+spas.html	Personal Care	Spas
+nail-studios.html	Personal Care	Nail studios
+grocery-stores.html	Retail	Grocery stores
+supermarkets.html	Retail	Supermarkets
+toy-shops.html	Retail	Toy shops
+clothing-stores.html	Retail	Clothing stores
+shoe-stores.html	Retail	Shoe stores
+electronics-shops.html	Retail	Electronics shops
+furniture-stores.html	Retail	Furniture stores
+gift-shops.html	Retail	Gift shops
+pet-shops.html	Retail	Pet shops
+hardware-stores.html	Retail	Hardware stores
+bookstores.html	Retail	Bookstores
+lawyers.html	Professional Services	Lawyers
+accountants.html	Professional Services	Accountants
+consultants.html	Professional Services	Consultants
+architects.html	Professional Services	Architects
+real-estate.html	Professional Services	Real estate agencies
+marketing-agencies.html	Professional Services	Marketing agencies
+gyms.html	Fitness and Recreation	Gyms
+yoga-studios.html	Fitness and Recreation	Yoga studios
+sports-academies.html	Fitness and Recreation	Sports academies
+dance-studios.html	Fitness and Recreation	Dance studios
+car-repair.html	Automotive	Car repair shops
+auto-dealers.html	Automotive	Auto dealers
+bike-repair.html	Automotive	Bike repair shops
+car-washes.html	Automotive	Car washes
+schools.html	Education	Schools
+coaching-centers.html	Education	Coaching centers
+training-institutes.html	Education	Training institutes
+tutors.html	Education	Tutors
+plumbers.html	Home Services	Plumbers
+electricians.html	Home Services	Electricians
+interior-designers.html	Home Services	Interior designers
+cleaning-services.html	Home Services	Cleaning services
+pest-control.html	Home Services	Pest control
+construction.html	Home Services	Construction companies

@@ -1098,3 +1098,255 @@ model WebsiteAuditJob {
   @@index([auditId, status])
   @@index([status, createdAt])
 }
+
+// ─── Business Website Opportunities (local businesses that may lack a site) ───
+
+enum BizWebsiteStatus {
+  NO_WEBSITE_LISTED
+  WEBSITE_VERIFIED_UNAVAILABLE
+  WEBSITE_EXISTS
+  WEBSITE_UNVERIFIED
+}
+
+enum BizLeadStatus {
+  NEW
+  REVIEWING
+  QUALIFIED
+  CONCEPT_READY
+  PROPOSAL_READY
+  AWAITING_APPROVAL
+  CONTACTED
+  NOT_INTERESTED
+  SUPPRESSED
+  DISQUALIFIED
+}
+
+enum BizJobStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum BizJobStep {
+  PENDING
+  DISCOVERING
+  VERIFYING
+  GENERATING_CONTENT
+  RENDERING_WEBSITE
+  CAPTURING_SCREENSHOTS
+  GENERATING_PDF
+  AWAITING_APPROVAL
+  SENDING_EMAIL
+  COMPLETED
+  FAILED
+}
+
+enum BizConceptStatus {
+  DRAFT
+  GENERATING
+  READY
+  FAILED
+}
+
+enum BizProposalStatus {
+  DRAFT
+  GENERATING
+  READY
+  APPROVED
+  FAILED
+}
+
+enum BizOutreachStatus {
+  DRAFT
+  AWAITING_APPROVAL
+  APPROVED
+  SENDING
+  SENT
+  FAILED
+  REJECTED
+  SUPPRESSED
+  UNSUBSCRIBED
+}
+
+enum BizAssetType {
+  PHOTO
+  LOGO
+  SCREENSHOT_DESKTOP
+  SCREENSHOT_MOBILE
+  OTHER
+}
+
+/// Durable discovery / generation job for business website opportunities.
+model BusinessOpportunityJob {
+  id              String      @id @default(cuid())
+  status          BizJobStatus @default(QUEUED)
+  step            BizJobStep  @default(PENDING)
+  progress        Int         @default(0)
+  countryCode     String
+  countryName     String
+  cities          String[]
+  categories      String[]
+  radiusKm        Int?
+  resultLimit     Int         @default(25)
+  provider        String      @default("manual")
+  filters         Json?
+  discoveredCount Int         @default(0)
+  errorMessage    String?     @db.Text
+  createdByUserId String?
+  startedAt       DateTime?
+  completedAt     DateTime?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  opportunities   BusinessOpportunity[]
+
+  @@index([status, createdAt])
+  @@index([countryCode, createdAt])
+}
+
+/// One local business opportunity (separate from Shopify Lead research).
+model BusinessOpportunity {
+  id                         String           @id @default(cuid())
+  provider                   String
+  providerRecordId           String?
+  businessName               String
+  category                   String
+  categoryGroup              String?
+  countryCode                String
+  countryName                String
+  city                       String
+  address                    String?
+  phone                      String?
+  publicEmail                String?
+  websiteUrl                 String?
+  websiteStatus              BizWebsiteStatus @default(WEBSITE_UNVERIFIED)
+  websiteVerificationEvidence String?         @db.Text
+  websiteVerifiedAt          DateTime?
+  description                String?          @db.Text
+  openingHours               Json?
+  publicServices             Json?
+  publicProducts             Json?
+  locationData               Json?
+  sourceUrl                  String?
+  sourceMetadata             Json?
+  leadStatus                 BizLeadStatus    @default(NEW)
+  notes                      String?          @db.Text
+  /** Public URL segment: /{publicCategorySlug}/{publicHandle} */
+  publicCategorySlug         String?
+  publicHandle               String?
+  jobId                      String?
+  job                        BusinessOpportunityJob? @relation(fields: [jobId], references: [id], onDelete: SetNull)
+  assets                     BusinessOpportunityAsset[]
+  concepts                   BusinessWebsiteConcept[]
+  proposals                  BusinessProposal[]
+  outreach                   BusinessOutreach[]
+  createdAt                  DateTime         @default(now())
+  updatedAt                  DateTime         @updatedAt
+
+  @@unique([provider, providerRecordId])
+  @@unique([publicCategorySlug, publicHandle])
+  @@index([leadStatus, createdAt])
+  @@index([websiteStatus, publicEmail])
+  @@index([countryCode, city])
+  @@index([category, city])
+  @@index([jobId])
+  @@index([publicHandle])
+}
+
+model BusinessOpportunityAsset {
+  id                    String              @id @default(cuid())
+  businessOpportunityId String
+  business              BusinessOpportunity @relation(fields: [businessOpportunityId], references: [id], onDelete: Cascade)
+  assetType             BizAssetType        @default(OTHER)
+  assetUrl              String
+  sourceUrl             String?
+  usagePermission       String              @default("unknown")
+  attribution           String?
+  createdAt             DateTime            @default(now())
+
+  @@index([businessOpportunityId])
+}
+
+model BusinessWebsiteConcept {
+  id                    String              @id @default(cuid())
+  businessOpportunityId String
+  business              BusinessOpportunity @relation(fields: [businessOpportunityId], references: [id], onDelete: Cascade)
+  conceptTitle          String
+  generatedHtml         String              @db.Text
+  generatedContent      Json?
+  previewScreenshotUrl  String?
+  generationStatus      BizConceptStatus    @default(DRAFT)
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  proposals             BusinessProposal[]
+
+  @@index([businessOpportunityId, createdAt])
+  @@index([generationStatus])
+}
+
+model BusinessProposal {
+  id                    String              @id @default(cuid())
+  businessOpportunityId String
+  business              BusinessOpportunity @relation(fields: [businessOpportunityId], references: [id], onDelete: Cascade)
+  conceptId             String?
+  concept               BusinessWebsiteConcept? @relation(fields: [conceptId], references: [id], onDelete: SetNull)
+  pdfStorageKey         String?
+  pdfUrl                String?
+  pdfBase64             String?             @db.Text
+  proposalStatus        BizProposalStatus   @default(DRAFT)
+  generatedAt           DateTime?
+  approvedAt            DateTime?
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+  outreach              BusinessOutreach[]
+
+  @@index([businessOpportunityId, createdAt])
+  @@index([proposalStatus])
+}
+
+model BusinessOutreach {
+  id                    String              @id @default(cuid())
+  businessOpportunityId String
+  business              BusinessOpportunity @relation(fields: [businessOpportunityId], references: [id], onDelete: Cascade)
+  proposalId            String?
+  proposal              BusinessProposal?   @relation(fields: [proposalId], references: [id], onDelete: SetNull)
+  recipientEmail        String
+  senderEmail           String              @default("info@techlyser.com")
+  subject               String
+  emailBody             String              @db.Text
+  approvalStatus        BizOutreachStatus   @default(DRAFT)
+  deliveryStatus        BizOutreachStatus   @default(DRAFT)
+  providerMessageId     String?
+  sentAt                DateTime?
+  errorMessage          String?             @db.Text
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+
+  @@index([businessOpportunityId, createdAt])
+  @@index([approvalStatus, deliveryStatus])
+  @@index([recipientEmail])
+}
+
+/// Email / business opt-out and suppression for opportunity outreach.
+model BusinessOutreachSuppression {
+  id        String   @id @default(cuid())
+  email     String?  @unique
+  domain    String?  @unique
+  reason    String?
+  createdAt DateTime @default(now())
+
+  @@index([email])
+  @@index([domain])
+}
+
+model BusinessOpportunitySetting {
+  id                 String   @id @default("default")
+  favoriteCities     Json?
+  customCategories   Json?
+  dailyEmailQuota    Int      @default(20)
+  defaultSenderEmail String   @default("info@techlyser.com")
+  defaultProvider    String   @default("manual")
+  updatedAt          DateTime @updatedAt
+  createdAt          DateTime @default(now())
+}

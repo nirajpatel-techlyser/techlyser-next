@@ -8,8 +8,9 @@ export const siteConfig = {
   locale: "en_IN",
   language: "en-IN",
   email: "info@techlyser.com",
-  phone: "+919753808608",
-  phoneDisplay: "+91 97538 08608",
+  /** Canonical Techlyser contact / WhatsApp until explicitly changed. */
+  phone: "+919203708608",
+  phoneDisplay: "+91 92037 08608",
   country: "India",
   foundingYear: 2018,
   address: {

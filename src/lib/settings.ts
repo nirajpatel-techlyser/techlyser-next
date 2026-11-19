@@ -16,7 +16,7 @@ export type PublicSiteSettings = {
 
 const DEFAULTS: PublicSiteSettings = {
   theme: DEFAULT_SITE_THEME,
-  whatsappUrl: "https://wa.me/919753808608",
+  whatsappUrl: "https://wa.me/919203708608",
   facebookUrl: "",
   googleUrl: "https://g.page/r/CWYl15UAeeS3EAE/review",
   instagramUrl: "",

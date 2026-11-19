@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{{BUSINESS_NAME}} | Diagnostic centers</title>
+  <meta name="description" content="{{BUSINESS_NAME}} — Diagnostic centers in {{CITY}}." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink:#0f2744; --ink-soft:#243b55; --muted:#5b6f86; --line:#d7e3ef;
+      --bg:#f3f7fb; --surface:#ffffff; --accent:#1a6f8b; --accent-2:#0e8f7a;
+      --accent-soft:#e5f3f7; --warm:#f6efe6; --shadow:0 18px 50px rgba(15,39,68,0.10); --radius:22px; --max:1120px;
+      --topbar-bg:rgba(243,247,251,0.82);
+    }
+    *{box-sizing:border-box} html{scroll-behavior:smooth}
+    body{margin:0;font-family:Manrope, system-ui, sans-serif;color:var(--ink);background:radial-gradient(1200px 600px at 90% -10%, rgba(26,111,139,0.12), transparent 55%), #f3f7fb;line-height:1.55}
+    img{max-width:100%;display:block} a{color:inherit;text-decoration:none}
+    .wrap{width:min(var(--max),calc(100% - 2rem));margin-inline:auto}
+    @keyframes rise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes fade{from{opacity:0}to{opacity:1}}
+    @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+    @keyframes pulseSoft{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+    .anim{opacity:0;animation:rise .8s ease forwards}
+    .delay-1{animation-delay:.12s}.delay-2{animation-delay:.24s}.delay-3{animation-delay:.36s}.delay-4{animation-delay:.48s}
+    .topbar{position:sticky;top:0;z-index:40;backdrop-filter:blur(14px);background:var(--topbar-bg);border-bottom:1px solid color-mix(in srgb,var(--line) 70%,transparent)}
+    .topbar-inner{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.9rem 0}
+    .brand{display:flex;align-items:center;gap:.75rem;font-weight:700;letter-spacing:-.02em}
+    .brand-mark{width:42px;height:42px;border-radius:14px;background:linear-gradient(145deg,var(--accent),var(--accent-2));display:grid;place-items:center;color:#fff;box-shadow:0 10px 24px color-mix(in srgb,var(--accent) 28%,transparent)}
+    .brand-mark svg{width:22px;height:22px}
+    .nav{display:flex;gap:1.25rem;color:var(--muted);font-size:.95rem;font-weight:500}
+    .nav a:hover{color:var(--accent)}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;border:0;border-radius:999px;padding:.85rem 1.25rem;font-weight:700;font-size:.95rem;cursor:pointer;transition:transform .2s ease,box-shadow .2s ease}
+    .btn svg{width:18px;height:18px}
+    .btn-primary{background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#fff;box-shadow:0 12px 28px color-mix(in srgb,var(--accent) 28%,transparent)}
+    .btn-primary:hover{transform:translateY(-2px)}
+    .btn-ghost{background:var(--surface);color:var(--ink);border:1px solid var(--line)}
+    .btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
+    .hero{display:grid;grid-template-columns:1.05fr .95fr;gap:2.5rem;align-items:center;padding:3.5rem 0 2.5rem}
+    .eyebrow{display:inline-flex;align-items:center;gap:.45rem;padding:.4rem .8rem;border-radius:999px;background:var(--accent-soft);color:var(--accent);font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+    .eyebrow svg{width:14px;height:14px}
+    h1{margin:1rem 0 .75rem;font-family:Fraunces, Georgia, serif;font-size:clamp(2.4rem,5vw,3.6rem);line-height:1.05;letter-spacing:-.03em}
+    .chip{display:inline-block;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:.35rem .75rem;font-size:.85rem;color:var(--ink-soft);font-weight:600;margin:.25rem .35rem .25rem 0}
+    .lead{margin:0;max-width:38rem;color:var(--muted);font-size:1.05rem}
+    .hero-actions{display:flex;flex-wrap:wrap;gap:.75rem;margin-top:1.6rem}
+    .trust-row{display:flex;flex-wrap:wrap;gap:1.25rem;margin-top:1.75rem;color:var(--muted);font-size:.9rem}
+    .trust-item{display:inline-flex;align-items:center;gap:.45rem}
+    .trust-item svg{width:18px;height:18px;color:var(--accent-2)}
+    .hero-visual{position:relative;min-height:460px}
+    .hero-card{position:relative;border-radius:28px;overflow:hidden;box-shadow:var(--shadow);background:var(--ink);min-height:460px;height:100%}
+    .hero-card img{width:100%;height:100%;object-fit:cover;min-height:460px;animation:fade 1.1s ease both}
+    .float-card{position:absolute;left:-18px;bottom:28px;width:min(250px,70%);background:color-mix(in srgb,var(--surface) 94%,transparent);backdrop-filter:blur(10px);border:1px solid color-mix(in srgb,var(--surface) 70%,transparent);border-radius:18px;padding:1rem;box-shadow:var(--shadow);animation:floaty 5s ease-in-out infinite}
+    .float-card strong{display:block;font-size:.95rem;margin-bottom:.2rem}
+    .float-card span{color:var(--muted);font-size:.85rem}
+    section{padding:3.5rem 0}
+    .section-head{display:grid;gap:.6rem;margin-bottom:1.75rem;max-width:40rem}
+    .section-head h2{margin:0;font-family:Fraunces, Georgia, serif;font-size:clamp(1.8rem,3vw,2.4rem);letter-spacing:-.02em;line-height:1.15}
+    .section-head p{margin:0;color:var(--muted)}
+    .about-grid{display:grid;grid-template-columns:.95fr 1.05fr;gap:1.5rem}
+    .photo-panel{border-radius:var(--radius);overflow:hidden;min-height:360px;box-shadow:var(--shadow)}
+    .photo-panel img{width:100%;height:100%;object-fit:cover;min-height:360px}
+    .about-copy{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:1.6rem;box-shadow:var(--shadow)}
+    .about-copy p{color:var(--muted);margin-top:.75rem}
+    .highlights{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-top:1.5rem}
+    .highlight{padding:1rem;border-radius:16px;background:var(--accent-soft);border:1px solid color-mix(in srgb,var(--accent) 15%,transparent)}
+    .highlight strong{display:block;margin-bottom:.25rem}
+    .highlight span{color:var(--muted);font-size:.9rem}
+    .cards,.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+    .card,.step{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:1.35rem;transition:transform .25s ease,box-shadow .25s ease}
+    .card:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+    .icon-bubble{width:48px;height:48px;border-radius:16px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;margin-bottom:1rem}
+    .icon-bubble svg{width:24px;height:24px}
+    .card h3,.step h3{margin:0 0 .45rem;font-size:1.1rem}
+    .card p,.step p{margin:0;color:var(--muted);font-size:.95rem}
+    .step-num{width:36px;height:36px;border-radius:12px;background:var(--accent);color:#fff;display:grid;place-items:center;font-weight:700;margin-bottom:.85rem;animation:pulseSoft 3.5s ease-in-out infinite}
+    .gallery{display:grid;grid-template-columns:1.3fr 1fr 1fr;grid-template-rows:180px 180px;gap:.85rem}
+    .gallery figure{margin:0;border-radius:18px;overflow:hidden;position:relative;box-shadow:var(--shadow)}
+    .gallery figure:first-child{grid-row:1 / span 2}
+    .gallery img{width:100%;height:100%;object-fit:cover;transition:transform .5s ease}
+    .gallery figure:hover img{transform:scale(1.05)}
+    .gallery figcaption{position:absolute;left:.7rem;bottom:.7rem;background:color-mix(in srgb,var(--ink) 62%,transparent);color:#fff;font-size:.75rem;padding:.3rem .55rem;border-radius:999px}
+    .contact-panel{display:grid;grid-template-columns:1.15fr .85fr;gap:1rem;background:linear-gradient(145deg, #102a44, #1a6f8b 70%, #0e8f7a);color:#fff;border-radius:28px;padding:1.6rem;box-shadow:var(--shadow);overflow:hidden;position:relative}
+    .contact-panel::after{content:"";position:absolute;width:280px;height:280px;right:-60px;bottom:-80px;border-radius:50%;background:rgba(255,255,255,.08)}
+    .contact-panel h2{margin:0 0 .5rem;font-family:Fraunces, Georgia, serif;font-size:clamp(1.7rem,3vw,2.2rem)}
+    .contact-panel p{margin:0;color:rgba(255,255,255,.8);max-width:36rem}
+    .facts{display:grid;gap:.85rem;margin-top:1.4rem;position:relative;z-index:1}
+    .fact{display:grid;grid-template-columns:40px 1fr;gap:.75rem}
+    .fact-icon{width:40px;height:40px;border-radius:12px;background:rgba(255,255,255,.12);display:grid;place-items:center}
+    .fact-icon svg{width:20px;height:20px}
+    .fact strong{display:block;font-size:.8rem;opacity:.75;font-weight:600}
+    .fact span{font-size:1rem;font-weight:600}
+    .cta-box{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);border-radius:20px;padding:1.25rem;align-self:center;position:relative;z-index:1}
+    .cta-box .btn-primary{width:100%;margin-top:.85rem;background:#fff;color:var(--ink);box-shadow:none}
+    footer{padding:2rem 0 2.5rem;color:var(--muted);font-size:.88rem;display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap;border-top:1px solid var(--line);margin-top:1rem}
+    .template-note{margin:0 auto 1rem;width:min(var(--max),calc(100% - 2rem));background:var(--warm);border:1px solid color-mix(in srgb,var(--warm) 60%,#000);color:#6a553d;border-radius:14px;padding:.75rem 1rem;font-size:.85rem}
+    @media (max-width:900px){
+      .nav{display:none}
+      .hero,.about-grid,.cards,.steps,.contact-panel,.gallery,.highlights{grid-template-columns:1fr}
+      .gallery{grid-template-rows:220px 160px 160px}
+      .gallery figure:first-child{grid-row:auto}
+      .hero-visual,.hero-card,.hero-card img{min-height:340px}
+      .float-card{left:12px;bottom:12px}
+    }
+  </style>
+</head>
+<body>
+  <p class="template-note">Diagnostic centers landing template (diagnostic-centers) — scrap fields fill placeholders; stock images used when listing photos are missing.</p>
+  <header class="topbar"><div class="wrap topbar-inner">
+    <div class="brand"><div class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.2H22l-6 4.8 2.4 7.2L12 16.4 5.6 21.2 8 14 2 9.2h7.6L12 2z" stroke-linejoin="round"/></svg></div><span>{{BUSINESS_NAME}}</span></div>
+    <nav class="nav" aria-label="Primary">
+      <a href="#about">About</a><a href="#services">Services</a><a href="#process">Process</a><a href="#gallery">Gallery</a><a href="#contact">Contact</a>
+    </nav>
+    <a class="btn btn-primary" href="tel:{{PHONE}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v2a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h2a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.6a2 2 0 0 1-.5 2.1L7.1 9.9a16 16 0 0 0 6 6l1.5-1.1a2 2 0 0 1 2.1-.4c.8.3 1.7.5 2.6.6A2 2 0 0 1 22 16.9z" stroke-linecap="round" stroke-linejoin="round"/></svg> Call now</a>
+  </div></header>
+  <main>
+    <section class="wrap hero">
+      <div>
+        <div class="eyebrow anim"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-4.4-7-10a7 7 0 0 1 14 0c0 5.6-7 10-7 10z" stroke-linejoin="round"/><circle cx="12" cy="11" r="2.2"/></svg> {{CATEGORY}} · {{CITY}}</div>
+        <h1 class="anim delay-1">{{BUSINESS_NAME}}</h1>
+        <div class="anim delay-1"><span class="chip">{{SPECIALTY}}</span><span class="chip">{{CITY}}</span></div>
+        <p class="lead anim delay-2">{{ABOUT_SHORT}}</p>
+        <div class="hero-actions anim delay-3">
+          <a class="btn btn-primary" href="tel:{{PHONE}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v2a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h2a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.6a2 2 0 0 1-.5 2.1L7.1 9.9a16 16 0 0 0 6 6l1.5-1.1a2 2 0 0 1 2.1-.4c.8.3 1.7.5 2.6.6A2 2 0 0 1 22 16.9z" stroke-linecap="round" stroke-linejoin="round"/></svg> Call {{PHONE}}</a>
+          <a class="btn btn-ghost" href="#contact"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8l8 5 8-5"/><rect x="4" y="5" width="16" height="14" rx="2"/></svg> View contact</a>
+        </div>
+        <div class="trust-row anim delay-4">
+          <div class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke-linejoin="round"/></svg> Local diagnostic center presence</div>
+          <div class="trust-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2" stroke-linecap="round"/></svg> {{HOURS}}</div>
+        </div>
+      </div>
+      <div class="hero-visual anim delay-2"><div class="hero-card">
+        <img class="js-img" src="{{HERO_IMAGE}}" data-fallback="https://images.unsplash.com/photo-1579154204601-01588f351e67?auto=format&fit=crop&w=1600&q=80" alt="Diagnostic centers hero" width="800" height="1000" />
+        <div class="float-card"><strong>{{SPECIALTY}}</strong><span>Serving {{CITY}}</span></div>
+      </div></div>
+    </section>
+
+    <section class="wrap" id="about">
+      <div class="section-head anim"><h2>About diagnostic centers</h2><p>A modern website concept built from public listing details.</p></div>
+      <div class="about-grid">
+        <div class="photo-panel anim delay-1"><img class="js-img" src="{{ABOUT_IMAGE}}" data-fallback="https://images.unsplash.com/photo-1582719471384-894fbb16e074?auto=format&fit=crop&w=1600&q=80" alt="Diagnostic centers about" width="900" height="700" /></div>
+        <div class="about-copy anim delay-2">
+          <div class="eyebrow">{{CATEGORY}}</div>
+          <h2 style="margin:.8rem 0 0;font-family:inherit;font-size:1.8rem;letter-spacing:-.02em;">Clear details. Easy next step.</h2>
+          <p>{{ABOUT_LONG}}</p>
+          <div class="highlights">
+            <div class="highlight"><strong>Focus</strong><span>{{SPECIALTY}}</span></div>
+            <div class="highlight"><strong>City</strong><span>{{CITY}}</span></div>
+            <div class="highlight"><strong>Contact</strong><span>Direct phone line</span></div>
+          </div>
+          <div class="hero-actions"><a class="btn btn-primary" href="tel:{{PHONE}}">Call now</a></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="wrap" id="services">
+      <div class="section-head anim"><h2>What we offer</h2><p>Service highlights tailored for diagnostic centers.</p></div>
+      <div class="cards">
+        <article class="card anim delay-1"><div class="icon-bubble"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7l3-7z" stroke-linejoin="round"/></svg></div><h3>{{SERVICE_1}}</h3><p>Core offering aligned to your diagnostic centers listing.</p></article>
+        <article class="card anim delay-2"><div class="icon-bubble"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg></div><h3>{{SERVICE_2}}</h3><p>Clear presentation of specialty and customer value.</p></article>
+        <article class="card anim delay-3"><div class="icon-bubble"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v2a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h2a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.6a2 2 0 0 1-.5 2.1L7.1 9.9a16 16 0 0 0 6 6l1.5-1.1a2 2 0 0 1 2.1-.4c.8.3 1.7.5 2.6.6A2 2 0 0 1 22 16.9z" stroke-linecap="round" stroke-linejoin="round"/></svg></div><h3>{{SERVICE_3}}</h3><p>One-tap calling so customers never guess how to reach you.</p></article>
+      </div>
+    </section>
+
+    <section class="wrap" id="process">
+      <div class="section-head anim"><h2>How it works</h2><p>A simple path from discovery to contact.</p></div>
+      <div class="steps">
+        <div class="step anim delay-1"><div class="step-num">1</div><h3>Discover</h3><p>Find diagnostic centers details and specialty online.</p></div>
+        <div class="step anim delay-2"><div class="step-num">2</div><h3>Call</h3><p>Reach the business on the listed phone number.</p></div>
+        <div class="step anim delay-3"><div class="step-num">3</div><h3>Visit</h3><p>Arrive with address and hours already clear.</p></div>
+      </div>
+    </section>
+
+    <section class="wrap" id="gallery">
+      <div class="section-head anim"><h2>Gallery</h2><p>Illustrative imagery for the proposal — replace with real photos later.</p></div>
+      <div class="gallery anim delay-1">
+        <figure><img class="js-img" src="{{GALLERY_1}}" data-fallback="https://images.unsplash.com/photo-1579154204601-01588f351e67?auto=format&fit=crop&w=1000&q=80" alt="Gallery 1" width="900" height="1200" /><figcaption>Featured</figcaption></figure>
+        <figure><img class="js-img" src="{{GALLERY_2}}" data-fallback="https://images.unsplash.com/photo-1576086213369-97a306d36557?auto=format&fit=crop&w=1000&q=80" alt="Gallery 2" width="700" height="500" /><figcaption>Space</figcaption></figure>
+        <figure><img class="js-img" src="{{GALLERY_3}}" data-fallback="https://images.unsplash.com/photo-1582719471384-894fbb16e074?auto=format&fit=crop&w=1000&q=80" alt="Gallery 3" width="700" height="500" /><figcaption>Detail</figcaption></figure>
+        <figure><img class="js-img" src="{{GALLERY_4}}" data-fallback="https://images.unsplash.com/photo-1579154204601-01588f351e67?auto=format&fit=crop&w=1000&q=80" alt="Gallery 4" width="700" height="500" /><figcaption>Work</figcaption></figure>
+        <figure><img class="js-img" src="{{GALLERY_5}}" data-fallback="https://images.unsplash.com/photo-1576086213369-97a306d36557?auto=format&fit=crop&w=1000&q=80" alt="Gallery 5" width="700" height="500" /><figcaption>Visit</figcaption></figure>
+      </div>
+    </section>
+
+    <section class="wrap" id="contact">
+      <div class="contact-panel anim">
+        <div>
+          <h2>Visit &amp; contact</h2>
+          <p>Everything a customer needs to reach {{BUSINESS_NAME}}.</p>
+          <div class="facts">
+            <div class="fact"><div class="fact-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 5-6 8-6s6.5 2 8 6" stroke-linecap="round"/></svg></div><div><strong>Business</strong><span>{{BUSINESS_NAME}}</span></div></div>
+            <div class="fact"><div class="fact-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7l3-7z" stroke-linejoin="round"/></svg></div><div><strong>Focus</strong><span>{{SPECIALTY}}</span></div></div>
+            <div class="fact"><div class="fact-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v2a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h2a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.6a2 2 0 0 1-.5 2.1L7.1 9.9a16 16 0 0 0 6 6l1.5-1.1a2 2 0 0 1 2.1-.4c.8.3 1.7.5 2.6.6A2 2 0 0 1 22 16.9z" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><strong>Phone</strong><span>{{PHONE}}</span></div></div>
+            <div class="fact"><div class="fact-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 8l8 5 8-5"/><rect x="4" y="5" width="16" height="14" rx="2"/></svg></div><div><strong>Email</strong><span>{{EMAIL}}</span></div></div>
+            <div class="fact"><div class="fact-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-4.4-7-10a7 7 0 0 1 14 0c0 5.6-7 10-7 10z" stroke-linejoin="round"/><circle cx="12" cy="11" r="2.2"/></svg></div><div><strong>Location</strong><span>{{ADDRESS}}, {{CITY}}</span></div></div>
+            <div class="fact"><div class="fact-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2" stroke-linecap="round"/></svg></div><div><strong>Hours</strong><span>{{HOURS}}</span></div></div>
+          </div>
+        </div>
+        <div class="cta-box">
+          <strong style="font-size:1.15rem;display:block;margin-bottom:.35rem;">Ready to connect?</strong>
+          <span style="opacity:.85;font-size:.95rem;">Call the listing number and speak directly with the business.</span>
+          <a class="btn btn-primary" href="tel:{{PHONE}}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.9v2a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h2a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.6a2 2 0 0 1-.5 2.1L7.1 9.9a16 16 0 0 0 6 6l1.5-1.1a2 2 0 0 1 2.1-.4c.8.3 1.7.5 2.6.6A2 2 0 0 1 22 16.9z" stroke-linecap="round" stroke-linejoin="round"/></svg> {{PHONE}}</a>
+        </div>
+      </div>
+    </section>
+  </main>
+  <footer class="wrap">
+    <span>Website concept for {{BUSINESS_NAME}} · {{CITY}}</span>
+    <span>Prepared by Techlyser · diagnostic-centers</span>
+  </footer>
+  <script>
+(function(){
+  if(window.__CATEGORY_TEMPLATE_FILLED__) return;
+  var demo={"BUSINESS_NAME":"Accurate Labs","CATEGORY":"Diagnostic centers","CITY":"Indore","SPECIALTY":"Labs & diagnostics","PHONE":"+91 98765 43210","EMAIL":"hello@example.com","ADDRESS":"12 MG Road","HOURS":"Mon–Sat · 10am–7pm","ABOUT_SHORT":"Accurate Labs brings labs & diagnostics to customers in Indore with clear contact and location details.","ABOUT_LONG":"Accurate Labs is listed as a diagnostic centers business in Indore. This Techlyser concept page uses public listing fields — swap in real photos and services when you go live.","SERVICE_1":"Lab tests","SERVICE_2":"Reports","SERVICE_3":"Appointment call","HERO_IMAGE":"https://images.unsplash.com/photo-1579154204601-01588f351e67?auto=format&fit=crop&w=1600&q=80","ABOUT_IMAGE":"https://images.unsplash.com/photo-1582719471384-894fbb16e074?auto=format&fit=crop&w=1600&q=80","GALLERY_1":"https://images.unsplash.com/photo-1579154204601-01588f351e67?auto=format&fit=crop&w=1000&q=80","GALLERY_2":"https://images.unsplash.com/photo-1576086213369-97a306d36557?auto=format&fit=crop&w=1000&q=80","GALLERY_3":"https://images.unsplash.com/photo-1582719471384-894fbb16e074?auto=format&fit=crop&w=1000&q=80","GALLERY_4":"https://images.unsplash.com/photo-1579154204601-01588f351e67?auto=format&fit=crop&w=1000&q=80","GALLERY_5":"https://images.unsplash.com/photo-1576086213369-97a306d36557?auto=format&fit=crop&w=1000&q=80"};
+  if(!document.body.innerHTML.includes("{{"+"BUSINESS_NAME}}")){bindImg();return;}
+  window.__CATEGORY_TEMPLATE_FILLED__=true;
+  function apply(s){Object.keys(demo).forEach(function(k){s=s.split("{{"+k+"}}").join(demo[k]);});return s;}
+  document.title=apply(document.title);
+  var m=document.querySelector('meta[name="description"]');
+  if(m) m.setAttribute("content", apply(m.getAttribute("content")||""));
+  document.body.innerHTML=apply(document.body.innerHTML);
+  bindImg();
+})();
+function bindImg(){
+  var SAFE="data:image/svg+xml,"+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800"><rect width="1200" height="800" fill="#444"/><text x="600" y="410" text-anchor="middle" fill="#fff" font-family="Arial" font-size="32">Photo</text></svg>');
+  document.querySelectorAll("img.js-img,img[data-fallback]").forEach(function(img){
+    img.addEventListener("error",function onErr(){
+      img.removeEventListener("error",onErr);
+      var n=img.getAttribute("data-fallback");
+      if(n&&img.src!==n){img.src=n;return;}
+      img.src=SAFE;
+    });
+  });
+}
+</script>
+</body>
+</html>

@@ -70,10 +70,14 @@ export default async function LeadGenerationPage({
   return (
     <div className="space-y-8">
       <header>
-        <h1 className="text-3xl font-bold text-slate-900">Lead generation</h1>
+        <h1 className="text-3xl font-bold text-slate-900">Shopify store leads</h1>
         <p className="mt-2 max-w-3xl text-slate-600">
           Research public Shopify stores in the United States, Canada, Australia, New Zealand, Denmark, and Europe.
-          Messages are drafts only.
+          For local business discovery (country / city / category buttons), use{" "}
+          <Link href="/admin/business-opportunities/discover" className="font-semibold text-primary underline">
+            Lead generation → Discover
+          </Link>
+          . Messages are drafts only.
         </p>
       </header>
 

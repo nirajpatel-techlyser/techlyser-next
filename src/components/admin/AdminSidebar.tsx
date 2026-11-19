@@ -20,6 +20,7 @@ import {
   Share2,
   Sparkles,
   ClipboardCheck,
+  MapPin,
 } from "lucide-react";
 
 const navItems = [
@@ -31,8 +32,17 @@ const navItems = [
   { href: "/admin/ai/autopilot", label: "Daily Autopilot", icon: Sparkles },
   { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
   { href: "/admin/blogs", label: "Blogs", icon: FileText },
-  { href: "/admin/lead-generation", label: "Lead generation", icon: Users },
+  {
+    href: "/admin/business-opportunities",
+    label: "Lead generation",
+    icon: Users,
+  },
   { href: "/admin/website-audits", label: "Website audits", icon: ClipboardCheck },
+  {
+    href: "/admin/lead-generation",
+    label: "Shopify store leads",
+    icon: MapPin,
+  },
   { href: "/admin/social/accounts", label: "Social accounts", icon: Share2 },
   { href: "/admin/social/history", label: "Social history", icon: History },
   { href: "/admin/comments", label: "Comments", icon: MessageSquare },
