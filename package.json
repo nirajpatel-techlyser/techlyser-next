@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "node scripts/check-auth-url.mjs && prisma generate && next build",
+    "build": "node scripts/check-auth-url.mjs && prisma generate && next build --webpack",
     "dev": "next dev",
     "start": "next start",
     "lint": "eslint",

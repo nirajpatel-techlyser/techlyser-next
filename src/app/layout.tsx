@@ -17,10 +17,11 @@ import {
 } from "@/lib/seo";
 import "./globals.css";
 
+// Avoid multi-weight next/font queries — Turbopack build fails with
+// "Can't resolve '@vercel/turbopack-next/internal/font/google/font'".
 const nunito = Nunito({
   variable: "--font-nunito",
   subsets: ["latin"],
-  weight: ["400", "600", "700", "800"],
   display: "swap",
   adjustFontFallback: true,
 });
@@ -28,7 +29,7 @@ const nunito = Nunito({
 const roboto = Roboto({
   variable: "--font-roboto",
   subsets: ["latin"],
-  weight: ["400", "500", "700"],
+  weight: "400",
   display: "swap",
   adjustFontFallback: true,
 });

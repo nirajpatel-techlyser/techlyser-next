@@ -5,6 +5,11 @@ import { existsSync } from "node:fs";
  */
 
 function windowsBrowserCandidates() {
+  if (process.platform !== "win32") {
+    return [process.env.PUPPETEER_EXECUTABLE_PATH, process.env.CHROME_PATH].filter(
+      (p): p is string => Boolean(p),
+    );
+  }
   const candidates = [
     process.env.PUPPETEER_EXECUTABLE_PATH,
     process.env.CHROME_PATH,
@@ -14,6 +19,17 @@ function windowsBrowserCandidates() {
     "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
   ];
   return candidates.filter((p): p is string => Boolean(p && existsSync(p)));
+}
+
+/** Load puppeteer only at runtime — never bundle Chromium into the Next graph. */
+async function loadPuppeteer(): Promise<typeof import("puppeteer") | null> {
+  try {
+    // webpackIgnore keeps Vercel/Next from resolving puppeteer's native deps at build time.
+    return await import(/* webpackIgnore: true */ "puppeteer");
+  } catch (err) {
+    console.warn("[puppeteer] unavailable in this environment:", err);
+    return null;
+  }
 }
 
 async function launchBrowser(puppeteer: typeof import("puppeteer")) {
@@ -68,12 +84,8 @@ export async function renderConceptHtmlDesktopCapture(
 ): Promise<DesktopCapture | null> {
   if (!html || html.length < 200) return null;
 
-  let puppeteer: typeof import("puppeteer");
-  try {
-    puppeteer = await import("puppeteer");
-  } catch {
-    return null;
-  }
+  const puppeteer = await loadPuppeteer();
+  if (!puppeteer) return null;
 
   let browser: Awaited<ReturnType<typeof puppeteer.launch>> | null = null;
   try {
@@ -136,12 +148,8 @@ export async function renderConceptHtmlToPdf(
   if (!capture) return null;
 
   // Keep a simple single-engine PDF fallback path unused by proposal builder.
-  let puppeteer: typeof import("puppeteer");
-  try {
-    puppeteer = await import("puppeteer");
-  } catch {
-    return null;
-  }
+  const puppeteer = await loadPuppeteer();
+  if (!puppeteer) return null;
 
   let browser: Awaited<ReturnType<typeof puppeteer.launch>> | null = null;
   try {

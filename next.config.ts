@@ -38,6 +38,8 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: projectRoot,
   },
+  // Keep Chromium tooling out of the Next server bundle (Vercel build).
+  serverExternalPackages: ["puppeteer", "@puppeteer/browsers", "chromium-bidi"],
   poweredByHeader: false,
   compress: true,
   images: {
