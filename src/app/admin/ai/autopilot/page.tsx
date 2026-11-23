@@ -52,8 +52,10 @@ export default async function AdminAutopilotPage() {
         </p>
         <h1 className="mt-2 text-2xl font-bold text-slate-900">Daily Autopilot</h1>
         <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-          Daily cron creates one Techlyser-first DRAFT (+ LinkedIn personal +
-          company posts) + SEO/GEO. The{" "}
+          Free-tier default: daily cron is <strong>off</strong> — use{" "}
+          <strong>Run Autopilot</strong> below when you want a draft (saves
+          Neon CU-hours). When cron is re-enabled it creates one Techlyser-first
+          DRAFT (+ LinkedIn personal + company posts) + SEO/GEO. The{" "}
           <strong>Growth Engine</strong> scores topics with{" "}
           <code className="text-xs">techlyserGrowthScore</code> (must be ≥ 70),
           applies a strict third-party promotion filter, then{" "}

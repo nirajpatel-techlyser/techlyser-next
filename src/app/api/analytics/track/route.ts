@@ -5,6 +5,7 @@ import {
   getGeoFromHeaders,
   hashIp,
 } from "@/lib/analytics";
+import { isDbAnalyticsEnabled } from "@/lib/runtime-flags";
 
 function isBot(userAgent: string | null) {
   if (!userAgent) return false;
@@ -15,6 +16,15 @@ function isBot(userAgent: string | null) {
 
 export async function POST(request: Request) {
   try {
+    // Free-tier: skip all analytics DB writes unless explicitly enabled.
+    if (!isDbAnalyticsEnabled()) {
+      return NextResponse.json({
+        ok: true,
+        skipped: true,
+        reason: "analytics_disabled",
+      });
+    }
+
     const body = await request.json();
     const path =
       typeof body.path === "string" && body.path.startsWith("/")

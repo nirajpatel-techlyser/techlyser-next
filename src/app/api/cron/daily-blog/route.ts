@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { runDailyAutopilot } from "@/ai/autopilot";
 import { runDbRetention } from "@/lib/db-retention";
+import { isCronAutopilotEnabled } from "@/lib/runtime-flags";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -41,6 +42,18 @@ export async function GET(request: Request) {
   if (!isAuthorized(request)) {
     console.error("[cron.daily-blog] Unauthorized cron request");
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  // Free-tier: do not auto-wake Neon / burn CU-hours unless explicitly enabled.
+  if (!isCronAutopilotEnabled()) {
+    console.info(
+      "[cron.daily-blog] skipped — ENABLE_CRON_AUTOPILOT is off. Run from Admin → Autopilot.",
+    );
+    return NextResponse.json({
+      ok: true,
+      skipped: true,
+      reason: "ENABLE_CRON_AUTOPILOT is off",
+    });
   }
 
   try {

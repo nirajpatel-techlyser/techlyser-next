@@ -3,10 +3,18 @@
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 
+/**
+ * Only fires when NEXT_PUBLIC_ENABLE_DB_ANALYTICS=true.
+ * Keeps Neon asleep for normal browsing on the free tier.
+ */
 export default function AnalyticsTracker() {
   const pathname = usePathname();
+  const enabled =
+    process.env.NEXT_PUBLIC_ENABLE_DB_ANALYTICS === "1" ||
+    process.env.NEXT_PUBLIC_ENABLE_DB_ANALYTICS === "true";
 
   useEffect(() => {
+    if (!enabled) return;
     if (!pathname || pathname.startsWith("/admin")) {
       return;
     }
@@ -27,7 +35,7 @@ export default function AnalyticsTracker() {
     });
 
     return () => controller.abort();
-  }, [pathname]);
+  }, [pathname, enabled]);
 
   return null;
 }
