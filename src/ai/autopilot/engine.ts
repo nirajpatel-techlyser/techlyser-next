@@ -110,7 +110,8 @@ export async function runDailyAutopilot(
   await cleanupStuckAutopilotRuns();
 
   const oncePerDay = options.oncePerDay ?? autopilotOncePerDay();
-  const refreshMarket = options.refreshMarket !== false;
+  // Opt-in only — never auto-run research unless caller sets refreshMarket: true.
+  const refreshMarket = options.refreshMarket === true;
   const applySeo = options.applySeo !== false;
   const generateImage =
     options.generateImage ?? autopilotGenerateImageEnabled();

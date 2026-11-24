@@ -147,7 +147,10 @@ export default async function RootLayout({
             : "bg-background text-foreground"
         }`}
       >
-        <AnalyticsTracker />
+        {process.env.NEXT_PUBLIC_ENABLE_DB_ANALYTICS === "true" ||
+        process.env.NEXT_PUBLIC_ENABLE_DB_ANALYTICS === "1" ? (
+          <AnalyticsTracker />
+        ) : null}
         {!isAdminRoute ? (
           <JsonLd
             data={[

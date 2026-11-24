@@ -1,7 +1,6 @@
 import Link from "next/link";
 import RunAutopilotButton from "@/components/admin/ai/RunAutopilotButton";
 import {
-  cleanupStuckAutopilotRuns,
   isAutopilotEnabled,
   autopilotPublishEnabled,
 } from "@/ai/autopilot";
@@ -21,23 +20,30 @@ function formatDate(value: Date) {
   }).format(value);
 }
 
-export default async function AdminAutopilotPage() {
-  await cleanupStuckAutopilotRuns(5);
+export default async function AdminAutopilotPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ history?: string }>;
+}) {
+  const params = await searchParams;
+  const loadHistory = params.history === "1";
 
-  const runs = await prisma.aiAgentRun.findMany({
-    where: { workflowId: "daily-autopilot" },
-    orderBy: { createdAt: "desc" },
-    take: 15,
-    select: {
-      id: true,
-      status: true,
-      currentStep: true,
-      errorMessage: true,
-      startedAt: true,
-      completedAt: true,
-      createdAt: true,
-    },
-  });
+  const runs = loadHistory
+    ? await prisma.aiAgentRun.findMany({
+        where: { workflowId: "daily-autopilot" },
+        orderBy: { createdAt: "desc" },
+        take: 15,
+        select: {
+          id: true,
+          status: true,
+          currentStep: true,
+          errorMessage: true,
+          startedAt: true,
+          completedAt: true,
+          createdAt: true,
+        },
+      })
+    : [];
 
   const enabled = isAutopilotEnabled();
   const autoPublish = autopilotPublishEnabled();
@@ -52,16 +58,10 @@ export default async function AdminAutopilotPage() {
         </p>
         <h1 className="mt-2 text-2xl font-bold text-slate-900">Daily Autopilot</h1>
         <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-          Free-tier default: daily cron is <strong>off</strong> — use{" "}
-          <strong>Run Autopilot</strong> below when you want a draft (saves
-          Neon CU-hours). When cron is re-enabled it creates one Techlyser-first
-          DRAFT (+ LinkedIn personal + company posts) + SEO/GEO. The{" "}
-          <strong>Growth Engine</strong> scores topics with{" "}
-          <code className="text-xs">techlyserGrowthScore</code> (must be ≥ 70),
-          applies a strict third-party promotion filter, then{" "}
-          <code className="text-xs">validateContent()</code> before any
-          auto-publish. Research is skipped by default so the draft finishes
-          inside Vercel&apos;s time limit. Default: <strong>DRAFT only</strong>.
+          Daily cron is <strong>off</strong>. Click <strong>Run</strong> when you
+          want one Techlyser-first DRAFT (+ LinkedIn posts) + SEO/GEO. Nothing
+          auto-starts on page open (saves Neon CU-hours). Default:{" "}
+          <strong>DRAFT only</strong>.
         </p>
         <div className="mt-4 flex flex-wrap gap-4 text-sm text-slate-600">
           <span>
@@ -85,16 +85,15 @@ export default async function AdminAutopilotPage() {
             </strong>
           </span>
           <span>
-            Cron: <strong className="text-slate-900">scheduled 9:00 AM IST</strong>{" "}
-            (Vercel Hobby may run ~9:00–10:00 AM) · write-first
+            Cron: <strong className="text-emerald-700">off</strong> (manual Run
+            only)
           </span>
         </div>
         <div className="mt-5">
           <RunAutopilotButton />
         </div>
         <p className="mt-3 text-xs text-slate-500">
-          Admin button and daily cron both write a DRAFT first (no market
-          research). Cron max 1 successful run/day. Prefer{" "}
+          Stuck-run cleanup runs inside the Run path, not on page load. Prefer{" "}
           <code className="text-xs">GEMINI_API_KEY</code>. Images: upload in Blog
           edit.
         </p>
@@ -106,7 +105,17 @@ export default async function AdminAutopilotPage() {
       </header>
 
       <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-slate-900">Recent autopilot runs</h2>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-lg font-semibold text-slate-900">
+            Recent autopilot runs
+          </h2>
+          <Link
+            href={loadHistory ? "/admin/ai/autopilot" : "/admin/ai/autopilot?history=1"}
+            className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-800 hover:bg-slate-50"
+          >
+            {loadHistory ? "Hide history" : "Run / load history"}
+          </Link>
+        </div>
         <div className="mt-4 overflow-x-auto">
           <table className="min-w-full text-left text-sm">
             <thead className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500">
@@ -118,27 +127,44 @@ export default async function AdminAutopilotPage() {
               </tr>
             </thead>
             <tbody>
-              {runs.map((run) => (
-                <tr key={run.id} className="border-b border-slate-100">
-                  <td className="px-2 py-3 text-slate-700">{run.status}</td>
-                  <td className="px-2 py-3 text-slate-600">
-                    {run.currentStep || "—"}
-                  </td>
-                  <td className="px-2 py-3 text-slate-600">
-                    {formatDate(run.createdAt)}
-                  </td>
-                  <td className="px-2 py-3 text-slate-600">
-                    {run.errorMessage || "—"}
-                  </td>
-                </tr>
-              ))}
-              {runs.length === 0 ? (
+              {!loadHistory ? (
                 <tr>
                   <td colSpan={4} className="px-2 py-6 text-slate-500">
-                    No autopilot runs yet.
+                    History paused. Click{" "}
+                    <Link
+                      href="/admin/ai/autopilot?history=1"
+                      className="font-semibold text-primary hover:underline"
+                    >
+                      Run / load history
+                    </Link>{" "}
+                    to query the database.
                   </td>
                 </tr>
-              ) : null}
+              ) : (
+                <>
+                  {runs.map((run) => (
+                    <tr key={run.id} className="border-b border-slate-100">
+                      <td className="px-2 py-3 text-slate-700">{run.status}</td>
+                      <td className="px-2 py-3 text-slate-600">
+                        {run.currentStep || "—"}
+                      </td>
+                      <td className="px-2 py-3 text-slate-600">
+                        {formatDate(run.createdAt)}
+                      </td>
+                      <td className="px-2 py-3 text-slate-600">
+                        {run.errorMessage || "—"}
+                      </td>
+                    </tr>
+                  ))}
+                  {runs.length === 0 ? (
+                    <tr>
+                      <td colSpan={4} className="px-2 py-6 text-slate-500">
+                        No autopilot runs yet.
+                      </td>
+                    </tr>
+                  ) : null}
+                </>
+              )}
             </tbody>
           </table>
         </div>
