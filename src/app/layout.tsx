@@ -124,11 +124,8 @@ export default async function RootLayout({
   const isAdminRoute = pathname.startsWith("/admin");
 
   const settings = await getSiteSettings();
-  const theme = isAdminRoute
-    ? "light"
-    : settings.theme === "LIGHT"
-      ? "light"
-      : "dark";
+  // Public site is always dark (light invert was turning the orange mark blue).
+  const theme = isAdminRoute ? "light" : "dark";
 
   const sameAs = [
     settings.linkedinUrl,

@@ -31,8 +31,15 @@ async function safe<T>(label: string, fn: () => Promise<T>, fallback: T): Promis
   }
 }
 
-export default async function AdminDashboardPage() {
-  // Keep concurrency low — Supabase session pooler rejects too many parallel clients.
+export default async function AdminDashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ analytics?: string }>;
+}) {
+  const params = await searchParams;
+  const loadAnalytics = params.analytics === "1";
+
+  // Blog counts only by default — pageView analytics wake Neon; load on demand.
   const total = await safe("total", () => prisma.blog.count(), 0);
   const published = await safe(
     "published",
@@ -49,7 +56,6 @@ export default async function AdminDashboardPage() {
     () => prisma.blog.aggregate({ _sum: { views: true } }),
     { _sum: { views: 0 } },
   );
-  const visitCount = await safe("visitCount", () => prisma.pageView.count(), 0);
   const pendingComments = await safe(
     "pendingComments",
     () =>
@@ -77,66 +83,76 @@ export default async function AdminDashboardPage() {
     [],
   );
 
-  const recentVisits = await safe(
-    "recentVisits",
-    () =>
-      prisma.pageView.findMany({
-        orderBy: { createdAt: "desc" },
-        take: 12,
-        include: {
-          blog: {
-            select: { title: true, slug: true },
-          },
-        },
-      }),
-    [],
-  );
+  const visitCount = loadAnalytics
+    ? await safe("visitCount", () => prisma.pageView.count(), 0)
+    : null;
 
-  const topCountries = await safe(
-    "topCountries",
-    () =>
-      prisma.pageView.groupBy({
-        by: ["country"],
-        _count: { _all: true },
-        orderBy: { _count: { country: "desc" } },
-        take: 8,
-      }),
-    [],
-  );
-
-  const blogViews = await safe(
-    "blogViews",
-    () =>
-      prisma.blog.findMany({
-        where: { status: BlogStatus.PUBLISHED },
-        orderBy: { views: "desc" },
-        take: 5,
-        select: {
-          id: true,
-          title: true,
-          slug: true,
-          views: true,
-        },
-      }),
-    [],
-  );
-
-  // One grouped query instead of N+1 per blog.
-  const blogIds = blogViews.map((blog) => blog.id);
-  const geoRows = blogIds.length
+  const recentVisits = loadAnalytics
     ? await safe(
-        "blogGeo",
+        "recentVisits",
         () =>
-          prisma.pageView.groupBy({
-            by: ["blogId", "country", "city"],
-            where: { blogId: { in: blogIds } },
-            _count: { _all: true },
-            orderBy: { _count: { blogId: "desc" } },
-            take: 40,
+          prisma.pageView.findMany({
+            orderBy: { createdAt: "desc" },
+            take: 12,
+            include: {
+              blog: {
+                select: { title: true, slug: true },
+              },
+            },
           }),
         [],
       )
     : [];
+
+  const topCountries = loadAnalytics
+    ? await safe(
+        "topCountries",
+        () =>
+          prisma.pageView.groupBy({
+            by: ["country"],
+            _count: { _all: true },
+            orderBy: { _count: { country: "desc" } },
+            take: 8,
+          }),
+        [],
+      )
+    : [];
+
+  const blogViews = loadAnalytics
+    ? await safe(
+        "blogViews",
+        () =>
+          prisma.blog.findMany({
+            where: { status: BlogStatus.PUBLISHED },
+            orderBy: { views: "desc" },
+            take: 5,
+            select: {
+              id: true,
+              title: true,
+              slug: true,
+              views: true,
+            },
+          }),
+        [],
+      )
+    : [];
+
+  const blogIds = blogViews.map((blog) => blog.id);
+  const geoRows =
+    loadAnalytics && blogIds.length
+      ? await safe(
+          "blogGeo",
+          () =>
+            prisma.pageView.groupBy({
+              by: ["blogId", "country", "city"],
+              where: { blogId: { in: blogIds } },
+              _count: { _all: true },
+              orderBy: { _count: { blogId: "desc" } },
+              take: 40,
+            }),
+          [],
+        )
+      : [];
 
   const blogGeo = blogViews.map((blog) => {
     const geos = geoRows
@@ -162,7 +178,7 @@ export default async function AdminDashboardPage() {
     },
     {
       label: "Site Visits",
-      value: visitCount,
+      value: visitCount === null ? "—" : visitCount,
       icon: Globe2,
       tone: "bg-sky-50 text-sky-700",
       href: "/admin/analytics",
@@ -198,10 +214,18 @@ export default async function AdminDashboardPage() {
             Dashboard
           </h1>
           <p className="mt-2 text-slate-600">
-            Content, visits, geo analytics and comment moderation overview.
+            Content overview. Visit analytics stay off until you click Run
+            (saves Neon CU).
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
+          <Link
+            href={loadAnalytics ? "/admin" : "/admin?analytics=1"}
+            className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-800 transition hover:bg-slate-50"
+          >
+            <Globe2 className="h-4 w-4" />
+            {loadAnalytics ? "Hide visit analytics" : "Run visit analytics"}
+          </Link>
           <Link
             href="/admin/comments"
             className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-800 transition hover:bg-slate-50"
@@ -267,14 +291,29 @@ export default async function AdminDashboardPage() {
               </tr>
             </thead>
             <tbody>
-              {recentVisits.length === 0 ? (
+              {!loadAnalytics ? (
                 <tr>
                   <td
                     colSpan={5}
                     className="px-5 py-10 text-center text-slate-500"
                   >
-                    No visits tracked yet. Browse the public site to generate
-                    analytics.
+                    Visit analytics paused.{" "}
+                    <Link
+                      href="/admin?analytics=1"
+                      className="font-semibold text-primary hover:underline"
+                    >
+                      Run visit analytics
+                    </Link>{" "}
+                    to load (wakes Neon once).
+                  </td>
+                </tr>
+              ) : recentVisits.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={5}
+                    className="px-5 py-10 text-center text-slate-500"
+                  >
+                    No visits tracked yet. Auto pageview tracking is off.
                   </td>
                 </tr>
               ) : (
@@ -319,7 +358,23 @@ export default async function AdminDashboardPage() {
                 </tr>
               </thead>
               <tbody>
-                {topCountries.length === 0 ? (
+                {!loadAnalytics ? (
+                  <tr>
+                    <td
+                      colSpan={2}
+                      className="px-5 py-8 text-center text-slate-500"
+                    >
+                      Click{" "}
+                      <Link
+                        href="/admin?analytics=1"
+                        className="font-semibold text-primary hover:underline"
+                      >
+                        Run visit analytics
+                      </Link>
+                      .
+                    </td>
+                  </tr>
+                ) : topCountries.length === 0 ? (
                   <tr>
                     <td
                       colSpan={2}

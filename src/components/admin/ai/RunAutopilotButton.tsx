@@ -59,7 +59,7 @@ export default function RunAutopilotButton() {
         disabled={loading}
         className="rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
       >
-        {loading ? "Running autopilot…" : "Run daily autopilot now"}
+        {loading ? "Running…" : "Run"}
       </button>
       {message ? <p className="text-sm text-emerald-700">{message}</p> : null}
       {error ? <p className="text-sm text-red-600">{error}</p> : null}

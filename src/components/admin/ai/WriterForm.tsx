@@ -209,7 +209,7 @@ export default function WriterForm({ contentIdeas = [] }: WriterFormProps) {
             disabled={loading}
             className="rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
           >
-            {loading ? "Generating draft…" : "Generate & save draft"}
+            {loading ? "Running…" : "Run"}
           </button>
           <p className="text-xs text-slate-500">
             Always saves as Blog DRAFT — never auto-publishes.

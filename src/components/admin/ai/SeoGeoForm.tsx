@@ -127,7 +127,7 @@ export default function SeoGeoForm({ blogs }: { blogs: BlogOption[] }) {
             disabled={loading || !blogId}
             className="rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white transition hover:opacity-90 disabled:opacity-60"
           >
-            {loading ? "Optimizing…" : "Run SEO + GEO"}
+            {loading ? "Running…" : "Run"}
           </button>
         </div>
         {error ? <p className="mt-3 text-sm text-red-600">{error}</p> : null}

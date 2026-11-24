@@ -35,10 +35,11 @@ export default async function SiteFooter() {
               aria-label={`${siteConfig.legalName} home`}
             >
               <Image
-                src="/images/TEXHLYSER_white_Logo.png"
+                src="/images/TEXHLYSER_white_Logo.svg"
                 alt={siteConfig.legalName}
                 width={180}
                 height={48}
+                unoptimized
                 className="site-logo h-9 w-auto object-contain sm:h-10"
               />
             </Link>

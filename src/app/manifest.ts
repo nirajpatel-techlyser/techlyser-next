@@ -19,7 +19,7 @@ export default function manifest(): MetadataRoute.Manifest {
         type: "image/png",
       },
       {
-        src: "/images/TEXHLYSER_Logo.png",
+        src: "/images/TEXHLYSER_Logo.svg",
         sizes: "512x512",
         type: "image/png",
       },

@@ -32,11 +32,12 @@ export default function Navbar() {
           aria-label="Techlyser Web Solutions home"
         >
           <Image
-            src="/images/TEXHLYSER_white_Logo.png"
+            src="/images/TEXHLYSER_white_Logo.svg"
             alt="Techlyser Web Solutions"
             width={180}
             height={48}
             priority
+            unoptimized
             className="site-logo h-9 w-auto object-contain sm:h-10 md:h-11"
           />
         </Link>

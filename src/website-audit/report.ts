@@ -25,7 +25,7 @@ function escapeHtml(value: string) {
 
 function brandStripHtml() {
   return `<div class="brand-strip">
-  <img src="${siteConfig.url}/images/TEXHLYSER_white_Logo.png" alt="Techlyser" />
+  <img src="${siteConfig.url}/images/TEXHLYSER_white_Logo.svg" alt="Techlyser" />
   <div class="brand-meta">${escapeHtml(siteConfig.phoneDisplay)}<br/>
   <a href="${siteConfig.url}">techlyser.com</a> · ${escapeHtml(siteConfig.email)}</div>
 </div><div class="accent"></div>`;
@@ -300,7 +300,7 @@ export async function buildReportPdfBase64(input: {
 
   let logoBytes: Uint8Array | null = null;
   try {
-    const logoRes = await fetch(`${siteConfig.url}/images/TEXHLYSER_white_Logo.png`, {
+    const logoRes = await fetch(`${siteConfig.url}/images/TEXHLYSER_white_Logo.svg`, {
       signal: AbortSignal.timeout(8000),
     });
     if (logoRes.ok) logoBytes = new Uint8Array(await logoRes.arrayBuffer());

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Moon, Sun } from "lucide-react";
+import { Moon } from "lucide-react";
 import { updateSiteTheme } from "@/actions/settings";
 import type { SiteThemeMode } from "@/lib/theme";
 
@@ -9,95 +9,57 @@ type ThemeSettingsFormProps = {
   initialTheme: SiteThemeMode;
 };
 
-const options: Array<{
-  value: SiteThemeMode;
-  label: string;
-  description: string;
-  icon: typeof Moon;
-}> = [
-  {
-    value: "DARK",
-    label: "Dark theme",
-    description: "Black background, white headings, orange highlights.",
-    icon: Moon,
-  },
-  {
-    value: "LIGHT",
-    label: "Light theme",
-    description: "White background, black headings, orange highlights.",
-    icon: Sun,
-  },
-];
-
 export default function ThemeSettingsForm({
   initialTheme,
 }: ThemeSettingsFormProps) {
-  const [theme, setTheme] = useState<SiteThemeMode>(initialTheme);
+  const [theme, setTheme] = useState<SiteThemeMode>(
+    initialTheme === "DARK" ? "DARK" : "DARK",
+  );
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [pending, startTransition] = useTransition();
 
-  function onSelect(next: SiteThemeMode) {
+  function ensureDark() {
     setError("");
     setMessage("");
-    setTheme(next);
+    setTheme("DARK");
 
     startTransition(async () => {
-      const result = await updateSiteTheme(next);
+      const result = await updateSiteTheme("DARK");
       if (!result.success) {
         setError(result.error || "Could not save theme.");
-        setTheme(initialTheme);
+        setTheme(initialTheme === "DARK" ? "DARK" : "DARK");
         return;
       }
-      setMessage(
-        next === "DARK"
-          ? "Dark theme is live on the public site."
-          : "Light theme is live on the public site.",
-      );
+      setMessage("Dark theme is locked on for the public site.");
     });
   }
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 sm:grid-cols-2">
-        {options.map(({ value, label, description, icon: Icon }) => {
-          const active = theme === value;
-          return (
-            <button
-              key={value}
-              type="button"
-              disabled={pending}
-              onClick={() => onSelect(value)}
-              className={`rounded-2xl border p-5 text-left transition disabled:opacity-60 ${
-                active
-                  ? "border-primary bg-primary/5 shadow-sm ring-2 ring-primary/20"
-                  : "border-slate-200 bg-white hover:border-slate-300"
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <span
-                  className={`rounded-xl p-2 ${
-                    active
-                      ? "bg-primary text-white"
-                      : "bg-slate-100 text-slate-600"
-                  }`}
-                >
-                  <Icon className="h-5 w-5" />
-                </span>
-                <div>
-                  <p className="font-semibold text-slate-900">{label}</p>
-                  <p className="mt-1 text-sm text-slate-600">{description}</p>
-                </div>
-              </div>
-              {active ? (
-                <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-primary">
-                  Active
-                </p>
-              ) : null}
-            </button>
-          );
-        })}
-      </div>
+      <button
+        type="button"
+        disabled={pending}
+        onClick={ensureDark}
+        className="w-full rounded-2xl border border-primary bg-primary/5 p-5 text-left shadow-sm ring-2 ring-primary/20 disabled:opacity-60 sm:max-w-md"
+      >
+        <div className="flex items-center gap-3">
+          <span className="rounded-xl bg-primary p-2 text-white">
+            <Moon className="h-5 w-5" />
+          </span>
+          <div>
+            <p className="font-semibold text-slate-900">Dark theme</p>
+            <p className="mt-1 text-sm text-slate-600">
+              Public site stays dark (black background, white logo, orange
+              accents). Light mode is disabled — it inverted the logo orange
+              into blue.
+            </p>
+          </div>
+        </div>
+        <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-primary">
+          {theme === "DARK" ? "Active" : "Click to set dark"}
+        </p>
+      </button>
 
       {error ? (
         <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -109,10 +71,6 @@ export default function ThemeSettingsForm({
           {message}
         </p>
       ) : null}
-      <p className="text-sm text-slate-500">
-        This controls the overall public website look. Section-wise colors can be
-        refined later.
-      </p>
     </div>
   );
 }

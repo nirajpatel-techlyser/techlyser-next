@@ -67,13 +67,53 @@ async function safe<T>(label: string, fn: () => Promise<T>, fallback: T): Promis
   }
 }
 
-export default async function SiteAnalyticsPage() {
+export default async function SiteAnalyticsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ run?: string }>;
+}) {
+  const params = await searchParams;
+  if (params.run !== "1") {
+    return (
+      <div className="space-y-6">
+        <div>
+          <Link
+            href="/admin"
+            className="inline-flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-slate-900"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Dashboard
+          </Link>
+          <h1 className="mt-4 text-3xl font-bold tracking-tight text-slate-900">
+            Site Analytics
+          </h1>
+          <p className="mt-2 max-w-2xl text-slate-600">
+            Visitor analytics auto-tracking is off to save Neon CU-hours. Open
+            this report only when you need it — loading queries wakes the
+            database.
+          </p>
+        </div>
+        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <p className="text-sm text-slate-600">
+            No automatic jobs. Click Run to load the analytics report.
+          </p>
+          <Link
+            href="/admin/analytics?run=1"
+            className="mt-4 inline-flex rounded-xl bg-primary px-5 py-3 text-sm font-semibold text-white hover:bg-primary-hover"
+          >
+            Run analytics report
+          </Link>
+        </section>
+      </div>
+    );
+  }
+
   const { today: todayKey, yesterday: yesterdayKey } = getTodayYesterdayKeys();
   const rangeStart = startOfDayInZone(29);
   const todayStart = startOfDayInZone(0);
   const yesterdayStart = startOfDayInZone(1);
 
-  // Sequential + safe queries to avoid Supabase session pool exhaustion.
+  // Sequential + safe queries — only after explicit Run click (?run=1).
   const visitCount = await safe("visitCount", () => prisma.pageView.count(), 0);
   const todayViews = await safe(
     "todayViews",

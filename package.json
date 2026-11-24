@@ -13,6 +13,8 @@
     "db:cleanup": "tsx --env-file=.env.local --env-file=.env scripts/db-cleanup.ts",
     "test": "tsx --test src/social/social.test.ts src/leads/leads.test.ts src/website-audit/website-audit.test.ts src/lib/business-website-generator/generator.test.ts src/lib/business-website-generator/public-listing.test.ts",
     "db:studio": "prisma studio",
+    "db:export-neon": "tsx scripts/export-db-for-neon.ts",
+    "db:import-neon": "tsx scripts/import-db-from-neon-export.ts",
     "ai:research": "tsx --env-file=.env.local scripts/run-research-engine.ts",
     "ai:opportunities": "tsx --env-file=.env.local scripts/run-opportunity-engine.ts",
     "ai:plan": "tsx --env-file=.env.local scripts/run-content-planner.ts",

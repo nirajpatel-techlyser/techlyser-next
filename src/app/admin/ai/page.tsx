@@ -41,9 +41,9 @@ export default function AdminAiStudioPage() {
               {AI_GROWTH_OS.name}
             </h1>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-              Research → Opportunities → Planner → Writer → SEO/GEO are live.
-              Writer and SEO engines save or update Blog drafts only — never
-              auto-publish.
+              Nothing auto-runs. Open a module and click its Run / Generate
+              button when you want work done (saves Neon CU). Writer and SEO
+              save Blog drafts only — never auto-publish. Daily cron is off.
             </p>
           </div>
           <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-800 ring-1 ring-emerald-200">

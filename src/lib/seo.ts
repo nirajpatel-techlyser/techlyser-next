@@ -165,7 +165,7 @@ export function organizationJsonLd(sameAs: string[] = []) {
     foundingDate: String(siteConfig.foundingYear),
     logo: {
       "@type": "ImageObject",
-      url: absoluteUrl("/images/TEXHLYSER_white_Logo.png"),
+      url: absoluteUrl("/images/TEXHLYSER_white_Logo.svg"),
       width: 512,
       height: 512,
     },
