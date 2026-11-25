@@ -361,8 +361,12 @@ async function discoverViaPhoton(
     const data = (await response.json()) as { features?: PhotonFeature[] };
     for (const feature of data.features || []) {
       const props = feature.properties || {};
-      const coords = feature.geometry?.coordinates;
-      if (!props.name?.trim() || !props || coords.length < 2) continue;
+      const rawCoords = feature.geometry?.coordinates;
+      if (!props.name?.trim()) continue;
+      if (!Array.isArray(rawCoords) || rawCoords.length < 2) continue;
+      const lon = rawCoords[0];
+      const lat = rawCoords[1];
+      if (!Number.isFinite(lon) || !Number.isFinite(lat)) continue;
       if (
         props.countrycode &&
         props.countrycode.toUpperCase() !== input.countryCode.toUpperCase()
@@ -370,8 +374,6 @@ async function discoverViaPhoton(
         continue;
       }
 
-      const lon = coords[0];
-      const lat = coords[1];
       if (
         haversineKm(input.latitude, input.longitude, lat, lon) > maxRadius
       ) {
