@@ -319,7 +319,7 @@ function pushHit(
 ) {
   if (hits.length >= input.limit) return;
   if (seen.has(hit.providerRecordId)) return;
-  if (!passesWebsiteFilter(hit.websiteUrl, websiteFilter)) return;
+  if (!passesWebsiteFilter(hit.websiteUrl ?? null, websiteFilter)) return;
   if (input.requireEmail && !hit.publicEmail) return;
   if (input.requirePhone && !hit.phone) return;
   seen.add(hit.providerRecordId);
