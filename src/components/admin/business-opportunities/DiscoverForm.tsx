@@ -75,6 +75,16 @@ export default function DiscoverForm({
     setMessage("");
   }
 
+  async function readJsonSafe<T>(response: Response): Promise<T | null> {
+    const text = await response.text();
+    if (!text.trim()) return null;
+    try {
+      return JSON.parse(text) as T;
+    } catch {
+      return null;
+    }
+  }
+
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
     if (!countryCode) {
@@ -93,58 +103,89 @@ export default function DiscoverForm({
     setBusy(true);
     setMessage("Starting discovery…");
 
-    const create = await fetch("/api/admin/business-opportunities/jobs", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        countryCode,
-        cities: selectedCities,
-        categories: selectedCategories,
-        radiusKm,
-        resultLimit,
-        websiteFilter,
-        requireEmail,
-        requirePhone,
-      }),
-    });
-    const created = (await create.json()) as {
-      error?: string;
-      job?: { id: string };
-    };
-    if (!create.ok || !created.job) {
+    const stepController = new AbortController();
+    const stepTimer = window.setTimeout(() => stepController.abort(), 55_000);
+
+    try {
+      const create = await fetch("/api/admin/business-opportunities/jobs", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          countryCode,
+          cities: selectedCities,
+          categories: selectedCategories,
+          radiusKm,
+          resultLimit,
+          websiteFilter,
+          requireEmail,
+          requirePhone,
+        }),
+      });
+      const created = await readJsonSafe<{
+        error?: string;
+        job?: { id: string };
+      }>(create);
+      if (!create.ok || !created?.job) {
+        setMessage(
+          created?.error ||
+            `Discovery could not start (HTTP ${create.status}). Check database connection.`,
+        );
+        return;
+      }
+
+      setMessage("Querying OpenStreetMap… (usually 10–40s)");
+      const step = await fetch(
+        `/api/admin/business-opportunities/jobs/${created.job.id}/step`,
+        { method: "POST", signal: stepController.signal },
+      );
+      const state = await readJsonSafe<{
+        error?: string;
+        discoveredCount?: number;
+        errorMessage?: string | null;
+        status?: string;
+      }>(step);
+
+      if (!step.ok) {
+        setMessage(
+          state?.error ||
+            state?.errorMessage ||
+            `Discovery step failed (HTTP ${step.status}). OpenStreetMap may be busy — try again with 1 city and a smaller radius.`,
+        );
+        return;
+      }
+
+      if (!state) {
+        setMessage(
+          "Discovery timed out or returned an empty response. Try again with 1 city, 1 category, and radius ≤ 5 km.",
+        );
+        return;
+      }
+
+      const count = state.discoveredCount ?? 0;
+      setMessage(
+        count > 0
+          ? `Found ${count} business${count === 1 ? "" : "es"} in ${getCountryName(countryCode)}. Opening Business Leads…`
+          : state.errorMessage ||
+              "No businesses matched these filters. Try another city/category, or set website filter to Any and uncheck email/phone.",
+      );
+      router.refresh();
+      if (count > 0) {
+        router.push("/admin/business-opportunities/leads");
+      }
+    } catch (err) {
+      const aborted =
+        (err instanceof DOMException && err.name === "AbortError") ||
+        (err instanceof Error && err.name === "AbortError");
+      setMessage(
+        aborted
+          ? "OpenStreetMap query timed out after 55s. Try 1 city, 1 category, radius 5 km, then retry."
+          : err instanceof Error
+            ? err.message
+            : "Discovery failed unexpectedly.",
+      );
+    } finally {
+      window.clearTimeout(stepTimer);
       setBusy(false);
-      setMessage(created.error || "Discovery could not start.");
-      return;
-    }
-
-    setMessage("Querying OpenStreetMap…");
-    const step = await fetch(
-      `/api/admin/business-opportunities/jobs/${created.job.id}/step`,
-      { method: "POST" },
-    );
-    const state = (await step.json()) as {
-      error?: string;
-      discoveredCount?: number;
-      errorMessage?: string | null;
-      status?: string;
-    };
-    setBusy(false);
-
-    if (!step.ok) {
-      setMessage(state.error || "Discovery step failed.");
-      return;
-    }
-
-    const count = state.discoveredCount ?? 0;
-    setMessage(
-      count > 0
-        ? `Found ${count} business${count === 1 ? "" : "es"} in ${getCountryName(countryCode)}. Open Business Leads for PDF preview and email drafts (send is off).`
-        : state.errorMessage ||
-            "No businesses matched these filters. Try another city or category.",
-    );
-    router.refresh();
-    if (count > 0) {
-      router.push("/admin/business-opportunities/leads");
     }
   }
 
@@ -370,8 +411,9 @@ export default function DiscoverForm({
           {busy ? "Discovering…" : "Find businesses"}
         </button>
         <p className="text-xs text-slate-500">
-          Uses live OpenStreetMap data. Google Places can be added later with an
-          API key.
+          Uses live OpenStreetMap (Overpass, with Nominatim fallback if mirrors
+          are busy). For WhatsApp tests: pick 1 city + 1 category, keep website
+          filter as &quot;No website listed&quot;, optionally tick phone.
         </p>
       </div>
 

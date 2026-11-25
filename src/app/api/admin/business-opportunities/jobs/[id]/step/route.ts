@@ -6,6 +6,7 @@ import {
 } from "@/lib/business-discovery/discover";
 
 export const runtime = "nodejs";
+/** Hobby plan max is 60s — keep Overpass attempts short so this finishes with a JSON error. */
 export const maxDuration = 60;
 
 export async function POST(
